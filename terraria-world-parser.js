@@ -157,7 +157,7 @@ class TerrariaUtilities {
 
 				num3 = this.ReadByte();
 				num4 = 1;
-			} else num4 <<= 1;
+			} else num4 = num4 << 1 ; 
 
 			if ((num3 & num4) == num4) importances[i] = true;
 		}
