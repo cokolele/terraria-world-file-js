@@ -206,24 +206,29 @@ class TerrariaWorldParser extends TerrariaUtilities {
 		data.expertMode 			= this.ReadBoolean();
 		data.creationTime 			= this.ReadInt64();
 		data.moonType 				= this.ReadByte();
+
 		data.treeX = [];
 		data.treeX[0] 				= this.ReadInt32();
 		data.treeX[1] 				= this.ReadInt32();
 		data.treeX[2] 				= this.ReadInt32();
+
 		data.treeStyle = [];
 		data.treeStyle[0] 			= this.ReadInt32();
 		data.treeStyle[1] 			= this.ReadInt32();
 		data.treeStyle[2] 			= this.ReadInt32();
 		data.treeStyle[3] 			= this.ReadInt32();
+
 		data.caveBackX = [];
 		data.caveBackX[0] 			= this.ReadInt32();
 		data.caveBackX[1] 			= this.ReadInt32();
 		data.caveBackX[2] 			= this.ReadInt32();
+
 		data.caveBackStyle = [];
 		data.caveBackStyle[0] 		= this.ReadInt32();
 		data.caveBackStyle[1] 		= this.ReadInt32();
 		data.caveBackStyle[2] 		= this.ReadInt32();
 		data.caveBackStyle[3] 		= this.ReadInt32();
+
 		data.iceBackStyle 			= this.ReadInt32();
 		data.jungleBackStyle 		= this.ReadInt32();
 		data.hellBackStyle 			= this.ReadInt32();
@@ -260,7 +265,7 @@ class TerrariaWorldParser extends TerrariaUtilities {
 		data.downedPirates 			= this.ReadBoolean();
 		data.shadowOrbSmashed 		= this.ReadBoolean();
 		data.spawnMeteor 			= this.ReadBoolean();
-		this.SkipBytes(); //data.shadowOrbCount 		= (int) this.ReadByte();
+		data.shadowOrbCount 		= this.ReadByte();
 		data.altarCount 			= this.ReadInt32();
 		data.hardMode 				= this.ReadBoolean();
 		data.invasionDelay 			= this.ReadInt32();
@@ -268,7 +273,7 @@ class TerrariaWorldParser extends TerrariaUtilities {
 		data.invasionType 			= this.ReadInt32();
 		data.invasionX 				= this.ReadDouble();
 		data.slimeRainTime 			= this.ReadDouble();
-		this.SkipBytes();//data.sundialCooldown 		= (int) this.ReadByte();
+		data.sundialCooldown 		= this.ReadByte();
 		data.tempRaining 			= this.ReadBoolean();
 		data.tempRainTime 			= this.ReadInt32();
 		data.tempMaxRain 			= this.ReadSingle();
@@ -284,27 +289,33 @@ class TerrariaWorldParser extends TerrariaUtilities {
 		data.setBG6 				= this.ReadByte();
 		data.setBG7 				= this.ReadByte();
 		data.cloudBGActive 			= this.ReadInt32();
-/*		data.cloudBGAlpha 			= (double) data.cloudBGActive < 1.0 ? 0.0f : 1f;
-		data.cloudBGActive 			= (float) -data.genRand.Next(8640, 86400);
-		data.numClouds 				= (int) this.ReadInt16();
-*/		data.windSpeedSet 			= this.ReadSingle();
+		data.cloudBGAlpha 			= data.cloudBGActive < 1.0 ? 0.0 : 1.0;
+		data.cloudBGActive 			= "TODO" //(float) -data.genRand.Next(8640, 86400);
+		data.numClouds 				= this.ReadInt16();
+		data.windSpeedSet 			= this.ReadSingle();
 		data.windSpeed 				= data.windSpeedSet;
-//		for (int index = this.ReadInt32(); index > 0; --index)
-//			data.anglerWhoFinishedToday.Add(this.ReadString());
+
+		data.anglerWhoFinishedToday = [];
+		for (let i = this.ReadInt32(); i > 0; --i) {
+			data.anglerWhoFinishedToday.push(this.ReadString());
+		}
+
 		data.savedAngler 			= this.ReadBoolean();
 		data.anglerQuest 			= this.ReadInt32();
 		data.savedStylist 			= this.ReadBoolean();
 		data.savedTaxCollector 		= this.ReadBoolean();
 		data.invasionSizeStart 		= this.ReadInt32();
 		data.tempCultistDelay 		= this.ReadInt32();
-/*		int num1 = (int) this.ReadInt16();
-		for (int index = 0; index < num1; ++index)
-			{
-				if (index < 580)
-					data.killCount[index] = this.ReadInt32();
-				else
-					this.ReadInt32();
-			}*/
+
+		data.killCount = [];
+		const num1 = this.ReadInt16();
+		for (let i = 0; i < num1; ++i) {
+			if (i < 580)
+				data.killCount[i] = this.ReadInt32();
+			else
+				this.SkipBytes(4);
+		}
+
 		data.fastForwardTime 		= this.ReadBoolean();
 		data.downedFishron 			= this.ReadBoolean();
 		data.downedMartians 		= this.ReadBoolean();
@@ -327,9 +338,13 @@ class TerrariaWorldParser extends TerrariaUtilities {
 		data.tempPartyManual 		= this.ReadBoolean();
 		data.tempPartyGenuine 		= this.ReadBoolean();
 		data.tempPartyCooldown 		= this.ReadInt32();
-/*		int num2 = this.ReadInt32();
-		for (int index = 0; index < num2; ++index)
-			data.tempPartyCelebratingNPCs.Add(this.ReadInt32());*/
+
+		data.tempPartyCelebratingNPCs = [];
+		const num2 = this.ReadInt32();
+		for (let i = 0; i < num2; ++i) {
+			data.tempPartyCelebratingNPCs.push(this.ReadInt32());
+		}
+		
 		data.Temp_Sandstorm_Happening 		= this.ReadBoolean();
 		data.Temp_Sandstorm_TimeLeft 		= this.ReadInt32();
 		data.Temp_Sandstorm_Severity 		= this.ReadSingle();
