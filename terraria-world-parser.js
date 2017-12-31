@@ -135,6 +135,7 @@ class TerrariaUtilities {
 
 		let pointers = [];
 		const numberOfPointers = this.ReadInt16();
+
 		for (let i = 0; i < numberOfPointers; i++) {
 			pointers[i] = this.ReadInt32();
 		}
@@ -143,14 +144,25 @@ class TerrariaUtilities {
 	}
 
 	LoadImportants() {
+		
+		let importances = [];
+		const numberOfImportants = this.ReadInt16();
 
-/*		data.importants = [];
-		const numberOfImportants = this.readInt16();
-		for (let i = 0; i < numberOfImportants; i++) {
-			data.importants[i] = 
+		let num3 = 0;
+		let num4 = 128;
+
+		for (let i = 0; i < numberOfImportants; ++i) {
+
+			if (num4 == 128) {
+
+				num3 = this.ReadByte();
+				num4 = 1;
+			} else num4 <<= 1;
+
+			if ((num3 & num4) == num4) importances[i] = true;
 		}
-*/
-		return "TODO";
+
+		return importances;
 	}
 }
 
@@ -289,7 +301,7 @@ class TerrariaWorldParser extends TerrariaUtilities {
 		data.setBG6 				= this.ReadByte();
 		data.setBG7 				= this.ReadByte();
 		data.cloudBGActive 			= this.ReadInt32();
-		data.cloudBGAlpha 			= data.cloudBGActive < 1.0 ? 0.0 : 1.0;
+		data.cloudBGAlpha 			= data.cloudBGActive < 1 ? 0 : 1;
 		data.cloudBGActive 			= "TODO" //(float) -data.genRand.Next(8640, 86400);
 		data.numClouds 				= this.ReadInt16();
 		data.windSpeedSet 			= this.ReadSingle();
