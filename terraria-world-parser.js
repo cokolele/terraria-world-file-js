@@ -154,7 +154,7 @@ class TerrariaUtilities {
 	}
 }
 
-class TerrariaWorldFile extends TerrariaUtilities {
+class TerrariaWorldParser extends TerrariaUtilities {
 
 	constructor(path) {
 		
@@ -340,4 +340,4 @@ class TerrariaWorldFile extends TerrariaUtilities {
 
 }
 
-module.exports = TerrariaWorldFile;
+module.exports = TerrariaWorldParser;
