@@ -6,17 +6,17 @@ class TerrariaUtilities {
 
 		this.buffer = fs.readFileSync( path , [null, "r+"]);
 		this.offset = 0;
-
-		this.pointers = this.LoadPointers();
-		this.importants = this.LoadImportants();
 	}
+/**
+ * Binary parsing methods
+ */
 
 	ReadByte() {
 
 		const data = this.buffer[this.offset];
 		this.offset += 1;
 
-		return data
+		return data;
 	}
 
 	ReadInt16() {
@@ -123,31 +123,34 @@ class TerrariaUtilities {
 		this.offset = offset;
 	}
 
+/**
+ * Binary data reading methods
+ */
+
 	ReadGuid(bytesArray) {
 
-		this.offset += 16;
+		this.SkipBytes(16);
 		return "TODO";
 	}
 
-	LoadPointers() {
+	ReadValidatingMetaData() {
 
+		this.JumpTo(0);
+		this.version 		= this.ReadInt32();
+		this.magicNumber 	= this.ReadBytes(7).toString("ascii");
+		this.fileType 		= this.ReadByte();
+		
 		this.JumpTo(0x18);
+		this.pointers = [];
+		this.importants = [];
 
-		let pointers = [];
 		const numberOfPointers = this.ReadInt16();
 
 		for (let i = 0; i < numberOfPointers; i++) {
-			pointers[i] = this.ReadInt32();
+			this.pointers[i] = this.ReadInt32();
 		}
 
-		return pointers;
-	}
-
-	LoadImportants() {
-		
-		let importances = [];
 		const numberOfImportants = this.ReadInt16();
-
 		let num3 = 0;
 		let num4 = 128;
 
@@ -159,10 +162,8 @@ class TerrariaUtilities {
 				num4 = 1;
 			} else num4 = num4 << 1 ; 
 
-			if ((num3 & num4) == num4) importances[i] = true;
+			if ((num3 & num4) == num4) this.importants[i] = true;
 		}
-
-		return importances;
 	}
 }
 
@@ -170,15 +171,30 @@ class TerrariaWorldParser extends TerrariaUtilities {
 
 	constructor(path) {
 		
-		super(path);
+		try {
+			super(path);
+		} catch (e) {
+			throw new Error("Couldn't read world file: " + e.message);
+		}
+
+		try {
+			this.ReadValidatingMetaData();
+		} catch (e) {
+			throw new Error("Couldn't read metadata: Corrupted world file.");
+		}
+
+		if ( this.version < 194 || this.magicNumber != "relogic" || this.fileType != 2 || this.pointers.length != 10 || this.importants.length != 470 ) {
+			throw new Error("Invalid metadata: World file version is not supported (only 1.3.5.8) or Corrupted world file");
+		}
 	}
 
 	Load() {
 
 		let data = {};
 
-		data.fileFormatHeader 	= this.LoadFileFormatHeader();
-		data.header 			= this.LoadHeader();
+//		data.fileFormatHeader 	= this.LoadFileFormatHeader();
+//		data.header 			= this.LoadHeader();
+		data.worldTiles 		= this.LoadWorldTiles();
 
 		return data;
 	}
@@ -186,13 +202,13 @@ class TerrariaWorldParser extends TerrariaUtilities {
 	LoadFileFormatHeader() {
 		
 		let data = {};
-		this.JumpTo(0);
+		this.JumpTo(0xC);
 		
-		data.version 		= this.ReadInt32();
-		data.magicNumber 	= this.ReadBytes(7).toString("ascii");
-		data.fileType 		= this.ReadByte();
+		data.version 		= this.version;
+		data.magicNumber 	= this.magicNumber;
+		data.fileType 		= this.fileType;
 		data.revision 		= this.ReadUInt32();
-		data.favorite  		= "0 (always zero)"; this.SkipBytes(8);
+		data.favorite  		= "0 (always zero)";
 		data.pointers 		= this.pointers;
 		data.importants 	= this.importants;
 
@@ -361,6 +377,20 @@ class TerrariaWorldParser extends TerrariaUtilities {
 		data.Temp_Sandstorm_TimeLeft 		= this.ReadInt32();
 		data.Temp_Sandstorm_Severity 		= this.ReadSingle();
 		data.Temp_Sandstorm_IntendedSeverity = this.ReadSingle();
+		data.position = this.offset;
+
+		data.savedBartender 			= this.ReadBoolean();
+        data.DD2Event_DownedInvasionT1 	= this.ReadBoolean();
+        data.DD2Event_DownedInvasionT2 	= this.ReadBoolean();
+        data.DD2Event_DownedInvasionT3 	= this.ReadBoolean();
+
+		return data;
+	}
+
+	LoadWorldTiles() {
+
+		let data = {};
+		this.JumpTo(this.pointers[1]);
 
 		return data;
 	}
