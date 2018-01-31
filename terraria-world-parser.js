@@ -54,7 +54,7 @@ class TerrariaUtilities {
 
 		return data;
 	}
-      
+	  
 	ReadInt64() {
 
 		const firstHalf = this.buffer.readInt32LE( this.offset );
@@ -172,14 +172,12 @@ class TerrariaWorldParser extends TerrariaUtilities {
 		
 		try {
 
-			data.fileFormatHeader 	= this.LoadFileFormatHeader();
-			//data.header 			= this.LoadHeader();
-			//data.worldTiles 		= this.LoadWorldTiles();
-			data.chestsData 		= this.LoadChests();
-			
+			data.fileFormatHeader   = this.LoadFileFormatHeader();
 			delete data.fileFormatHeader;
-			delete data.header;
-			delete data.worldTiles;
+			//data.header           = this.LoadHeader();
+			//data.worldTiles       = this.LoadWorldTiles();
+			//data.chestsData       = this.LoadChests();
+			data.signsData          = this.LoadSigns();
 
 		} catch (e) {
 
@@ -201,13 +199,13 @@ class TerrariaWorldParser extends TerrariaUtilities {
 
 		let data = {};
 
-		data.version 		= this.ReadInt32();
-		data.magicNumber 	= this.ReadBytes(7).toString("ascii");
-		data.fileType 		= this.ReadByte();
-		data.revision 		= this.ReadUInt32();
-		data.favorite  		= "0 (always zero)"; this.SkipBytes(8);
-		data.pointers 		= [];
-		data.importants 	= [];
+		data.version        = this.ReadInt32();
+		data.magicNumber    = this.ReadBytes(7).toString("ascii");
+		data.fileType       = this.ReadByte();
+		data.revision       = this.ReadUInt32();
+		data.favorite       = "0 (always zero)"; this.SkipBytes(8);
+		data.pointers       = [];
+		data.importants     = [];
 
 		const cPointers = this.ReadInt16();
 
@@ -244,120 +242,120 @@ class TerrariaWorldParser extends TerrariaUtilities {
 
 		let data = {};
 
-		data.mapName 				= this.ReadString();
-		data.seedText 				= this.ReadString();
-		data.worldGeneratorVersion 	= this.ReadUInt64();
-		data.guid 					= this.ReadGuid();
-		data.worldID 				= this.ReadInt32();
-		data.leftWorld 				= this.ReadInt32();
-		data.rightWorld 			= this.ReadInt32();
-		data.topWorld 				= this.ReadInt32();
-		data.bottomWorld 			= this.ReadInt32();
-		data.maxTilesY 				= this.ReadInt32();
-		data.maxTilesX 				= this.ReadInt32();
-		data.expertMode 			= this.ReadBoolean();
-		data.creationTime 			= this.ReadInt64();
-		data.moonType 				= this.ReadByte();
+		data.mapName                = this.ReadString();
+		data.seedText               = this.ReadString();
+		data.worldGeneratorVersion  = this.ReadUInt64();
+		data.guid                   = this.ReadGuid();
+		data.worldID                = this.ReadInt32();
+		data.leftWorld              = this.ReadInt32();
+		data.rightWorld             = this.ReadInt32();
+		data.topWorld               = this.ReadInt32();
+		data.bottomWorld            = this.ReadInt32();
+		data.maxTilesY              = this.ReadInt32();
+		data.maxTilesX              = this.ReadInt32();
+		data.expertMode             = this.ReadBoolean();
+		data.creationTime           = this.ReadInt64();
+		data.moonType               = this.ReadByte();
 
 		data.treeX = [];
-		data.treeX[0] 				= this.ReadInt32();
-		data.treeX[1] 				= this.ReadInt32();
-		data.treeX[2] 				= this.ReadInt32();
+		data.treeX[0]               = this.ReadInt32();
+		data.treeX[1]               = this.ReadInt32();
+		data.treeX[2]               = this.ReadInt32();
 
 		data.treeStyle = [];
-		data.treeStyle[0] 			= this.ReadInt32();
-		data.treeStyle[1] 			= this.ReadInt32();
-		data.treeStyle[2] 			= this.ReadInt32();
-		data.treeStyle[3] 			= this.ReadInt32();
+		data.treeStyle[0]           = this.ReadInt32();
+		data.treeStyle[1]           = this.ReadInt32();
+		data.treeStyle[2]           = this.ReadInt32();
+		data.treeStyle[3]           = this.ReadInt32();
 
 		data.caveBackX = [];
-		data.caveBackX[0] 			= this.ReadInt32();
-		data.caveBackX[1] 			= this.ReadInt32();
-		data.caveBackX[2] 			= this.ReadInt32();
+		data.caveBackX[0]           = this.ReadInt32();
+		data.caveBackX[1]           = this.ReadInt32();
+		data.caveBackX[2]           = this.ReadInt32();
 
 		data.caveBackStyle = [];
-		data.caveBackStyle[0] 		= this.ReadInt32();
-		data.caveBackStyle[1] 		= this.ReadInt32();
-		data.caveBackStyle[2] 		= this.ReadInt32();
-		data.caveBackStyle[3] 		= this.ReadInt32();
+		data.caveBackStyle[0]       = this.ReadInt32();
+		data.caveBackStyle[1]       = this.ReadInt32();
+		data.caveBackStyle[2]       = this.ReadInt32();
+		data.caveBackStyle[3]       = this.ReadInt32();
 
-		data.iceBackStyle 			= this.ReadInt32();
-		data.jungleBackStyle 		= this.ReadInt32();
-		data.hellBackStyle 			= this.ReadInt32();
-		data.spawnTileX 			= this.ReadInt32();
-		data.spawnTileY 			= this.ReadInt32();
-		data.worldSurface 			= this.ReadDouble();
-		data.rockLayer 				= this.ReadDouble();
-		data.tempTime 				= this.ReadDouble();
-		data.tempDayTime 			= this.ReadBoolean();
-		data.tempMoonPhase 			= this.ReadInt32();
-		data.tempBloodMoon 			= this.ReadBoolean();
-		data.tempEclipse 			= this.ReadBoolean();
-		data.eclipse 				= data.tempEclipse;
-		data.dungeonX 				= this.ReadInt32();
-		data.dungeonY 				= this.ReadInt32();
-		data.crimson 				= this.ReadBoolean();
-		data.downedBoss1 			= this.ReadBoolean();
-		data.downedBoss2 			= this.ReadBoolean();
-		data.downedBoss3 			= this.ReadBoolean();
-		data.downedQueenBee 		= this.ReadBoolean();
-		data.downedMechBoss1 		= this.ReadBoolean();
-		data.downedMechBoss2 		= this.ReadBoolean();
-		data.downedMechBoss3 		= this.ReadBoolean();
-		data.downedMechBossAny 		= this.ReadBoolean();
-		data.downedPlantBoss 		= this.ReadBoolean();
-		data.downedGolemBoss 		= this.ReadBoolean();
-		data.downedSlimeKing 		= this.ReadBoolean();
-		data.savedGoblin 			= this.ReadBoolean();
-		data.savedWizard 			= this.ReadBoolean();
-		data.savedMech 				= this.ReadBoolean();
-		data.downedGoblins 			= this.ReadBoolean();
-		data.downedClown 			= this.ReadBoolean();
-		data.downedFrost 			= this.ReadBoolean();
-		data.downedPirates 			= this.ReadBoolean();
-		data.shadowOrbSmashed 		= this.ReadBoolean();
-		data.spawnMeteor 			= this.ReadBoolean();
-		data.shadowOrbCount 		= this.ReadByte();
-		data.altarCount 			= this.ReadInt32();
-		data.hardMode 				= this.ReadBoolean();
-		data.invasionDelay 			= this.ReadInt32();
-		data.invasionSize 			= this.ReadInt32();
-		data.invasionType 			= this.ReadInt32();
-		data.invasionX 				= this.ReadDouble();
-		data.slimeRainTime 			= this.ReadDouble();
-		data.sundialCooldown 		= this.ReadByte();
-		data.tempRaining 			= this.ReadBoolean();
-		data.tempRainTime 			= this.ReadInt32();
-		data.tempMaxRain 			= this.ReadSingle();
-		data.oreTier1 				= this.ReadInt32();
-		data.oreTier2 				= this.ReadInt32();
-		data.oreTier3 				= this.ReadInt32();
-		data.setBG0 				= this.ReadByte();
-		data.setBG1 				= this.ReadByte();
-		data.setBG2 				= this.ReadByte();
-		data.setBG3 				= this.ReadByte();
-		data.setBG4 				= this.ReadByte();
-		data.setBG5 				= this.ReadByte();
-		data.setBG6 				= this.ReadByte();
-		data.setBG7 				= this.ReadByte();
-		data.cloudBGActive 			= this.ReadInt32();
-		data.cloudBGAlpha 			= data.cloudBGActive < 1 ? 0 : 1;
-		data.cloudBGActive 			= Math.random() * (86400 - 8640) + 8640; //(float) -data.genRand.Next(8640, 86400);
-		data.numClouds 				= this.ReadInt16();
-		data.windSpeedSet 			= this.ReadSingle();
-		data.windSpeed 				= data.windSpeedSet;
+		data.iceBackStyle           = this.ReadInt32();
+		data.jungleBackStyle        = this.ReadInt32();
+		data.hellBackStyle          = this.ReadInt32();
+		data.spawnTileX             = this.ReadInt32();
+		data.spawnTileY             = this.ReadInt32();
+		data.worldSurface           = this.ReadDouble();
+		data.rockLayer              = this.ReadDouble();
+		data.tempTime               = this.ReadDouble();
+		data.tempDayTime            = this.ReadBoolean();
+		data.tempMoonPhase          = this.ReadInt32();
+		data.tempBloodMoon          = this.ReadBoolean();
+		data.tempEclipse            = this.ReadBoolean();
+		data.eclipse                = data.tempEclipse;
+		data.dungeonX               = this.ReadInt32();
+		data.dungeonY               = this.ReadInt32();
+		data.crimson                = this.ReadBoolean();
+		data.downedBoss1            = this.ReadBoolean();
+		data.downedBoss2            = this.ReadBoolean();
+		data.downedBoss3            = this.ReadBoolean();
+		data.downedQueenBee         = this.ReadBoolean();
+		data.downedMechBoss1        = this.ReadBoolean();
+		data.downedMechBoss2        = this.ReadBoolean();
+		data.downedMechBoss3        = this.ReadBoolean();
+		data.downedMechBossAny      = this.ReadBoolean();
+		data.downedPlantBoss        = this.ReadBoolean();
+		data.downedGolemBoss        = this.ReadBoolean();
+		data.downedSlimeKing        = this.ReadBoolean();
+		data.savedGoblin            = this.ReadBoolean();
+		data.savedWizard            = this.ReadBoolean();
+		data.savedMech              = this.ReadBoolean();
+		data.downedGoblins          = this.ReadBoolean();
+		data.downedClown            = this.ReadBoolean();
+		data.downedFrost            = this.ReadBoolean();
+		data.downedPirates          = this.ReadBoolean();
+		data.shadowOrbSmashed       = this.ReadBoolean();
+		data.spawnMeteor            = this.ReadBoolean();
+		data.shadowOrbCount         = this.ReadByte();
+		data.altarCount             = this.ReadInt32();
+		data.hardMode               = this.ReadBoolean();
+		data.invasionDelay          = this.ReadInt32();
+		data.invasionSize           = this.ReadInt32();
+		data.invasionType           = this.ReadInt32();
+		data.invasionX              = this.ReadDouble();
+		data.slimeRainTime          = this.ReadDouble();
+		data.sundialCooldown        = this.ReadByte();
+		data.tempRaining            = this.ReadBoolean();
+		data.tempRainTime           = this.ReadInt32();
+		data.tempMaxRain            = this.ReadSingle();
+		data.oreTier1               = this.ReadInt32();
+		data.oreTier2               = this.ReadInt32();
+		data.oreTier3               = this.ReadInt32();
+		data.setBG0                 = this.ReadByte();
+		data.setBG1                 = this.ReadByte();
+		data.setBG2                 = this.ReadByte();
+		data.setBG3                 = this.ReadByte();
+		data.setBG4                 = this.ReadByte();
+		data.setBG5                 = this.ReadByte();
+		data.setBG6                 = this.ReadByte();
+		data.setBG7                 = this.ReadByte();
+		data.cloudBGActive          = this.ReadInt32();
+		data.cloudBGAlpha           = data.cloudBGActive < 1 ? 0 : 1;
+		data.cloudBGActive          = Math.random() * (86400 - 8640) + 8640; //(float) -data.genRand.Next(8640, 86400);
+		data.numClouds              = this.ReadInt16();
+		data.windSpeedSet           = this.ReadSingle();
+		data.windSpeed              = data.windSpeedSet;
 
 		data.anglerWhoFinishedToday = [];
 		for (let i = this.ReadInt32(); i > 0; --i) {
 			data.anglerWhoFinishedToday.push(this.ReadString());
 		}
 
-		data.savedAngler 			= this.ReadBoolean();
-		data.anglerQuest 			= this.ReadInt32();
-		data.savedStylist 			= this.ReadBoolean();
-		data.savedTaxCollector 		= this.ReadBoolean();
-		data.invasionSizeStart 		= this.ReadInt32();
-		data.tempCultistDelay 		= this.ReadInt32();
+		data.savedAngler            = this.ReadBoolean();
+		data.anglerQuest            = this.ReadInt32();
+		data.savedStylist           = this.ReadBoolean();
+		data.savedTaxCollector      = this.ReadBoolean();
+		data.invasionSizeStart      = this.ReadInt32();
+		data.tempCultistDelay       = this.ReadInt32();
 
 		data.killCount = [];
 		const num1 = this.ReadInt16();
@@ -368,28 +366,28 @@ class TerrariaWorldParser extends TerrariaUtilities {
 				this.SkipBytes(4);
 		}
 
-		data.fastForwardTime 		= this.ReadBoolean();
-		data.downedFishron 			= this.ReadBoolean();
-		data.downedMartians 		= this.ReadBoolean();
-		data.downedAncientCultist 	= this.ReadBoolean();
-		data.downedMoonlord 		= this.ReadBoolean();
-		data.downedHalloweenKing 	= this.ReadBoolean();
-		data.downedHalloweenTree 	= this.ReadBoolean();
+		data.fastForwardTime        = this.ReadBoolean();
+		data.downedFishron          = this.ReadBoolean();
+		data.downedMartians         = this.ReadBoolean();
+		data.downedAncientCultist   = this.ReadBoolean();
+		data.downedMoonlord         = this.ReadBoolean();
+		data.downedHalloweenKing    = this.ReadBoolean();
+		data.downedHalloweenTree    = this.ReadBoolean();
 		data.downedChristmasIceQueen = this.ReadBoolean();
 		data.downedChristmasSantank = this.ReadBoolean();
-		data.downedChristmasTree 	= this.ReadBoolean();
-		data.downedTowerSolar 		= this.ReadBoolean();
-		data.downedTowerVortex 		= this.ReadBoolean();
-		data.downedTowerNebula 		= this.ReadBoolean();
-		data.downedTowerStardust 	= this.ReadBoolean();
-		data.TowerActiveSolar 		= this.ReadBoolean();
-		data.TowerActiveVortex 		= this.ReadBoolean();
-		data.TowerActiveNebula 		= this.ReadBoolean();
-		data.TowerActiveStardust 	= this.ReadBoolean();
-		data.LunarApocalypseIsUp 	= this.ReadBoolean();
-		data.tempPartyManual 		= this.ReadBoolean();
-		data.tempPartyGenuine 		= this.ReadBoolean();
-		data.tempPartyCooldown 		= this.ReadInt32();
+		data.downedChristmasTree    = this.ReadBoolean();
+		data.downedTowerSolar       = this.ReadBoolean();
+		data.downedTowerVortex      = this.ReadBoolean();
+		data.downedTowerNebula      = this.ReadBoolean();
+		data.downedTowerStardust    = this.ReadBoolean();
+		data.TowerActiveSolar       = this.ReadBoolean();
+		data.TowerActiveVortex      = this.ReadBoolean();
+		data.TowerActiveNebula      = this.ReadBoolean();
+		data.TowerActiveStardust    = this.ReadBoolean();
+		data.LunarApocalypseIsUp    = this.ReadBoolean();
+		data.tempPartyManual        = this.ReadBoolean();
+		data.tempPartyGenuine       = this.ReadBoolean();
+		data.tempPartyCooldown      = this.ReadInt32();
 
 		data.tempPartyCelebratingNPCs = [];
 		const num2 = this.ReadInt32();
@@ -397,14 +395,14 @@ class TerrariaWorldParser extends TerrariaUtilities {
 			data.tempPartyCelebratingNPCs.push(this.ReadInt32());
 		}
 		
-		data.Temp_Sandstorm_Happening 		= this.ReadBoolean();
-		data.Temp_Sandstorm_TimeLeft 		= this.ReadInt32();
-		data.Temp_Sandstorm_Severity 		= this.ReadSingle();
+		data.Temp_Sandstorm_Happening       = this.ReadBoolean();
+		data.Temp_Sandstorm_TimeLeft        = this.ReadInt32();
+		data.Temp_Sandstorm_Severity        = this.ReadSingle();
 		data.Temp_Sandstorm_IntendedSeverity = this.ReadSingle();
-		data.savedBartender 				= this.ReadBoolean();
-		data.DD2Event_DownedInvasionT1 		= this.ReadBoolean();
-		data.DD2Event_DownedInvasionT2 		= this.ReadBoolean();
-		data.DD2Event_DownedInvasionT3 		= this.ReadBoolean();
+		data.savedBartender                 = this.ReadBoolean();
+		data.DD2Event_DownedInvasionT1      = this.ReadBoolean();
+		data.DD2Event_DownedInvasionT2      = this.ReadBoolean();
+		data.DD2Event_DownedInvasionT3      = this.ReadBoolean();
 
 		if (this.offset != this.world.pointers[1])
 			throw new Error("header section position did not end where it should");
@@ -562,8 +560,8 @@ class TerrariaWorldParser extends TerrariaUtilities {
 		for (let i = 0; i < data.chestsCount; i++) {
 			
 			data.chests[i] = {};
-			data.chests[i].x 	= this.ReadInt32();
-			data.chests[i].y 	= this.ReadInt32();
+			data.chests[i].x    = this.ReadInt32();
+			data.chests[i].y    = this.ReadInt32();
 			data.chests[i].name = this.ReadString();
 			if (data.chests[i].name == '') 
 				delete data.chests[i].name;
@@ -577,8 +575,8 @@ class TerrariaWorldParser extends TerrariaUtilities {
 				if (!data.chests[i].items) 
 					data.chests[i].items = [];
 				data.chests[i].items[_i] = {};
-				data.chests[i].items[_i].stack 	= (stack < 0) ? 1 : stack;
-				data.chests[i].items[_i].id 	= this.ReadInt32();
+				data.chests[i].items[_i].stack  = (stack < 0) ? 1 : stack;
+				data.chests[i].items[_i].id     = this.ReadInt32();
 				data.chests[i].items[_i].prefix = this.ReadByte();
 			}
 
@@ -586,6 +584,24 @@ class TerrariaWorldParser extends TerrariaUtilities {
 			for (let _i = 0; _i < data.overflow; _i++) {
 				if (this.ReadInt16() > 0) this.SkipBytes(5);
 			}
+		}
+
+		return data;
+	}
+
+	LoadSigns() {
+
+		let data = {};
+		this.JumpTo(this.world.pointers[3]);
+
+		data.signsCount = this.ReadInt16();
+		if (data.signsCount) data.signs = [];
+
+		for (let i = 0; i < data.signsCount; i++) {
+
+			data.signs[i].text = this.ReadString();
+			data.signs[i].x    = this.ReadInt32();
+			data.signs[i].y    = this.ReadInt32();
 		}
 
 		return data;
