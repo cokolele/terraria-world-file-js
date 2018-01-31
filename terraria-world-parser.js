@@ -173,8 +173,9 @@ class TerrariaWorldParser extends TerrariaUtilities {
 		try {
 
 			data.fileFormatHeader 	= this.LoadFileFormatHeader();
-			data.header 			= this.LoadHeader();
-			data.worldTiles 		= this.LoadWorldTiles();
+			//data.header 			= this.LoadHeader();
+			//data.worldTiles 		= this.LoadWorldTiles();
+			data.chestsData 		= this.LoadChests();
 			
 			delete data.fileFormatHeader;
 			delete data.header;
@@ -416,7 +417,6 @@ class TerrariaWorldParser extends TerrariaUtilities {
 	LoadWorldTiles() {
 
 		let data;
-		this.JumpTo(this.world.pointers[1]);
 
 		data = new Array(this.world.tiles.x);
 		for (let x = 0; x < this.world.tiles.x; x++) {
@@ -453,7 +453,7 @@ class TerrariaWorldParser extends TerrariaUtilities {
 		let flags2, flags3;
 		const flags1 = this.ReadByte();
 
-	// flags2 present
+		// flags2 present
 		if ((flags1 & 1) == 1) {
 			flags2 = this.ReadByte();
 
@@ -462,14 +462,14 @@ class TerrariaWorldParser extends TerrariaUtilities {
 				flags3 = this.ReadByte();
 		}
 
-	// contains block
+		// contains block
 		if ((flags1 & 2) == 2) {
 
-		// block id has 1 byte / 2 bytes
+			// block id has 1 byte / 2 bytes
 			if ((flags1 & 32) == 32) tile.blockId = this.ReadUInt16();
 			else tile.blockId = this.ReadByte();
 
-		// important tile (animated, big sprite, more variants...)
+			// important tile (animated, big sprite, more variants...)
 			if (this.world.importants[tile.blockId]) {
 				tile.frameX = this.ReadInt16();
 				tile.frameY = tile.blockId == 144 ? 0 : this.ReadInt16();
@@ -478,25 +478,25 @@ class TerrariaWorldParser extends TerrariaUtilities {
 				tile.frameY = -1;
 			}
 
-		// painted block
+			// painted block
 			if ((flags3 & 8) == 8) {
 				if (!tile.color) tile.color = {};
 				tile.color.block = this.ReadByte();
 			}
 		}
 
-	// contains wall
+		// contains wall
 		if ((flags1 & 4) == 4) {
 			tile.wall = this.ReadByte();
 
-		// painted wall
+			// painted wall
 			if ((flags3 & 16) == 16) {
 				if (!tile.color) tile.color = {};
 				tile.color.wall = this.ReadByte();
 			}
 		}
 
-	// liquid informations
+		// liquid informations
 		const liquidType = (flags1 & 24) >> 3;
 		if (liquidType != 0) {
 			
@@ -509,7 +509,7 @@ class TerrariaWorldParser extends TerrariaUtilities {
 			}
 		}
 
-	// flags2 has any other informations than flags3 presence
+		// flags2 has any other informations than flags3 presence
 		if (flags2 > 1) {
 			
 			if (!tile.wiring) tile.wiring = {};
@@ -531,7 +531,7 @@ class TerrariaWorldParser extends TerrariaUtilities {
 			}
 		}
 
-	// flags3 has any informations
+		// flags3 has any informations
 		if (flags3 > 0) {
 			
 			if (!tile.wiring) tile.wiring = {};
@@ -549,6 +549,47 @@ class TerrariaWorldParser extends TerrariaUtilities {
 		return tile;
 	}
 
+	LoadChests() {
+
+		let data = {};
+
+		data.chestsCount = this.ReadInt16();
+		data.chestSpace = this.ReadInt16();
+		data.overflow = data.chestSpace <= 40 ? 0 : data.chestSpace - 40;
+		if (data.chestsCount) 
+			data.chests = [];
+
+		for (let i = 0; i < data.chestsCount; i++) {
+			
+			data.chests[i] = {};
+			data.chests[i].x 	= this.ReadInt32();
+			data.chests[i].y 	= this.ReadInt32();
+			data.chests[i].name = this.ReadString();
+			if (data.chests[i].name == '') 
+				delete data.chests[i].name;
+
+			for (let _i = 0; _i < data.chestSpace; _i++) {
+
+				const stack = this.ReadInt16();
+				if (stack == 0) 
+					continue;
+
+				if (!data.chests[i].items) 
+					data.chests[i].items = [];
+				data.chests[i].items[_i] = {};
+				data.chests[i].items[_i].stack 	= (stack < 0) ? 1 : stack;
+				data.chests[i].items[_i].id 	= this.ReadInt32();
+				data.chests[i].items[_i].prefix = this.ReadByte();
+			}
+
+			// skipping overflow items
+			for (let _i = 0; _i < data.overflow; _i++) {
+				if (this.ReadInt16() > 0) this.SkipBytes(5);
+			}
+		}
+
+		return data;
+	}
 }
 
 module.exports = TerrariaWorldParser;
