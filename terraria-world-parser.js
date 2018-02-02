@@ -213,12 +213,24 @@ class TerrariaWorldParser extends TerrariaUtilities {
 		try {
 
 			data.fileFormatHeader   = this.LoadFileFormatHeader();
+			data.header           	= this.LoadHeader();
+			data.worldTiles       	= this.LoadWorldTiles();
+			data.chestsData       	= this.LoadChests();
+			data.signsData        	= this.LoadSigns();
+			data.npcsData 			= this.LoadNPCs();
+			data.tileEntities 		= this.LoadTileEntities();
+			data.pressurePlates 	= this.LoadWeightedPressurePlates();
+			data.townManager 		= this.LoadTownManager();
+
 			delete data.fileFormatHeader;
-			//data.header           = this.LoadHeader();
-			//data.worldTiles       = this.LoadWorldTiles();
-			//data.chestsData       = this.LoadChests();
-			//data.signsData        = this.LoadSigns();
-			//data.npcsData 		= this.LoadNPCs();
+			delete data.header;
+			delete data.worldTiles;
+			delete data.chestsData;
+			delete data.signsData;
+			delete data.npcsData;
+			delete data.tileEntities;
+			delete data.pressurePlates;
+			delete data.townManager;
 
 		} catch (e) {
 
@@ -234,7 +246,13 @@ class TerrariaWorldParser extends TerrariaUtilities {
 				e.message = `terraria-world-parser error \ndescription: potentionally corrupted signs section \ndetails: ${e.stack}`;
 			else if (e.stack.includes("LoadNPCs")) 
 				e.message = `terraria-world-parser error \ndescription: potentionally corrupted NPCs section \ndetails: ${e.stack}`;
-			else 
+			else if (e.stack.includes("LoadTileEntities")) 
+				e.message = `terraria-world-parser error \ndescription: potentionally corrupted tile entities section \ndetails: ${e.stack}`;
+			else if (e.stack.includes("LoadWeightedPressurePlates")) 
+				e.message = `terraria-world-parser error \ndescription: potentionally corrupted pressure plates section \ndetails: ${e.stack}`;
+			else if (e.stack.includes("LoadTownManager")) 
+				e.message = `terraria-world-parser error \ndescription: potentionally corrupted town manager section \ndetails: ${e.stack}`;
+			else
 				e.message = `terraria-world-parser error \ndetails: ${e.stack}`;
 			throw e;
 		}
@@ -469,7 +487,7 @@ class TerrariaWorldParser extends TerrariaUtilities {
 			data[x] = new Array(this.world.tiles.y);
 			for (let y = 0; y < this.world.tiles.y; y++) {
 
-				const tile = this.DeserializeTileData();
+				const tile = this.ParseTileData();
 
 				data[x][y] = tile;
 
@@ -490,7 +508,7 @@ class TerrariaWorldParser extends TerrariaUtilities {
 		return data;
 	}
 
-	DeserializeTileData() {
+	ParseTileData() {
 
 		let tile = {};
 
@@ -633,31 +651,36 @@ class TerrariaWorldParser extends TerrariaUtilities {
 			}
 		}
 
+		if (this.offset != this.world.pointers[3])
+			throw new Error("chests section position did not end where it should");
+
 		return data;
 	}
 
 	LoadSigns() {
 
 		let data = {};
-		this.JumpTo(this.world.pointers[3]);
 
 		data.signsCount = this.ReadInt16();
 		if (data.signsCount) data.signs = [];
 
 		for (let i = 0; i < data.signsCount; i++) {
 
+			data.signs[i] = {};
 			data.signs[i].text = this.ReadString();
 			data.signs[i].x    = this.ReadInt32();
 			data.signs[i].y    = this.ReadInt32();
 		}
-
+		
+		if (this.offset != this.world.pointers[4])
+			throw new Error("signs section position did not end where it should");
+		
 		return data;
 	}
 
 	LoadNPCs() {
 
 		let data = {};
-		this.JumpTo(this.world.pointers[4]);
 
 		if (this.ReadBoolean()) {
 
@@ -694,7 +717,99 @@ class TerrariaWorldParser extends TerrariaUtilities {
 			data.npcs[i].position = this.ReadVector2();
 		}
 
+		if (this.offset != this.world.pointers[5])
+			throw new Error("NPCs section position did not end where it should");
+
 		return data.npcs[1];
+	}
+
+	LoadTileEntities() {
+
+		let data = {};
+
+		data.tileEntitiesCounter = this.ReadInt32();
+		if (data.tileEntitiesCounter) data.tileEntities = [];
+
+		for (let i = 0; i < data.tileEntitiesCounter; i++ ) {
+			
+			data.tileEntities[i] = {};
+
+			const type 				= this.ReadByte();
+			data.tileEntities[i].id = this.ReadInt32();
+			data.tileEntities[i].x  = this.ReadInt16();
+			data.tileEntities[i].y  = this.ReadInt16();
+
+			switch (type) {
+
+				//dummy
+				case 0:
+
+					data.tileEntities[i].targetDummy = {
+						"npc": this.ReadInt16(),
+					}
+					break;
+
+				//item frame
+				case 1:
+					data.tileEntities[i].itemFrame = {
+						"itemId": this.ReadInt16(),
+						"prefix": this.ReadByte(),
+						"stack" : this.ReadInt16(),
+					}
+					break;
+
+				//logic sensor
+				case 2:
+					data.tileEntities[i].logicSensor = {
+						"logicCheck": this.ReadByte(),
+						"on"		: this.ReadBoolean(),
+					}
+					break;
+			}
+
+		}
+
+		if (this.offset != this.world.pointers[6])
+			throw new Error("tile entities section position did not end where it should");
+
+		return data;
+	}
+
+	LoadWeightedPressurePlates() {
+
+		let data = {};
+
+		data.pressurePlatesCount = this.ReadInt32();
+		if (data.pressurePlatesCount) data.pressurePlates = [];
+
+		for (let i = 0; i < data.pressurePlatesCount; i++ ) {
+			
+			data.pressurePlates[i].x = this.ReadInt32();
+			data.pressurePlates[i].y = this.ReadInt32();
+		}
+
+		if (this.offset != this.world.pointers[7])
+			throw new Error("pressure plates section position did not end where it should");
+
+		return data;
+	}
+
+	LoadTownManager() {
+
+		let data = {};
+
+		data.totalRooms = this.ReadInt32();
+		data.rooms = [];
+
+        for (let i = 0; i < data.totalRooms; i++) {
+				
+				data.rooms[i] = {};
+                data.rooms[i].NpcId = this.ReadInt32();
+                data.rooms[i].x 	= this.ReadInt32();
+                data.rooms[i].y 	= this.ReadInt32();
+        }
+
+		return data;
 	}
 }
 
