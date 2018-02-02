@@ -798,13 +798,13 @@ class TerrariaWorldParser extends TerrariaUtilities {
 
 		let data = {};
 
-		data.totalRooms = this.ReadInt32();
+		data.roomsCount = this.ReadInt32();
 		data.rooms = [];
 
-        for (let i = 0; i < data.totalRooms; i++) {
+        for (let i = 0; i < data.roomsCount; i++) {
 				
 				data.rooms[i] = {};
-                data.rooms[i].NpcId = this.ReadInt32();
+                data.rooms[i].npcId = this.ReadInt32();
                 data.rooms[i].x 	= this.ReadInt32();
                 data.rooms[i].y 	= this.ReadInt32();
         }
