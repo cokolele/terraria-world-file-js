@@ -1,13 +1,12 @@
 ## Terraria world parser
 
 JavaScript based Terraria world file parser for Node.js
+
  \- supports only maps generated in 1.3.5.3
 
 **Return object**:
 
-```
-    data type                       variable                description
-```
+    data type ⤵                     variable ⤵              description ⤵
 
     *object* fileFormatHeader:
 
