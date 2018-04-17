@@ -3,27 +3,29 @@
 JavaScript based Terraria world file parser for Node.js
 \- supports only maps generated in 1.3.5.3
 
-**Return object**:
+###### Return object:
 
-data type ⤵                     variable ⤵              description ⤵
+Type | Variable | Description
+--- | --- | ---
 
-*object* fileFormatHeader:
 
-    *int32*                     version                 map file version
-    *7 bytes string*            magicNumber             magic number
-    *byte*                      fileType                file type
-    *uint32*                    revision                how many times this map was opened
-    *uint64*                    favorite                favorite (always 0)
-    *int32 array*               pointers                memory pointers for sections
-    *bool array*                importants              tile frame important for blocks (animated, big sprite, more variants...) 
-                                                        ! contains *null*s instead of *false*s
-                                                        ! array entry number == block id
+*object* **fileFormatHeader**
 
-*object* header:
+Type | Variable | Description
+--- | --- | ---
+*int32* | version | map file version
+*7 bytes string* | magicNumber | magic number
+*byte* | fileType | file type
+*uint32* | revision | how many times this map was opened ingame
+*uint64* | favorite | favorite (always 0)
+*int32 array* | pointers | memory pointers for sections
+*bool array* | importants | tile frame important for blocks (animated, big sprite, more variants...) \n ! contains *null*s instead of *false*s \n ! array entry number == block id
+
+*object* **header**
 
     *string*                    map name
 
-*2d array* worldTiles:
+*2d array* **worldTiles**
     
     *object*:                                           ! entries in object exists only if they are present in file
 
