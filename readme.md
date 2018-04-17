@@ -7,7 +7,8 @@ JavaScript based Terraria world file parser for Node.js
 
 *object* **fileFormatHeader**
 
-**Type** | **Variable** | **Description**
+Type | Variable | Description
+--- | --- | ---
 *int32* | version | map file version
 *7 bytes string* | magicNumber | magic number
 *byte* | fileType | file type
