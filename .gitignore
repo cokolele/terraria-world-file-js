@@ -1,1 +1,8 @@
-*.wld
+logs
+*.log
+npm-debug.log*
+node_modules/
+./Canvas.wld
+example/img.png
+example/pallete-generator.js
+./package-lock.json
