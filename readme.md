@@ -1,67 +1,66 @@
 ## Terraria world parser
 
 JavaScript based Terraria world file parser for Node.js
-
- \- supports only maps generated in 1.3.5.3
+\- supports only maps generated in 1.3.5.3
 
 **Return object**:
 
-    data type ⤵                     variable ⤵              description ⤵
+data type ⤵                     variable ⤵              description ⤵
 
-    *object* fileFormatHeader:
+*object* fileFormatHeader:
 
-        *int32*                     version                 map file version
-        *7 bytes string*            magicNumber             magic number
-        *byte*                      fileType                file type
-        *uint32*                    revision                how many times this map was opened
-        *uint64*                    favorite                favorite (always 0)
-        *int32 array*               pointers                memory pointers for sections
-        *bool array*                importants              tile frame important for blocks (animated, big sprite, more variants...) 
-                                                            ! contains *null*s instead of *false*s
-                                                            ! array entry number == block id
+    *int32*                     version                 map file version
+    *7 bytes string*            magicNumber             magic number
+    *byte*                      fileType                file type
+    *uint32*                    revision                how many times this map was opened
+    *uint64*                    favorite                favorite (always 0)
+    *int32 array*               pointers                memory pointers for sections
+    *bool array*                importants              tile frame important for blocks (animated, big sprite, more variants...) 
+                                                        ! contains *null*s instead of *false*s
+                                                        ! array entry number == block id
 
-    *object* header:
+*object* header:
 
-        *string*                    map name
+    *string*                    map name
 
-    *2d array* worldTiles:
-        
-        *object*:                                           ! entries in object exists only if they are present in file
+*2d array* worldTiles:
+    
+    *object*:                                           ! entries in object exists only if they are present in file
 
-            *byte / unint16*        blockId                 block id
-            *int16*                 frameX                  frame x (tile frame important)
-            *int16*                 frameY                  frame y (^)
-            *byte*                  wallId                  wall id
-            *string*                hammered                edited block (half, TR, TL, BR, BL)
+        *byte / unint16*        blockId                 block id
+        *int16*                 frameX                  frame x (tile frame important)
+        *int16*                 frameY                  frame y (^)
+        *byte*                  wallId                  wall id
+        *string*                hammered                edited block (half, TR, TL, BR, BL)
 
-            *object* colors: 
+        *object* colors: 
 
-                *byte*              block                   painted block
-                *byte*              wall                    painted wall
+            *byte*              block                   painted block
+            *byte*              wall                    painted wall
 
-            *object* liquid:
+        *object* liquid:
 
-                *string*            type                    liquid type (water, lava, honey)
-                *byte*              amount                  amount
+            *string*            type                    liquid type (water, lava, honey)
+            *byte*              amount                  amount
 
-            *object* wiring:
+        *object* wiring:
 
-                *bool*              hasActuator             contains actuator
-                *bool*              actuated                is actuated
+            *bool*              hasActuator             contains actuator
+            *bool*              actuated                is actuated
 
-                *object wires:
+            *object wires:
 
-                    *bool*          red                     contains red wire
-                    *bool*          blue                    contains blue wire
-                    *bool*          green                   contains green wire
-                    *bool*          yellow                  contains yellow wire
-
-
+                *bool*          red                     contains red wire
+                *bool*          blue                    contains blue wire
+                *bool*          green                   contains green wire
+                *bool*          yellow                  contains yellow wire
 
 
-    chestsData
-    signsData
-    npcsData
-    tileEntities
-    pressurePlates
-    townManager
+
+
+chestsData
+signsData
+npcsData
+tileEntities
+pressurePlates
+townManager
