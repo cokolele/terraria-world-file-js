@@ -25,28 +25,29 @@ Type | Variable | Description
 
 ***2d object array* worldTiles**
 
-Type | Variable | Description |  |  | 
---- | --- | --- | --- | ---
+Type | Variable | Description
+--- | --- | ---
 *byte / unint16* | blockId | block id
 *int16* | frameX | frame x (tile frame important)
 *int16* | frameY | frame y (^)
 *byte* | wallId | wall id
 *string* | hammered | edited block (half, TR, TL, BR, BL)
-*object* | colors : | 
- | *byte* | block | painted block
- | *byte | wall | painted wall
-*object* | liquid : | 
- | *string* | type | liquid type (water, lava, honey)
- | *byte* | amount | amount
- *object* | wiring : | 
-  | *bool* | hasActuator | contains actuator
-  | *bool | actuated | is actuated
-  | *object* | wires : | 
-  |  | *bool* | red | contains red wire
-  |  | *bool* | blue | contains blue wire
-  |  | *bool* | green | contains green wire
-  |  | *bool* | yellow | contains yellow wire
-        *object* liquid:
+*object* : | colors |
+\|&nbsp;&nbsp;&nbsp;&nbsp;*byte* | block | painted block
+\|&nbsp;&nbsp;&nbsp;&nbsp;*byte* | wall | painted wall
+*object* : | liquid |
+\|&nbsp;&nbsp;&nbsp;&nbsp;*string* | type | liquid type (water, lava, honey)
+\|&nbsp;&nbsp;&nbsp;&nbsp;*byte* | amount | amount
+*object* : | wiring |
+\|&nbsp;&nbsp;&nbsp;&nbsp;*bool* | hasActuator | contains actuator
+\|&nbsp;&nbsp;&nbsp;&nbsp;*bool* | actuated | is actuated
+\|&nbsp;&nbsp;&nbsp;&nbsp;*object* : | wires |
+\|&nbsp;&nbsp;&nbsp;&nbsp;\|&nbsp;&nbsp;&nbsp;&nbsp;*bool* | red | contains red wire
+\|&nbsp;&nbsp;&nbsp;&nbsp;\|&nbsp;&nbsp;&nbsp;&nbsp;*bool* | blue | contains blue wire
+\|&nbsp;&nbsp;&nbsp;&nbsp;\|&nbsp;&nbsp;&nbsp;&nbsp;*bool* | green | contains green wire
+\|&nbsp;&nbsp;&nbsp;&nbsp;\|&nbsp;&nbsp;&nbsp;&nbsp;*bool* | yellow | contains yellow wire
+
+
 
 chestsData
 signsData
