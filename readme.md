@@ -6,19 +6,25 @@ JavaScript based Terraria world file parser for Node.js
 ## Usage 
 
 ```javascript
+const TerrariaWorldParser = require("./terraria-world-parser.js");
+
 try {
 
-    const world = new TerrariaWorldParser("path/to/world.wld");
+    let world = new TerrariaWorldParser("./Canvas.wld");
     world = world.Load();
 
     const name = world.header.mapName;
-    const size = world.header.maxTilesX + "x" + world.header.maxTilesX;
+    const size = world.header.maxTilesX + "x" + world.header.maxTilesY;
     console.log( `Size of ${name} is ${size}`);
 
 } catch (e) {
     console.log(e.message)
 }
 ```
+
+Other examples in /examples directory:
+\- generate map image (png)
+\- count all trees
 
 ## Return object:
 
