@@ -1,7 +1,24 @@
-## Terraria world parser
+# Terraria world parser
 
 JavaScript based Terraria world file parser for Node.js
 \- supports only maps generated in 1.3.5.3
+
+## Usage 
+
+```javascript
+try {
+
+    const world = new TerrariaWorldParser("path/to/world.wld");
+    world = world.Load();
+
+    const name = world.header.mapName;
+    const size = world.header.maxTilesX + "x" + world.header.maxTilesX;
+    console.log( `Size of ${name} is ${size}`);
+
+} catch (e) {
+    console.log(e.message)
+}
+```
 
 ## Return object:
 
