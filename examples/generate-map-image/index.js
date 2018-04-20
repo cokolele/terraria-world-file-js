@@ -1,5 +1,5 @@
 const TerrariaWorldParser = require("../../terraria-world-parser.js");
-const pallete = require("./pallete.json");
+const palette = require("./palette.json");
 const pngjs = require('pngjs-image');
 
 try {
@@ -11,15 +11,15 @@ try {
 		x.forEach((tile, yi) => {
 
 			let color;
-			if (tile.blockId || tile.blockId == 0) color = pallete.tiles[tile.blockId];
-			else if (tile.liquid) color = pallete.liquids[tile.liquid.type];
-			else if (tile.wallId) color = pallete.walls[tile.wallId];
+			if (tile.blockId || tile.blockId == 0) color = palette.tiles[tile.blockId];
+			else if (tile.liquid) color = palette.liquids[tile.liquid.type];
+			else if (tile.wallId) color = palette.walls[tile.wallId];
 			else {
 
 				if (world.header.maxTilesY == 1800) {
-					if (yi < 565) color = pallete.backgrounds.sky;
-					else if (yi > 1600) color = pallete.backgrounds.underworld;
-					else color = pallete.backgrounds.cavern;
+					if (yi < 565) color = palette.backgrounds.sky;
+					else if (yi > 1600) color = palette.backgrounds.underworld;
+					else color = palette.backgrounds.cavern;
 				}
 			}
 
