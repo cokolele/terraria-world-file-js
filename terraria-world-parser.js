@@ -292,7 +292,7 @@ class TerrariaWorldParser extends TerrariaUtilities {
 		data.seedText               = this.ReadString();
 		data.worldGeneratorVersion  = this.ReadUInt64();
 		data.guid                   = this.ReadGuid();
-		data.worldID                = this.ReadInt32();
+		data.worldId                = this.ReadInt32();
 		data.leftWorld              = this.ReadInt32();
 		data.rightWorld             = this.ReadInt32();
 		data.topWorld               = this.ReadInt32();
@@ -386,7 +386,6 @@ class TerrariaWorldParser extends TerrariaUtilities {
 		data.setBG7                 = this.ReadByte();
 		data.cloudBGActive          = this.ReadInt32();
 		data.cloudBGAlpha           = data.cloudBGActive < 1 ? 0 : 1;
-		data.cloudBGActive          = Math.random() * (86400 - 8640) + 8640; //(float) -data.genRand.Next(8640, 86400);
 		data.numClouds              = this.ReadInt16();
 		data.windSpeedSet           = this.ReadSingle();
 		data.windSpeed              = data.windSpeedSet;
