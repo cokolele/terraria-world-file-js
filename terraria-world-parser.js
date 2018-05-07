@@ -45,7 +45,7 @@ class TerrariaUtilities {
 		}
 	}
 
-	ReadByte() {
+	ReadInt8() {
 
 		const data = this.buffer[this.offset];
 		this.offset += 1;
@@ -84,43 +84,18 @@ class TerrariaUtilities {
 
 		return data;
 	}
-	  
-	ReadInt64() {
-
-		const firstHalf = this.buffer.readInt32LE( this.offset );
-		this.offset += 4;
-		const secondHalf = this.buffer.readInt32LE( this.offset );
-		const wat = this.buffer[this.offset];
-		this.offset += 4;
-
-		const data = 4294967296 * secondHalf + ( wat & 128 === 128 ? 1 : -1 ) * firstHalf;
-
-		return data;
-	}
-
-	ReadUInt64() {
-		
-		const firstHalf = this.buffer.readUInt32LE( this.offset );
-		this.offset += 4;
-		const secondHalf = this.buffer.readUInt32LE( this.offset );
-		this.offset += 4;
-
-		const data = 4294967296 * secondHalf + firstHalf;
-
-		return data
-	}
 
 	ReadString() {
 
-		const stringLength = this.ReadByte();
+		const stringLength = this.ReadInt8();
 		const data = this.ReadBytes(stringLength).toString("utf8");
 
 		return data;
 	}
 
-	ReadSingle() {
+	ReadFloat() {
 
-		const data = this.buffer.readFloatLE();
+		const data = this.buffer.readFloatLE( this.offset );
 		this.offset += 4;
 
 		return data;
@@ -136,11 +111,11 @@ class TerrariaUtilities {
 
 	ReadBoolean() {
 
-		if (this.ReadByte()) return true;
+		if (this.ReadInt8()) return true;
 		return false;
 	}
 
-	ReadBytes(count, raw = false) {
+	ReadBytes(count) {
 
 		let data = [];
 
@@ -148,36 +123,12 @@ class TerrariaUtilities {
 			data[i] = this.buffer[this.offset];
 			this.offset += 1;
 		}
-		
-		if (raw) if (count == 1) {
-				return data[0]
-			} else return data;
 		return Buffer.from(data);
 	}
 
-	SkipBytes(count = 1) {
+	SkipBytes(count) {
 
 		this.offset += count;
-	}
-
-	SkipStrings(count = 1) {
-
-		for (let i = 0; i < count; i++) {
-
-			const stringLength = this.ReadByte();
-			this.offet += stringLength;
-		}
-	}
-
-	JumpTo(offset) {
-
-		this.offset = offset;
-	}
-
-	ReadGuid(bytesArray) {
-
-		this.SkipBytes(16);
-		return "TODO";
 	}
 }
 
@@ -247,27 +198,26 @@ class TerrariaWorldParser extends TerrariaUtilities {
 
 		data.version        = this.ReadInt32();
 		data.magicNumber    = this.ReadBytes(7).toString("ascii");
-		data.fileType       = this.ReadByte();
+		data.fileType       = this.ReadInt8();
 		data.revision       = this.ReadUInt32();
-		data.favorite       = 0; this.SkipBytes(8);
+		data.favorite       = this.ReadBytes(8);
 		data.pointers       = [];
 		data.importants     = [];
 
-		const cPointers = this.ReadInt16();
+		const pointersCount = this.ReadInt16();
 
-		for (let i = 0; i < cPointers; i++) {
+		for (let i = 0; i < pointersCount; i++) {
 			data.pointers[i] = this.ReadInt32();
 		}
 
-		const cImportants = this.ReadInt16();
+		const importantsCount = this.ReadInt16();
 		let num3 = 0;
 		let num4 = 128;
 
-		for (let i = 0; i < cImportants; ++i) {
+		for (let i = 0; i < importantsCount; ++i) {
 
 			if (num4 == 128) {
-
-				num3 = this.ReadByte();
+				num3 = this.ReadInt8();
 				num4 = 1;
 			} else num4 = num4 << 1 ; 
 
@@ -290,8 +240,8 @@ class TerrariaWorldParser extends TerrariaUtilities {
 
 		data.mapName                = this.ReadString();
 		data.seedText               = this.ReadString();
-		data.worldGeneratorVersion  = this.ReadUInt64();
-		data.guid                   = this.ReadGuid();
+		data.worldGeneratorVersion  = this.ReadBytes(8);
+		data.guid                   = this.ReadBytes(16);
 		data.worldId                = this.ReadInt32();
 		data.leftWorld              = this.ReadInt32();
 		data.rightWorld             = this.ReadInt32();
@@ -300,8 +250,8 @@ class TerrariaWorldParser extends TerrariaUtilities {
 		data.maxTilesY              = this.ReadInt32();
 		data.maxTilesX              = this.ReadInt32();
 		data.expertMode             = this.ReadBoolean();
-		data.creationTime           = this.ReadInt64();
-		data.moonType               = this.ReadByte();
+		data.creationTime           = this.ReadBytes(8);
+		data.moonType               = this.ReadInt8();
 
 		data.treeX = [];
 		data.treeX[0]               = this.ReadInt32();
@@ -361,7 +311,7 @@ class TerrariaWorldParser extends TerrariaUtilities {
 		data.downedPirates          = this.ReadBoolean();
 		data.shadowOrbSmashed       = this.ReadBoolean();
 		data.spawnMeteor            = this.ReadBoolean();
-		data.shadowOrbCount         = this.ReadByte();
+		data.shadowOrbCount         = this.ReadInt8();
 		data.altarCount             = this.ReadInt32();
 		data.hardMode               = this.ReadBoolean();
 		data.invasionDelay          = this.ReadInt32();
@@ -369,25 +319,25 @@ class TerrariaWorldParser extends TerrariaUtilities {
 		data.invasionType           = this.ReadInt32();
 		data.invasionX              = this.ReadDouble();
 		data.slimeRainTime          = this.ReadDouble();
-		data.sundialCooldown        = this.ReadByte();
+		data.sundialCooldown        = this.ReadInt8();
 		data.tempRaining            = this.ReadBoolean();
 		data.tempRainTime           = this.ReadInt32();
-		data.tempMaxRain            = this.ReadSingle();
+		data.tempMaxRain            = this.ReadFloat();
 		data.oreTier1               = this.ReadInt32();
 		data.oreTier2               = this.ReadInt32();
 		data.oreTier3               = this.ReadInt32();
-		data.setBG0                 = this.ReadByte();
-		data.setBG1                 = this.ReadByte();
-		data.setBG2                 = this.ReadByte();
-		data.setBG3                 = this.ReadByte();
-		data.setBG4                 = this.ReadByte();
-		data.setBG5                 = this.ReadByte();
-		data.setBG6                 = this.ReadByte();
-		data.setBG7                 = this.ReadByte();
+		data.setBG0                 = this.ReadInt8();
+		data.setBG1                 = this.ReadInt8();
+		data.setBG2                 = this.ReadInt8();
+		data.setBG3                 = this.ReadInt8();
+		data.setBG4                 = this.ReadInt8();
+		data.setBG5                 = this.ReadInt8();
+		data.setBG6                 = this.ReadInt8();
+		data.setBG7                 = this.ReadInt8();
 		data.cloudBGActive          = this.ReadInt32();
 		data.cloudBGAlpha           = data.cloudBGActive < 1 ? 0 : 1;
 		data.numClouds              = this.ReadInt16();
-		data.windSpeedSet           = this.ReadSingle();
+		data.windSpeedSet           = this.ReadFloat();
 		data.windSpeed              = data.windSpeedSet;
 
 		data.anglerWhoFinishedToday = [];
@@ -442,8 +392,8 @@ class TerrariaWorldParser extends TerrariaUtilities {
 		
 		data.Temp_Sandstorm_Happening       = this.ReadBoolean();
 		data.Temp_Sandstorm_TimeLeft        = this.ReadInt32();
-		data.Temp_Sandstorm_Severity        = this.ReadSingle();
-		data.Temp_Sandstorm_IntendedSeverity = this.ReadSingle();
+		data.Temp_Sandstorm_Severity        = this.ReadFloat();
+		data.Temp_Sandstorm_IntendedSeverity = this.ReadFloat();
 		data.savedBartender                 = this.ReadBoolean();
 		data.DD2Event_DownedInvasionT1      = this.ReadBoolean();
 		data.DD2Event_DownedInvasionT2      = this.ReadBoolean();
@@ -493,15 +443,15 @@ class TerrariaWorldParser extends TerrariaUtilities {
 		let tile = {};
 
 		let flags2, flags3;
-		const flags1 = this.ReadByte();
+		const flags1 = this.ReadInt8();
 
 		// flags2 present
 		if ((flags1 & 1) == 1) {
-			flags2 = this.ReadByte();
+			flags2 = this.ReadInt8();
 
 		// flags3 present
 			if ((flags2 & 1) == 1)
-				flags3 = this.ReadByte();
+				flags3 = this.ReadInt8();
 		}
 
 		// contains block
@@ -509,7 +459,7 @@ class TerrariaWorldParser extends TerrariaUtilities {
 
 			// block id has 1 byte / 2 bytes
 			if ((flags1 & 32) == 32) tile.blockId = this.ReadUInt16();
-			else tile.blockId = this.ReadByte();
+			else tile.blockId = this.ReadInt8();
 
 			// important tile (animated, big sprite, more variants...)
 			if (this.world.importants[tile.blockId]) {
@@ -520,18 +470,18 @@ class TerrariaWorldParser extends TerrariaUtilities {
 			// painted block
 			if ((flags3 & 8) == 8) {
 				if (!tile.color) tile.color = {};
-				tile.color.block = this.ReadByte();
+				tile.color.block = this.ReadInt8();
 			}
 		}
 
 		// contains wall
 		if ((flags1 & 4) == 4) {
-			tile.wallId = this.ReadByte();
+			tile.wallId = this.ReadInt8();
 
 			// painted wall
 			if ((flags3 & 16) == 16) {
 				if (!tile.colors) tile.colors = {};
-				tile.colors.wall = this.ReadByte();
+				tile.colors.wall = this.ReadInt8();
 			}
 		}
 
@@ -540,7 +490,7 @@ class TerrariaWorldParser extends TerrariaUtilities {
 		if (liquidType != 0) {
 			
 			if (!tile.liquid) tile.liquid = {};
-			tile.liquid.amount = this.ReadByte();
+			tile.liquid.amount = this.ReadInt8();
 			switch(liquidType) {
 				case 1: tile.liquid.type = "water"; break;
 				case 2: tile.liquid.type = "lava"; break;
@@ -581,7 +531,7 @@ class TerrariaWorldParser extends TerrariaUtilities {
 
 		switch ((flags1 & 192) >> 6) {
 			case 0: tile.RLE = 0; break;
-			case 1: tile.RLE = this.ReadByte(); break;
+			case 1: tile.RLE = this.ReadInt8(); break;
 			default: tile.RLE = this.ReadInt16(); break;
 		}
 
@@ -601,8 +551,10 @@ class TerrariaWorldParser extends TerrariaUtilities {
 		for (let i = 0; i < data.chestsCount; i++) {
 			
 			data.chests[i] = {};
-			data.chests[i].x    = this.ReadInt32();
-			data.chests[i].y    = this.ReadInt32();
+			data.chests[i].position = {
+				x: this.ReadInt32(),
+				y: this.ReadInt32()
+			};
 			data.chests[i].name = this.ReadString();
 			if (data.chests[i].name == '') 
 				delete data.chests[i].name;
@@ -618,7 +570,7 @@ class TerrariaWorldParser extends TerrariaUtilities {
 				data.chests[i].items[_i] = {};
 				data.chests[i].items[_i].stack  = (stack < 0) ? 1 : stack;
 				data.chests[i].items[_i].id     = this.ReadInt32();
-				data.chests[i].items[_i].prefix = this.ReadByte();
+				data.chests[i].items[_i].prefix = this.ReadInt8();
 			}
 
 			// skipping overflow items
@@ -644,8 +596,10 @@ class TerrariaWorldParser extends TerrariaUtilities {
 
 			data.signs[i] = {};
 			data.signs[i].text = this.ReadString();
-			data.signs[i].x    = this.ReadInt32();
-			data.signs[i].y    = this.ReadInt32();
+			data.signs[i].position = {
+				x: this.ReadInt32(),
+				y: this.ReadInt32()
+			};
 		}
 		
 		if (this.offset != this.world.pointers[4])
@@ -656,67 +610,61 @@ class TerrariaWorldParser extends TerrariaUtilities {
 
 	LoadNPCs() {
 
-		let data = {};
-
-		if (this.ReadBoolean()) {
-
-			//"reversing" previous read so the next loop does not ignore first npc's data
-			this.SkipBytes(-1);
-			data.npcsCount = 1;
-			data.npcs = [];
-		} else
-			data.npcsCount = 0;
+		let data = [];
 		
-		let i;
-		for (i = 0; this.ReadBoolean(); i++) {
+		let i = 0;
+		for (; this.ReadBoolean(); i++) {
 
-			data.npcs[i] = {};
-			data.npcs[i].id         = this.ReadInt32();
-			data.npcs[i].npc        = this.world.npcTypes[ data.npcs[i].id ];
-			if (!data.npcs[i].npc) delete data.npcs[i].npc;
-
-			data.npcs[i].name       = this.ReadString();
-			data.npcs[i].x          = this.ReadSingle();
-			data.npcs[i].y          = this.ReadSingle();
-			data.npcs[i].homeless   = this.ReadBoolean();
-			data.npcs[i].homeTileX  = this.ReadInt32();
-			data.npcs[i].homeTileY  = this.ReadInt32();
+			data[i] = {};
+			data[i].id         = this.ReadInt32();
+			data[i].npc        = this.world.npcTypes[ data[i].id ];
+			data[i].name       = this.ReadString();
+			data[i].position   = {
+				x: this.ReadFloat(),
+				y: this.ReadFloat(),
+			};
+			data[i].homeless   = this.ReadBoolean();
+			data[i].homePosition = {
+				x: this.ReadInt32(),
+				y: this.ReadInt32(),
+			};
 		}
 
 		for (; this.ReadBoolean(); i++) {
 			
-			if (!data.npcs) data.npcs = [];
-			data.npcs[i] = {};
-			data.npcs[i].id     = this.ReadInt32();
-			data.npcs[i].npc    = this.world.npcTypes[ data.npcs[i].id ];
+			data[i] = {};
+			data[i].id     = this.ReadInt32();
+			data[i].npc    = this.world.npcTypes[ data[i].id ];
 
-			data.npcs[i].position = {
-				x: ReadSingle(),
-				y: ReadSingle(),
+			data[i].position = {
+				x: this.ReadFloat(),
+				y: this.ReadFloat(),
 			};
 		}
 
 		if (this.offset != this.world.pointers[5])
 			throw new Error("NPCs section position did not end where it should");
 
-		return data.npcs[1];
+		return data;
 	}
 
 	LoadTileEntities() {
 
 		let data = {};
 
-		data.tileEntitiesCounter = this.ReadInt32();
-		if (data.tileEntitiesCounter) data.tileEntities = [];
+		data.tileEntitiesCount = this.ReadInt32();
+		if (data.tileEntitiesCount) data.tileEntities = [];
 
-		for (let i = 0; i < data.tileEntitiesCounter; i++ ) {
+		for (let i = 0; i < data.tileEntitiesCount; i++ ) {
 			
 			data.tileEntities[i] = {};
 
-			const type              = this.ReadByte();
+			const type              = this.ReadInt8();
 			data.tileEntities[i].id = this.ReadInt32();
-			data.tileEntities[i].x  = this.ReadInt16();
-			data.tileEntities[i].y  = this.ReadInt16();
+			data.tileEntities[i].position = {
+				x: this.ReadInt16(),
+				y: this.ReadInt16()
+			};
 
 			switch (type) {
 
@@ -732,7 +680,7 @@ class TerrariaWorldParser extends TerrariaUtilities {
 				case 1:
 					data.tileEntities[i].itemFrame = {
 						"itemId": this.ReadInt16(),
-						"prefix": this.ReadByte(),
+						"prefix": this.ReadInt8(),
 						"stack" : this.ReadInt16(),
 					}
 					break;
@@ -740,7 +688,7 @@ class TerrariaWorldParser extends TerrariaUtilities {
 				//logic sensor
 				case 2:
 					data.tileEntities[i].logicSensor = {
-						"logicCheck": this.ReadByte(),
+						"logicCheck": this.ReadInt8(),
 						"on"        : this.ReadBoolean(),
 					}
 					break;
@@ -762,9 +710,11 @@ class TerrariaWorldParser extends TerrariaUtilities {
 		if (data.pressurePlatesCount) data.pressurePlates = [];
 
 		for (let i = 0; i < data.pressurePlatesCount; i++ ) {
-			
-			data.pressurePlates[i].x = this.ReadInt32();
-			data.pressurePlates[i].y = this.ReadInt32();
+
+			data.pressirePlates[i].position = {
+				x: this.ReadInt32(),
+				y: this.ReadInt32()
+			};
 		}
 
 		if (this.offset != this.world.pointers[7])
@@ -784,8 +734,10 @@ class TerrariaWorldParser extends TerrariaUtilities {
 
 			data.rooms[i] = {};
 			data.rooms[i].npcId = this.ReadInt32();
-			data.rooms[i].x     = this.ReadInt32();
-			data.rooms[i].y     = this.ReadInt32();
+			data.rooms[i].position = {
+				x: this.ReadInt32(),
+				y: this.ReadInt32()
+			};
 		}
 
 		return data;

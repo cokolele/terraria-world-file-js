@@ -37,7 +37,7 @@ Type | Variable | Description
 --- | --- | ---
 *int32* | version | map file version (not game version)
 *7 bytes string* | magicNumber | magic number for file format
-*byte* | fileType | file format type (relogic uses more formats than .wld)
+*int8* | fileType | file format type (relogic uses more formats than .wld)
 *uint32* | revision | how many times this map was opened ingame
 *uint64* | favorite | is map favorite (always 0)
 *int32 array* | pointers | memory pointers for sections
@@ -81,11 +81,11 @@ Type | Variable | Description
 *bool* | crimson | is world crimson
 *int32* | altarCount | how many altars exists
 *bool* | shadowOrbSmashed | has been shadow orb (crimson hearts count too probably) smashed
-*byte* | shadowOrbCount | how many shadow orbs (crimson hearts ?) exists
+*int8* | shadowOrbCount | how many shadow orbs (crimson hearts ?) exists
 *double* | tempTime | current time
 *bool* | tempDayTime | is day time
 *bool* | spawnMeteor | ?
-*byte* | moonType | ?
+*int8* | moonType | ?
 *bool* | tempRaining | is currently raining
 *int32* | tempRainTime | current rain time
 *float* | tempMaxRain | ?
@@ -156,15 +156,15 @@ Type | Variable | Description
 *bool* | savedStylist | ^
 *bool* | savedTaxCollector | ^
 *bool* | savedBartender | ^ (Tavernkeep)
-*byte* | setBG0 | ?
-*byte* | setBG1 | ?
-*byte* | setBG2 | ?
-*byte* | setBG3 | ?
-*byte* | setBG4 | ?
-*byte* | setBG5 | ?
-*byte* | setBG6 | ?
-*byte* | setBG7 | ?
-*byte* | sundialCooldown | cooldown of the Enchanted Sundial
+*int8* | setBG0 | ?
+*int8* | setBG1 | ?
+*int8* | setBG2 | ?
+*int8* | setBG3 | ?
+*int8* | setBG4 | ?
+*int8* | setBG5 | ?
+*int8* | setBG6 | ?
+*int8* | setBG7 | ?
+*int8* | sundialCooldown | cooldown of the Enchanted Sundial
 *bool* | fastForwardTime | ?
 *string array* | anglerWhoFinishedToday | ?
 *int32* | anglerQuest | id of the current angler quest (probably)
@@ -176,14 +176,14 @@ Type | Variable | Description
 *byte / unint16* | blockId | block id
 *int16* | frameX | frame x (tile frame important)
 *int16* | frameY | frame y (^)
-*byte* | wallId | wall id
+*int8* | wallId | wall id
 *string* | hammered | edited block (half, TR, TL, BR, BL)
 *object* : | colors |
-\|&nbsp;&nbsp;&nbsp;&nbsp;*byte* | block | painted block
-\|&nbsp;&nbsp;&nbsp;&nbsp;*byte* | wall | painted wall
+\|&nbsp;&nbsp;&nbsp;&nbsp;*int8* | block | painted block
+\|&nbsp;&nbsp;&nbsp;&nbsp;*int8* | wall | painted wall
 *object* : | liquid |
 \|&nbsp;&nbsp;&nbsp;&nbsp;*string* | type | liquid type (water, lava, honey)
-\|&nbsp;&nbsp;&nbsp;&nbsp;*byte* | amount | amount
+\|&nbsp;&nbsp;&nbsp;&nbsp;*int8* | amount | amount
 *object* : | wiring |
 \|&nbsp;&nbsp;&nbsp;&nbsp;*bool* | hasActuator | contains actuator
 \|&nbsp;&nbsp;&nbsp;&nbsp;*bool* | actuated | is actuated
@@ -193,13 +193,58 @@ Type | Variable | Description
 \|&nbsp;&nbsp;&nbsp;&nbsp;\|&nbsp;&nbsp;&nbsp;&nbsp;*bool* | green | contains green wire
 \|&nbsp;&nbsp;&nbsp;&nbsp;\|&nbsp;&nbsp;&nbsp;&nbsp;*bool* | yellow | contains yellow wire
 
-chestsData
+***object* chestsData**
+
+Type | Variable | Description
+--- | --- | ---
+*int16* | chestsCount | number of chests in the world
+*int16* | chestSpace | number of slots for chests, 40 as for version 1.3.5.8
+*number* | overflow | number of overflowing slots
+*object array* : | chests |
+\|&nbsp;&nbsp;&nbsp;&nbsp;*int32* | x | position x of the chest
+\|&nbsp;&nbsp;&nbsp;&nbsp;*int32* | y | position y of the chest
+\|&nbsp;&nbsp;&nbsp;&nbsp;*string* | name | name of the chest
+\|&nbsp;&nbsp;&nbsp;&nbsp;*object array* : | items |
+\|&nbsp;&nbsp;&nbsp;&nbsp;\|&nbsp;&nbsp;&nbsp;&nbsp;*int16* | stack | stack of the item
+\|&nbsp;&nbsp;&nbsp;&nbsp;\|&nbsp;&nbsp;&nbsp;&nbsp;*int32* | id | id of the item
+\|&nbsp;&nbsp;&nbsp;&nbsp;\|&nbsp;&nbsp;&nbsp;&nbsp;*int8* | prefix | id of the prefix for the item (modifier)
 
 signsData
 
-npcsData
+***object array* npcsData**
 
-tileEntities
+Type | Variable | Description
+--- | --- | ---
+*int32* | id | id of an npc
+*string* | npc | type of an npc
+*string* | name | name of an npc
+*bool* | homeless | is homeless
+*object* : | position |
+\|&nbsp;&nbsp;&nbsp;&nbsp;*float* | x | position x of an npc
+\|&nbsp;&nbsp;&nbsp;&nbsp;*float* | y | position y of an npc
+*object* : | homePosition |
+\|&nbsp;&nbsp;&nbsp;&nbsp;*int32* | x | position x of npc's home
+\|&nbsp;&nbsp;&nbsp;&nbsp;*int32* | y | position y of npc's home
+
+***object* tileEntities**
+
+Type | Variable | Description
+--- | --- | ---
+*int32* | tileEntitiesCount | number of tile entities in the world
+*object array* : | tileEntities |
+\|&nbsp;&nbsp;&nbsp;&nbsp;*int32* | id | ID of the tile entity
+\|&nbsp;&nbsp;&nbsp;&nbsp;*object* : | position |
+\|&nbsp;&nbsp;&nbsp;&nbsp;\|&nbsp;&nbsp;&nbsp;&nbsp;*int16* | x | position x of the tile entity
+\|&nbsp;&nbsp;&nbsp;&nbsp;\|&nbsp;&nbsp;&nbsp;&nbsp;*int16* | y | position y of the tile entity
+\|&nbsp;&nbsp;&nbsp;&nbsp;*object* : | targetDummy |
+\|&nbsp;&nbsp;&nbsp;&nbsp;\|&nbsp;&nbsp;&nbsp;&nbsp;*int16* | npc | ?
+\|&nbsp;&nbsp;&nbsp;&nbsp;*object* : | itemFrame |
+\|&nbsp;&nbsp;&nbsp;&nbsp;\|&nbsp;&nbsp;&nbsp;&nbsp;*int16* | itemId | ID of the framed item
+\|&nbsp;&nbsp;&nbsp;&nbsp;\|&nbsp;&nbsp;&nbsp;&nbsp;*int8* | prefix | prefix of the framed item (modifier)
+\|&nbsp;&nbsp;&nbsp;&nbsp;\|&nbsp;&nbsp;&nbsp;&nbsp;*int16* | stack | stack of the framed item
+\|&nbsp;&nbsp;&nbsp;&nbsp;*object* : | logicSensor |
+\|&nbsp;&nbsp;&nbsp;&nbsp;\|&nbsp;&nbsp;&nbsp;&nbsp;*int8* | logicCheck | type of the logic check (probably)
+\|&nbsp;&nbsp;&nbsp;&nbsp;\|&nbsp;&nbsp;&nbsp;&nbsp;*bool* | on | is on
 
 pressurePlates
 
