@@ -599,10 +599,11 @@ class TerrariaWorldParser extends TerrariaUtilities {
 			};
 		}
 
+		//pillars, i guess
 		for (; this.ReadBoolean(); i++) {
 			
 			data[i] = {};
-			data[i].id     = this.ReadInt32();
+			data[i].id = this.ReadInt32();
 
 			data[i].position = {
 				x: this.ReadFloat(),
@@ -679,7 +680,7 @@ class TerrariaWorldParser extends TerrariaUtilities {
 
 		for (let i = 0; i < data.pressurePlatesCount; i++ ) {
 
-			data.pressirePlates[i].position = {
+			data.pressurePlates[i].position = {
 				x: this.ReadInt32(),
 				y: this.ReadInt32()
 			};

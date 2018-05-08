@@ -11,6 +11,8 @@ JavaScript based Terraria world file parser for Node.js
 
 \- supports only maps generated in 1.3.5.3
 
+Feel free to contribute 🌳
+
 ## Usage 
 
 ```javascript
@@ -56,9 +58,9 @@ Type | Variable | Description
 --- | --- | ---
 *string* | mapName | name of the map
 *string* | seedText | seed of the map
-*uint64* | worldGeneratorVersion | -
-*int64* | creationTime | time of creation (created with C# Datetime.ToBinary())
-*guid* | guid | guid of the map
+*uint64* | worldGeneratorVersion | returning 8 bytes array because node.js doesn't natively support 32+ bit value reads
+*int64* | creationTime | time of creation (created with C# Datetime.ToBinary()), returns 8 bytes array (^)
+*guid* | guid | guid of the map, returns 16 bytes array (^)
 *int32 array* | killCount | kill counter of the enemies (array index == enemy id probably)
 *int32* | worldId | id of the world, used as name of the .map file
 *int32* | leftWorld | map dimesion in pixels (1 tile = 16 pixels)
@@ -208,15 +210,25 @@ Type | Variable | Description
 *int16* | chestSpace | number of slots for chests, 40 as for version 1.3.5.8
 *number* | overflow | number of overflowing slots
 *object array* : | chests |
-\|&nbsp;&nbsp;&nbsp;&nbsp;*int32* | x | position x of the chest
-\|&nbsp;&nbsp;&nbsp;&nbsp;*int32* | y | position y of the chest
 \|&nbsp;&nbsp;&nbsp;&nbsp;*string* | name | name of the chest
+\|&nbsp;&nbsp;&nbsp;&nbsp;*object* : | position |
+\|&nbsp;&nbsp;&nbsp;&nbsp;\|&nbsp;&nbsp;&nbsp;&nbsp;*int32* | x | position x of the chest
+\|&nbsp;&nbsp;&nbsp;&nbsp;\|&nbsp;&nbsp;&nbsp;&nbsp;*int32* | y | position y of the chest
 \|&nbsp;&nbsp;&nbsp;&nbsp;*object array* : | items |
 \|&nbsp;&nbsp;&nbsp;&nbsp;\|&nbsp;&nbsp;&nbsp;&nbsp;*int16* | stack | stack of the item
 \|&nbsp;&nbsp;&nbsp;&nbsp;\|&nbsp;&nbsp;&nbsp;&nbsp;*int32* | id | id of the item
 \|&nbsp;&nbsp;&nbsp;&nbsp;\|&nbsp;&nbsp;&nbsp;&nbsp;*int8* | prefix | id of the prefix for the item (modifier)
 
-signsData
+***object* signsData**
+
+Type | Variable | Description
+--- | --- | ---
+*int16* | signsCount | number of signs in the world
+*object array* : | signs |
+\|&nbsp;&nbsp;&nbsp;&nbsp;*string* | text | text of the sign
+\|&nbsp;&nbsp;&nbsp;&nbsp;*object* : | position |
+\|&nbsp;&nbsp;&nbsp;&nbsp;\|&nbsp;&nbsp;&nbsp;&nbsp;*int32* | x | position x of the sign
+\|&nbsp;&nbsp;&nbsp;&nbsp;\|&nbsp;&nbsp;&nbsp;&nbsp;*int32* | y | position y of the sign
 
 ***object array* npcsData**
 
@@ -253,6 +265,24 @@ Type | Variable | Description
 \|&nbsp;&nbsp;&nbsp;&nbsp;\|&nbsp;&nbsp;&nbsp;&nbsp;*int8* | logicCheck | type of the logic check (probably)
 \|&nbsp;&nbsp;&nbsp;&nbsp;\|&nbsp;&nbsp;&nbsp;&nbsp;*bool* | on | is on
 
-pressurePlates
 
-townManager
+***object* pressurePlates**
+
+Type | Variable | Description
+--- | --- | ---
+*int32* | pressurePlatesCount | number of pressurePlates in the world
+*object array* : | pressurePlates |
+\|&nbsp;&nbsp;&nbsp;&nbsp;*object* : | position |
+\|&nbsp;&nbsp;&nbsp;&nbsp;\|&nbsp;&nbsp;&nbsp;&nbsp;*int32* | x | position x of the pressurePlate
+\|&nbsp;&nbsp;&nbsp;&nbsp;\|&nbsp;&nbsp;&nbsp;&nbsp;*int32* | y | position y of the pressurePlate
+
+***object* townManager**
+
+Type | Variable | Description
+--- | --- | ---
+*int32* | roomsCount | number of rooms in the world
+*object array* : | rooms |
+\|&nbsp;&nbsp;&nbsp;&nbsp;*int32* | npcId | ID of an NPC
+\|&nbsp;&nbsp;&nbsp;&nbsp;*object* : | position |
+\|&nbsp;&nbsp;&nbsp;&nbsp;\|&nbsp;&nbsp;&nbsp;&nbsp;*int32* | x | position x of the room
+\|&nbsp;&nbsp;&nbsp;&nbsp;\|&nbsp;&nbsp;&nbsp;&nbsp;*int32* | y | position y of the room
