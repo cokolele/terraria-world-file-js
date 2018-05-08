@@ -1,3 +1,10 @@
+<!--
+  Title: terraria world parser
+  Description: Terraria world file parser
+  Author: cokolele
+  Tags: terraria, world file, file structure, file dumper, file format, documentation, data, parsing, parser, map viewer, tool
+  -->
+
 # Terraria world parser
 
 JavaScript based Terraria world file parser for Node.js
