@@ -12,36 +12,6 @@ class TerrariaUtilities {
 				y:null,
 				solids: [true,true,true,null,null,null,true,true,true,true,true,null,null,null,null,null,null,null,null,true,null,null,true,true,null,true,null,null,null,null,true,null,null,null,null,null,null,true,true,true,true,true,null,true,true,true,true,true,true,null,null,true,true,true,true,null,true,true,true,true,true,null,true,true,true,true,true,true,true,null,true,null,null,null,null,true,true,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,true,true,true,null,true,true,null,null,true,true,true,true,true,true,true,true,true,null,null,null,true,null,null,true,null,null,null,null,null,null,true,null,null,true,null,null,null,null,true,true,true,true,null,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,null,true,true,true,true,true,null,null,null,null,true,true,true,null,true,true,true,true,true,null,null,null,null,true,true,true,true,true,true,true,true,true,true,true,true,true,null,true,true,true,true,true,null,true,null,null,true,null,null,null,null,null,null,null,null,null,true,true,true,true,true,true,null,null,true,true,null,true,null,true,true,null,null,null,true,null,null,null,null,null,null,null,null,true,true,true,true,true,true,null,true,true,true,true,true,true,true,true,true,true,true,true,true,true,null,null,null,true,true,true,null,null,null,null,null,null,null,null,null,true,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,true,true,true,null,true,null,null,null,null,null,true,true,null,null,true,true,true,true,true,null,null,null,null,null,null,true,null,null,null,true,true,true,true,true,true,true,true,true,null,true,true,true,true,null,null,null,true,null,null,null,null,null,null,null,true,true,true,true,true,true,true,null,null,null,null,null,null,null,true,null,true,true,true,true,true,null,null,null,null,null,null,null,null,null,null,true,true,true,true,true,true,true,true,true,null,null,true,true,true,null,null,null,null,null,true,true,true,true,null,null,true,true,null,null,null,true,null,null,null,true,true,true,true,true,null,null,null,null,null,null,null,null,null,null,null,true,true,true,true,true,true,null,null,null,null,null,null,true,true,true],
 			},
-			npcTypes: {
-				"17": "Merchant",
-				"18": "Nurse",
-				"19": "Arms Dealer",
-				"20": "Dryad",
-				"22": "Guide",
-				"37": "Old Man",
-				"38": "Demolitionist",
-				"54": "Clothier",
-				"107": "Goblin Tinkerer",
-				"108": "Wizard",
-				"124": "Mechanic",
-				"142": "Santa Claus",
-				"160": "Truffle",
-				"178": "Steampunker",
-				"207": "Dye Trader",
-				"208": "Party Girl",
-				"209": "Cyborg",
-				"227": "Painter",
-				"228": "Witch Doctor",
-				"229": "Pirate",
-				"353": "Stylist",
-				"369": "Angler",
-				"422": "Vortex Pillar",
-				"441": "Tax Collector",
-				"493": "Stardust Pillar",
-				"507": "Nebula Pillar",
-				"517": "Solar Pillar",
-				"550": "Tavernkeep",
-			}
 		}
 	}
 
@@ -617,7 +587,6 @@ class TerrariaWorldParser extends TerrariaUtilities {
 
 			data[i] = {};
 			data[i].id         = this.ReadInt32();
-			data[i].npc        = this.world.npcTypes[ data[i].id ];
 			data[i].name       = this.ReadString();
 			data[i].position   = {
 				x: this.ReadFloat(),
@@ -634,7 +603,6 @@ class TerrariaWorldParser extends TerrariaUtilities {
 			
 			data[i] = {};
 			data[i].id     = this.ReadInt32();
-			data[i].npc    = this.world.npcTypes[ data[i].id ];
 
 			data[i].position = {
 				x: this.ReadFloat(),
