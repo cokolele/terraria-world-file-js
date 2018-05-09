@@ -7,8 +7,16 @@ try {
 	
 	const img = pngjs.createImage(world.header.maxTilesX, world.header.maxTilesY);
 
-	world.worldTiles.forEach((x, xi) => {
-		x.forEach((tile, yi) => {
+	const layers = {
+		space: 80, //below
+		// sky - between
+		ground: world.header.worldSurface, //above
+		cavern: world.header.rockLayer, //above
+		underworld: world.header.maxTilesY - 192, //above
+	}
+
+	world.worldTiles.forEach((arrayX, x) => {
+		arrayX.forEach((tile, y) => {
 
 			let color;
 			if (tile.blockId || tile.blockId == 0) color = palette.tiles[tile.blockId];
@@ -16,14 +24,14 @@ try {
 			else if (tile.wallId) color = palette.walls[tile.wallId];
 			else {
 
-				if (world.header.maxTilesY == 1800) {
-					if (yi < 565) color = palette.backgrounds.sky;
-					else if (yi > 1600) color = palette.backgrounds.underworld;
-					else color = palette.backgrounds.cavern;
-				}
+				if (y < layers.space) color = palette.backgrounds.space;
+				else if (y >= layers.space && y < layers.ground) color = palette.backgrounds.sky;
+				else if (y >= layers.ground && y < layers.cavern) color = palette.backgrounds.ground;
+				else if (y >= layers.cavern && y < layers.underworld) color = palette.backgrounds.cavern;
+				else if (y >= layers.underworld) color = palette.backgrounds.underworld;
 			}
 
-			img.setAt(xi, yi, color);
+			img.setAt(x, y, color);
 		});
 	});
 

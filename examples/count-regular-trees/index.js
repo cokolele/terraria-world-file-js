@@ -10,8 +10,8 @@ try {
 		y: [132, 154, 176]
 	};
 
-	world.worldTiles.forEach((x, xi) => {
-		x.forEach((tile, yi) => {
+	world.worldTiles.forEach((arrayX) => {
+		arrayX.forEach((tile) => {
 
 			if (tile.blockId == 5)
 				if (treeBaseFrames.x.includes(tile.frameX) && treeBaseFrames.y.includes(tile.frameY))
@@ -20,6 +20,8 @@ try {
 	});
 
 	console.log(`This map contains ${treeCount} regular trees`);
+
+	console.log(world.header.treeX);
 
 } catch (e) {
 	console.log(e.message)

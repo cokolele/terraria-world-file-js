@@ -58,7 +58,7 @@ Type | Variable | Description
 --- | --- | ---
 *string* | mapName | name of the map
 *string* | seedText | seed of the map
-*uint64* | worldGeneratorVersion | returning 8 bytes array because node.js doesn't natively support 32+ bit value reads
+*uint64* | worldGeneratorVersion | version of the world generator, returns 8 bytes array because node.js doesn't natively support 32+ bit value reads
 *int64* | creationTime | time of creation (created with C# Datetime.ToBinary()), returns 8 bytes array (^)
 *guid* | guid | guid of the map, returns 16 bytes array (^)
 *int32 array* | killCount | kill counter of the enemies (array index == enemy id probably)
@@ -67,8 +67,8 @@ Type | Variable | Description
 *int32* | rightWorld | ^
 *int32* | topWorld | ^
 *int32* | bottomWorld | ^
-*int32* | maxTilesY | map dimension in tiles
-*int32* | maxTilesX | ^
+*int32* | maxTilesX | map dimension x in tiles
+*int32* | maxTilesY | map dimension y in tiles
 *int32* | spawnTileX | position x of the spawn point
 *int32* | spawnTileY | position y of the spawn point
 *int32* | dungeonX | position x of the dungeon base
@@ -80,10 +80,10 @@ Type | Variable | Description
 *int32* | iceBackStyle | ?
 *int32* | jungleBackStyle | ?
 *int32* | hellBackStyle | ?
-*double* | worldSurface | ?
-*double* | rockLayer | ?
+*double* | worldSurface | y dimension where ground level starts
+*double* | rockLayer | y dimension where cavern level starts
 *bool* | expertMode | expert mode map
-*bool* | hardMode | is map is hardmode
+*bool* | hardMode | is map hardmode
 *int32* | oreTier1 | what is <tier 1> hardmore ore (block id)
 *int32* | oreTier2 | ^
 *int32* | oreTier3 | ^
@@ -110,7 +110,7 @@ Type | Variable | Description
 *int32* | tempMoonPhase | moon phase (probably)
 *bool* | tempBloodMoon | is blood moon happening
 *bool* | tempEclipse | is eclipse happening
-*bool* | eclipse | ?
+*bool* | eclipse | is eclipse happening (^ copied)
 *int32* | invasionDelay | ?
 *int32* | invasionSize | ?
 *int32* | invasionSizeStart | ?

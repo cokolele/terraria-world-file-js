@@ -713,7 +713,9 @@
 	},
 
 	"backgrounds": {
+		"space": {"red":51,"green":102,"blue":153,"alpha":255},
 		"sky": {"red":155,"green":209,"blue":255,"alpha":255},
+		"ground": {"red":84,"green":57,"blue":42,"alpha":255},
 		"cavern": {"red":72,"green":64,"blue":57,"alpha":255},
 		"underworld": {"red":51,"green":0,"blue":0,"alpha":255}
 	}
