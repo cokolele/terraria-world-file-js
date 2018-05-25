@@ -3,7 +3,7 @@ const palette = require("./palette.json");
 const pngjs = require('pngjs-image');
 
 try {
-	const world = new TerrariaWorldParser("../../Canvas.wld").Load();
+	const world = new TerrariaWorldParser("../../d.wld").Load();
 	
 	const img = pngjs.createImage(world.header.maxTilesX, world.header.maxTilesY);
 

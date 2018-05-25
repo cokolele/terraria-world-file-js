@@ -17,66 +17,49 @@ class TerrariaUtilities {
 
 	ReadInt8() {
 
-		const data = this.buffer[this.offset];
 		this.offset += 1;
-
-		return data;
+		return this.buffer[this.offset - 1];
 	}
 
 	ReadInt16() {
 
-		const data = this.buffer.readInt16LE( this.offset );
 		this.offset += 2;
-
-		return data;
+		return this.buffer.readInt16LE( this.offset - 2 );
 	}
 
 	ReadUInt16() {
 
-		const data = this.buffer.readUInt16LE( this.offset );
 		this.offset += 2;
-
-		return data;
+		return this.buffer.readUInt16LE( this.offset - 2 );
 	}
 
 	ReadInt32() {
 		
-		const data = this.buffer.readInt32LE( this.offset );
 		this.offset += 4;
-
-		return data;
+		return this.buffer.readInt32LE( this.offset - 4 );
 	}
 
 	ReadUInt32() {
 		
-		const data = this.buffer.readUInt32LE( this.offset );
 		this.offset += 4;
-
-		return data;
+		return this.buffer.readUInt32LE( this.offset - 4 );
 	}
 
 	ReadString() {
 
-		const stringLength = this.ReadInt8();
-		const data = this.ReadBytes(stringLength).toString("utf8");
-
-		return data;
+		return this.ReadBytes( this.ReadInt8() ).toString("utf8");
 	}
 
 	ReadFloat() {
 
-		const data = this.buffer.readFloatLE( this.offset );
 		this.offset += 4;
-
-		return data;
+		return this.buffer.readFloatLE( this.offset - 4 );
 	}
 
 	ReadDouble() {
 
-		const data = this.buffer.readDoubleLE( this.offset );
 		this.offset += 8;
-
-		return data;
+		return this.buffer.readDoubleLE( this.offset - 8 );
 	}
 
 	ReadBoolean() {

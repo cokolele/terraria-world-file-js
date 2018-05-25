@@ -6,3 +6,4 @@ node_modules/
 examples/generate-map-image/pallete-generator.js
 /package-lock.json
 /test.js
+/package.json
