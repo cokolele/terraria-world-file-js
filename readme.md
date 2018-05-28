@@ -38,6 +38,18 @@ Other examples in /examples directory:
 
 \- count all trees
 
+## Functions:
+
+  class constructor: new TerrariaWorldParser( "./path/to/file.wld" )
+ - Opens the file, does not parse it yet
+
+
+  instance method: Load(["fileFormatHeader","header","worldTiles","chestsData","signsData",
+  "npcsData","tileEntities","pressurePlates","townManager"])
+ - Parses the file
+ - Parses only the sections passed by an argument (parses everything if undefined)
+ - Returns an object
+
 ## Return object:
 
 ***object* fileFormatHeader**

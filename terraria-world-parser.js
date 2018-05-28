@@ -83,6 +83,11 @@ class TerrariaUtilities {
 
 		this.offset += count;
 	}
+
+	JumpTo(offset) {
+
+		this.offset = offset;
+	}
 }
 
 class TerrariaWorldParser extends TerrariaUtilities {
@@ -101,21 +106,23 @@ class TerrariaWorldParser extends TerrariaUtilities {
 		}
 	}
 
-	Load() {
+	Load(sections = ["fileFormatHeader","header","worldTiles","chestsData","signsData","npcsData","tileEntities","pressurePlates","townManager"]) {
 
 		let data = {};
 		
 		try {
 
-			data.fileFormatHeader   = this.LoadFileFormatHeader();
-			data.header             = this.LoadHeader();
-			data.worldTiles         = this.LoadWorldTiles();
-			data.chestsData         = this.LoadChests();
-			data.signsData          = this.LoadSigns();
-			data.npcsData           = this.LoadNPCs();
-			data.tileEntities       = this.LoadTileEntities();
-			data.pressurePlates     = this.LoadWeightedPressurePlates();
-			data.townManager        = this.LoadTownManager()
+			if (sections.includes("fileFormatHeader")) data.fileFormatHeader = this.LoadFileFormatHeader();
+			else this.LoadFileFormatHeader(); //section pointers must be loaded to continue
+			if (sections.includes("header")) data.header = this.LoadHeader();
+			else this.LoadHeader(true); //map dimensions ^
+			if (sections.includes("worldTiles")) data.worldTiles = this.LoadWorldTiles();
+			if (sections.includes("chestsData")) data.chestsData = this.LoadChests();
+			if (sections.includes("signsData")) data.signsData = this.LoadSigns();
+			if (sections.includes("npcsData")) data.npcsData = this.LoadNPCs();
+			if (sections.includes("tileEntities")) data.tileEntities = this.LoadTileEntities();
+			if (sections.includes("pressurePlates")) data.pressurePlates = this.LoadWeightedPressurePlates();
+			if (sections.includes("townManager")) data.townManager = this.LoadTownManager();
 
 		} catch (e) {
 
@@ -178,7 +185,7 @@ class TerrariaWorldParser extends TerrariaUtilities {
 		}
 
 		if ( data.version < 194 || data.magicNumber != "relogic" || data.fileType != 2 || data.pointers.length != 10 || data.importants.length != 470 )
-			throw new Error("world file version is not supported (only 1.3.5.8) or corrupted metadata");
+			throw new Error("world file version is not supported (only 1.3.5.3) or corrupted metadata");
 		if ( this.offset != data.pointers[0] ) 
 			throw new Error("file format header section position did not end where it should");
 
@@ -187,9 +194,10 @@ class TerrariaWorldParser extends TerrariaUtilities {
 		return data;
 	}
 
-	LoadHeader() {
+	LoadHeader(onlyDimensions = false) {
 
 		let data = {};
+		this.JumpTo( this.world.pointers[0] );
 
 		data.mapName                = this.ReadString();
 		data.seedText               = this.ReadString();
@@ -202,6 +210,13 @@ class TerrariaWorldParser extends TerrariaUtilities {
 		data.bottomWorld            = this.ReadInt32();
 		data.maxTilesY              = this.ReadInt32();
 		data.maxTilesX              = this.ReadInt32();
+
+		if (onlyDimensions) {
+			this.world.tiles.x = data.maxTilesX;
+			this.world.tiles.y = data.maxTilesY;
+			return;
+		}
+
 		data.expertMode             = this.ReadBoolean();
 		data.creationTime           = this.ReadBytes(8);
 		data.moonType               = this.ReadInt8();
@@ -363,6 +378,7 @@ class TerrariaWorldParser extends TerrariaUtilities {
 	LoadWorldTiles() {
 
 		let data;
+		this.JumpTo( this.world.pointers[1] );
 
 		data = new Array(this.world.tiles.x);
 		for (let x = 0; x < this.world.tiles.x; x++) {
@@ -494,6 +510,7 @@ class TerrariaWorldParser extends TerrariaUtilities {
 	LoadChests() {
 
 		let data = {};
+		this.JumpTo( this.world.pointers[2] );
 
 		data.chestsCount = this.ReadInt16();
 		data.chestSpace = this.ReadInt16();
@@ -541,6 +558,7 @@ class TerrariaWorldParser extends TerrariaUtilities {
 	LoadSigns() {
 
 		let data = {};
+		this.JumpTo( this.world.pointers[3] );
 
 		data.signsCount = this.ReadInt16();
 		if (data.signsCount) data.signs = [];
@@ -564,6 +582,7 @@ class TerrariaWorldParser extends TerrariaUtilities {
 	LoadNPCs() {
 
 		let data = [];
+		this.JumpTo( this.world.pointers[4] );
 		
 		let i = 0;
 		for (; this.ReadBoolean(); i++) {
@@ -603,6 +622,7 @@ class TerrariaWorldParser extends TerrariaUtilities {
 	LoadTileEntities() {
 
 		let data = {};
+		this.JumpTo( this.world.pointers[5] );
 
 		data.tileEntitiesCount = this.ReadInt32();
 		if (data.tileEntitiesCount) data.tileEntities = [];
@@ -657,6 +677,7 @@ class TerrariaWorldParser extends TerrariaUtilities {
 	LoadWeightedPressurePlates() {
 
 		let data = {};
+		this.JumpTo( this.world.pointers[6] );
 
 		data.pressurePlatesCount = this.ReadInt32();
 		if (data.pressurePlatesCount) data.pressurePlates = [];
@@ -678,6 +699,7 @@ class TerrariaWorldParser extends TerrariaUtilities {
 	LoadTownManager() {
 
 		let data = {};
+		this.JumpTo( this.world.pointers[7] );
 
 		data.roomsCount = this.ReadInt32();
 		data.rooms = [];
