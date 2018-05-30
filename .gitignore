@@ -2,7 +2,6 @@ logs
 *.log
 npm-debug.log*
 node_modules/
-*.wld
 examples/generate-map-image/pallete-generator.js
 /package-lock.json
 /test.js
