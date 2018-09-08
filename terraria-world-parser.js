@@ -1,121 +1,34 @@
-class TerrariaUtilities {
+const terrariaFileParser = require("./utils/terraria-file-parser.js");
 
-	constructor(path) {
-		const fs = require("fs");
-		this.buffer = fs.readFileSync( path , [null, "r+"]);
-		this.offset = 0;
-		this.world = {
-			pointers:[],
-			importants:[],
-			tiles: {
-				x:null,
-				y:null,
-				solids: [true,true,true,null,null,null,true,true,true,true,true,null,null,null,null,null,null,null,null,true,null,null,true,true,null,true,null,null,null,null,true,null,null,null,null,null,null,true,true,true,true,true,null,true,true,true,true,true,true,null,null,true,true,true,true,null,true,true,true,true,true,null,true,true,true,true,true,true,true,null,true,null,null,null,null,true,true,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,true,true,true,null,true,true,null,null,true,true,true,true,true,true,true,true,true,null,null,null,true,null,null,true,null,null,null,null,null,null,true,null,null,true,null,null,null,null,true,true,true,true,null,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,null,true,true,true,true,true,null,null,null,null,true,true,true,null,true,true,true,true,true,null,null,null,null,true,true,true,true,true,true,true,true,true,true,true,true,true,null,true,true,true,true,true,null,true,null,null,true,null,null,null,null,null,null,null,null,null,true,true,true,true,true,true,null,null,true,true,null,true,null,true,true,null,null,null,true,null,null,null,null,null,null,null,null,true,true,true,true,true,true,null,true,true,true,true,true,true,true,true,true,true,true,true,true,true,null,null,null,true,true,true,null,null,null,null,null,null,null,null,null,true,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,true,true,true,null,true,null,null,null,null,null,true,true,null,null,true,true,true,true,true,null,null,null,null,null,null,true,null,null,null,true,true,true,true,true,true,true,true,true,null,true,true,true,true,null,null,null,true,null,null,null,null,null,null,null,true,true,true,true,true,true,true,null,null,null,null,null,null,null,true,null,true,true,true,true,true,null,null,null,null,null,null,null,null,null,null,true,true,true,true,true,true,true,true,true,null,null,true,true,true,null,null,null,null,null,true,true,true,true,null,null,true,true,null,null,null,true,null,null,null,true,true,true,true,true,null,null,null,null,null,null,null,null,null,null,null,true,true,true,true,true,true,null,null,null,null,null,null,true,true,true],
-			},
-		}
-	}
-
-	ReadInt8() {
-
-		this.offset += 1;
-		return this.buffer[this.offset - 1];
-	}
-
-	ReadInt16() {
-
-		this.offset += 2;
-		return this.buffer.readInt16LE( this.offset - 2 );
-	}
-
-	ReadUInt16() {
-
-		this.offset += 2;
-		return this.buffer.readUInt16LE( this.offset - 2 );
-	}
-
-	ReadInt32() {
-		
-		this.offset += 4;
-		return this.buffer.readInt32LE( this.offset - 4 );
-	}
-
-	ReadUInt32() {
-		
-		this.offset += 4;
-		return this.buffer.readUInt32LE( this.offset - 4 );
-	}
-
-	ReadString() {
-
-		return this.ReadBytes( this.ReadInt8() ).toString("utf8");
-	}
-
-	ReadFloat() {
-
-		this.offset += 4;
-		return this.buffer.readFloatLE( this.offset - 4 );
-	}
-
-	ReadDouble() {
-
-		this.offset += 8;
-		return this.buffer.readDoubleLE( this.offset - 8 );
-	}
-
-	ReadBoolean() {
-
-		if (this.ReadInt8()) return true;
-		return false;
-	}
-
-	ReadBytes(count) {
-
-		let data = [];
-
-		for (let i = 0; i < count; i++) {
-			data[i] = this.buffer[this.offset];
-			this.offset += 1;
-		}
-		return Buffer.from(data);
-	}
-
-	SkipBytes(count) {
-
-		this.offset += count;
-	}
-
-	JumpTo(offset) {
-
-		this.offset = offset;
-	}
-}
-
-class TerrariaWorldParser extends TerrariaUtilities {
-
-	constructor(path) {
-		
-		try {
+class terrariaWorldParser extends terrariaFileParser
+{
+	constructor(path)
+	{
+		try
+		{
 			super(path);
-		} catch (e) {
-
+		}
+		catch (e)
+		{
 			if (e.code = "ENOENT") 
-				e.message = `terraria-world-parser error \ndescription: wrong path \ndetails: ${e.stack}`;
+				e.message = `\nterraria-world-parser error \ndescription: wrong path \ndetails: ${e.stack}`;
 			else 
-				e.message = `terraria-world-parser error \ndetails: ${e.stack}`;
+				e.message = `\nterraria-world-parser error \ndetails: ${e.stack}`;
+
 			throw e;
 		}
 	}
 
-	Load(sections = ["fileFormatHeader","header","worldTiles","chestsData","signsData","npcsData","tileEntities","pressurePlates","townManager"]) {
-
+	Load(sections = ["fileFormatHeader", "header", "worldTiles", "chestsData", "signsData", "npcsData", "tileEntities", "pressurePlates", "townManager"])
+	{
 		let data = {};
-		
-		try {
 
+		try
+		{
 			if (sections.includes("fileFormatHeader")) data.fileFormatHeader = this.LoadFileFormatHeader();
 			else this.LoadFileFormatHeader(); //section pointers must be loaded to continue
 			if (sections.includes("header")) data.header = this.LoadHeader();
-			else this.LoadHeader(true); //map dimensions ^
+			else this.LoadHeader(true); //map dimensions must be loaded to continue
 			if (sections.includes("worldTiles")) data.worldTiles = this.LoadWorldTiles();
 			if (sections.includes("chestsData")) data.chestsData = this.LoadChests();
 			if (sections.includes("signsData")) data.signsData = this.LoadSigns();
@@ -123,37 +36,38 @@ class TerrariaWorldParser extends TerrariaUtilities {
 			if (sections.includes("tileEntities")) data.tileEntities = this.LoadTileEntities();
 			if (sections.includes("pressurePlates")) data.pressurePlates = this.LoadWeightedPressurePlates();
 			if (sections.includes("townManager")) data.townManager = this.LoadTownManager();
-
-		} catch (e) {
-
+		}
+		catch (e)
+		{
 			if (e.stack.includes("LoadFileFormatHeader")) 
-				e.message = `terraria-world-parser error \ndescription: potentionally corrupted file format header section \ndetails: ${e.stack}`;
+				e.message = `\nterraria-world-parser error \ndescription: potentionally corrupted file format header section \ndetails: ${e.stack}`;
 			else if (e.stack.includes("LoadHeader")) 
-				e.message = `terraria-world-parser error \ndescription: potentionally corrupted header section \ndetails: ${e.stack}`;
+				e.message = `\nterraria-world-parser error \ndescription: potentionally corrupted header section \ndetails: ${e.stack}`;
 			else if (e.stack.includes("LoadWorldTiles")) 
-				e.message = `terraria-world-parser error \ndescription: potentionally corrupted world tiles section \ndetails: ${e.stack}`;
+				e.message = `\nterraria-world-parser error \ndescription: potentionally corrupted world tiles section \ndetails: ${e.stack}`;
 			else if (e.stack.includes("LoadChests")) 
-				e.message = `terraria-world-parser error \ndescription: potentionally corrupted chests section \ndetails: ${e.stack}`;
+				e.message = `\nterraria-world-parser error \ndescription: potentionally corrupted chests section \ndetails: ${e.stack}`;
 			else if (e.stack.includes("LoadSigns")) 
-				e.message = `terraria-world-parser error \ndescription: potentionally corrupted signs section \ndetails: ${e.stack}`;
+				e.message = `\nterraria-world-parser error \ndescription: potentionally corrupted signs section \ndetails: ${e.stack}`;
 			else if (e.stack.includes("LoadNPCs")) 
-				e.message = `terraria-world-parser error \ndescription: potentionally corrupted NPCs section \ndetails: ${e.stack}`;
+				e.message = `\nterraria-world-parser error \ndescription: potentionally corrupted NPCs section \ndetails: ${e.stack}`;
 			else if (e.stack.includes("LoadTileEntities")) 
-				e.message = `terraria-world-parser error \ndescription: potentionally corrupted tile entities section \ndetails: ${e.stack}`;
+				e.message = `\nterraria-world-parser error \ndescription: potentionally corrupted tile entities section \ndetails: ${e.stack}`;
 			else if (e.stack.includes("LoadWeightedPressurePlates")) 
-				e.message = `terraria-world-parser error \ndescription: potentionally corrupted pressure plates section \ndetails: ${e.stack}`;
+				e.message = `\nterraria-world-parser error \ndescription: potentionally corrupted pressure plates section \ndetails: ${e.stack}`;
 			else if (e.stack.includes("LoadTownManager")) 
-				e.message = `terraria-world-parser error \ndescription: potentionally corrupted town manager section \ndetails: ${e.stack}`;
+				e.message = `\nterraria-world-parser error \ndescription: potentionally corrupted town manager section \ndetails: ${e.stack}`;
 			else
-				e.message = `terraria-world-parser error \ndetails: ${e.stack}`;
+				e.message = `\nterraria-world-parser error \ndetails: ${e.stack}`;
+
 			throw e;
 		}
 		
 		return data;
 	}
 
-	LoadFileFormatHeader() {
-
+	LoadFileFormatHeader()
+	{
 		let data = {};
 
 		data.version        = this.ReadInt32();
@@ -166,7 +80,8 @@ class TerrariaWorldParser extends TerrariaUtilities {
 
 		const pointersCount = this.ReadInt16();
 
-		for (let i = 0; i < pointersCount; i++) {
+		for (let i = 0; i < pointersCount; i++)
+		{
 			data.pointers[i] = this.ReadInt32();
 		}
 
@@ -174,14 +89,18 @@ class TerrariaWorldParser extends TerrariaUtilities {
 		let num3 = 0;
 		let num4 = 128;
 
-		for (let i = 0; i < importantsCount; ++i) {
-
-			if (num4 == 128) {
+		for (let i = 0; i < importantsCount; ++i)
+		{
+			if (num4 == 128)
+			{
 				num3 = this.ReadInt8();
 				num4 = 1;
-			} else num4 = num4 << 1 ; 
+			}
+			else 
+				num4 = num4 << 1 ; 
 
-			if ((num3 & num4) == num4) data.importants[i] = true;
+			if ((num3 & num4) == num4)
+				data.importants[i] = true;
 		}
 
 		if ( data.version < 194 || data.magicNumber != "relogic" || data.fileType != 2 || data.pointers.length != 10 || data.importants.length != 470 )
@@ -194,8 +113,8 @@ class TerrariaWorldParser extends TerrariaUtilities {
 		return data;
 	}
 
-	LoadHeader(onlyDimensions = false) {
-
+	LoadHeader(onlyDimensions = false)
+	{
 		let data = {};
 		this.JumpTo( this.world.pointers[0] );
 
@@ -211,7 +130,8 @@ class TerrariaWorldParser extends TerrariaUtilities {
 		data.maxTilesY              = this.ReadInt32();
 		data.maxTilesX              = this.ReadInt32();
 
-		if (onlyDimensions) {
+		if (onlyDimensions)
+		{
 			this.world.tiles.x = data.maxTilesX;
 			this.world.tiles.y = data.maxTilesY;
 			return;
@@ -309,7 +229,8 @@ class TerrariaWorldParser extends TerrariaUtilities {
 		data.windSpeed              = data.windSpeedSet;
 
 		data.anglerWhoFinishedToday = [];
-		for (let i = this.ReadInt32(); i > 0; --i) {
+		for (let i = this.ReadInt32(); i > 0; --i)
+		{
 			data.anglerWhoFinishedToday.push(this.ReadString());
 		}
 
@@ -322,7 +243,8 @@ class TerrariaWorldParser extends TerrariaUtilities {
 
 		data.killCount = [];
 		const num1 = this.ReadInt16();
-		for (let i = 0; i < num1; ++i) {
+		for (let i = 0; i < num1; ++i)
+		{
 			if (i < 580)
 				data.killCount[i] = this.ReadInt32();
 			else
@@ -354,7 +276,8 @@ class TerrariaWorldParser extends TerrariaUtilities {
 
 		data.tempPartyCelebratingNPCs = [];
 		const num2 = this.ReadInt32();
-		for (let i = 0; i < num2; ++i) {
+		for (let i = 0; i < num2; ++i)
+		{
 			data.tempPartyCelebratingNPCs.push(this.ReadInt32());
 		}
 		
@@ -375,17 +298,17 @@ class TerrariaWorldParser extends TerrariaUtilities {
 		return data;
 	}
 
-	LoadWorldTiles() {
-
+	LoadWorldTiles()
+	{
 		let data;
 		this.JumpTo( this.world.pointers[1] );
 
 		data = new Array(this.world.tiles.x);
-		for (let x = 0; x < this.world.tiles.x; x++) {
-
+		for (let x = 0; x < this.world.tiles.x; x++)
+		{
 			data[x] = new Array(this.world.tiles.y);
-			for (let y = 0; y < this.world.tiles.y; y++) {
-
+			for (let y = 0; y < this.world.tiles.y; y++)
+			{
 				const tile = this.ParseTileData();
 
 				data[x][y] = tile;
@@ -393,7 +316,8 @@ class TerrariaWorldParser extends TerrariaUtilities {
 				let RLE = tile.RLE;
 				delete tile.RLE;
 
-				while(RLE > 0) {
+				while(RLE > 0)
+				{
 					y++;
 					RLE--;
 					data[x][y] = tile;
@@ -407,15 +331,16 @@ class TerrariaWorldParser extends TerrariaUtilities {
 		return data;
 	}
 
-	ParseTileData() {
-
+	ParseTileData()
+	{
 		let tile = {};
 
 		let flags2, flags3;
 		const flags1 = this.ReadInt8();
 
 		// flags2 present
-		if ((flags1 & 1) == 1) {
+		if ((flags1 & 1) == 1)
+		{
 			flags2 = this.ReadInt8();
 
 		// flags3 present
@@ -424,31 +349,35 @@ class TerrariaWorldParser extends TerrariaUtilities {
 		}
 
 		// contains block
-		if ((flags1 & 2) == 2) {
-
+		if ((flags1 & 2) == 2)
+		{
 			// block id has 1 byte / 2 bytes
 			if ((flags1 & 32) == 32) tile.blockId = this.ReadUInt16();
 			else tile.blockId = this.ReadInt8();
 
 			// important tile (animated, big sprite, more variants...)
-			if (this.world.importants[tile.blockId]) {
+			if (this.world.importants[tile.blockId])
+			{
 				tile.frameX = this.ReadInt16();
 				tile.frameY = tile.blockId == 144 ? 0 : this.ReadInt16();
 			}
 
 			// painted block
-			if ((flags3 & 8) == 8) {
+			if ((flags3 & 8) == 8)
+			{
 				if (!tile.color) tile.color = {};
 				tile.color.block = this.ReadInt8();
 			}
 		}
 
 		// contains wall
-		if ((flags1 & 4) == 4) {
+		if ((flags1 & 4) == 4)
+		{
 			tile.wallId = this.ReadInt8();
 
 			// painted wall
-			if ((flags3 & 16) == 16) {
+			if ((flags3 & 16) == 16)
+			{
 				if (!tile.colors) tile.colors = {};
 				tile.colors.wall = this.ReadInt8();
 			}
@@ -456,11 +385,12 @@ class TerrariaWorldParser extends TerrariaUtilities {
 
 		// liquid informations
 		const liquidType = (flags1 & 24) >> 3;
-		if (liquidType != 0) {
-			
+		if (liquidType != 0)
+		{
 			if (!tile.liquid) tile.liquid = {};
 			tile.liquid.amount = this.ReadInt8();
-			switch(liquidType) {
+			switch(liquidType)
+			{
 				case 1: tile.liquid.type = "water"; break;
 				case 2: tile.liquid.type = "lava"; break;
 				case 3: tile.liquid.type = "honey"; break;
@@ -468,8 +398,8 @@ class TerrariaWorldParser extends TerrariaUtilities {
 		}
 
 		// flags2 has any other informations than flags3 presence
-		if (flags2 > 1) {
-			
+		if (flags2 > 1)
+		{
 			if (!tile.wiring) tile.wiring = {};
 			if (!tile.wiring.wires) tile.wiring.wires = {};
 			if ((flags2 & 2) == 2) tile.wiring.wires.red = true;
@@ -477,9 +407,10 @@ class TerrariaWorldParser extends TerrariaUtilities {
 			if ((flags2 & 8) == 8) tile.wiring.wires.green = true;
 
 			const hammeredBlock = (flags2 & 112) >> 4;
-			if (hammeredBlock != 0 && this.world.tiles.solids[tile.blockId]) {
-
-				switch(hammeredBlock) {
+			if (hammeredBlock != 0 && this.world.tiles.solids[tile.blockId])
+			{
+				switch(hammeredBlock)
+				{
 					case 1: tile.hammered = "half"; break;
 					case 2: tile.hammered = "TR"; break;
 					case 3: tile.hammered = "TL"; break;
@@ -490,15 +421,16 @@ class TerrariaWorldParser extends TerrariaUtilities {
 		}
 
 		// flags3 has any informations
-		if (flags3 > 0) {
-			
+		if (flags3 > 0)
+		{	
 			if (!tile.wiring) tile.wiring = {};
 			if ((flags3 & 2) == 2) tile.wiring.hasActuator = true;
 			if ((flags3 & 4) == 4) tile.wiring.actuated = true;
 			if ((flags3 & 32) == 32) tile.wiring.wires.yellow = true;
 		}
 
-		switch ((flags1 & 192) >> 6) {
+		switch ((flags1 & 192) >> 6)
+		{
 			case 0: tile.RLE = 0; break;
 			case 1: tile.RLE = this.ReadInt8(); break;
 			default: tile.RLE = this.ReadInt16(); break;
@@ -507,8 +439,8 @@ class TerrariaWorldParser extends TerrariaUtilities {
 		return tile;
 	}
 
-	LoadChests() {
-
+	LoadChests()
+	{
 		let data = {};
 		this.JumpTo( this.world.pointers[2] );
 
@@ -518,8 +450,8 @@ class TerrariaWorldParser extends TerrariaUtilities {
 		if (data.chestsCount) 
 			data.chests = [];
 
-		for (let i = 0; i < data.chestsCount; i++) {
-			
+		for (let i = 0; i < data.chestsCount; i++)
+		{
 			data.chests[i] = {};
 			data.chests[i].position = {
 				x: this.ReadInt32(),
@@ -529,8 +461,8 @@ class TerrariaWorldParser extends TerrariaUtilities {
 			if (data.chests[i].name == '') 
 				delete data.chests[i].name;
 
-			for (let _i = 0; _i < data.chestSpace; _i++) {
-
+			for (let _i = 0; _i < data.chestSpace; _i++)
+			{
 				const stack = this.ReadInt16();
 				if (stack == 0) 
 					continue;
@@ -544,7 +476,8 @@ class TerrariaWorldParser extends TerrariaUtilities {
 			}
 
 			// skipping overflow items
-			for (let _i = 0; _i < data.overflow; _i++) {
+			for (let _i = 0; _i < data.overflow; _i++)
+			{
 				if (this.ReadInt16() > 0) this.SkipBytes(5);
 			}
 		}
@@ -555,16 +488,16 @@ class TerrariaWorldParser extends TerrariaUtilities {
 		return data;
 	}
 
-	LoadSigns() {
-
+	LoadSigns()
+	{
 		let data = {};
 		this.JumpTo( this.world.pointers[3] );
 
 		data.signsCount = this.ReadInt16();
 		if (data.signsCount) data.signs = [];
 
-		for (let i = 0; i < data.signsCount; i++) {
-
+		for (let i = 0; i < data.signsCount; i++)
+		{
 			data.signs[i] = {};
 			data.signs[i].text = this.ReadString();
 			data.signs[i].position = {
@@ -579,14 +512,14 @@ class TerrariaWorldParser extends TerrariaUtilities {
 		return data;
 	}
 
-	LoadNPCs() {
-
+	LoadNPCs()
+	{
 		let data = [];
 		this.JumpTo( this.world.pointers[4] );
 		
 		let i = 0;
-		for (; this.ReadBoolean(); i++) {
-
+		for (; this.ReadBoolean(); i++)
+		{
 			data[i] = {};
 			data[i].id         = this.ReadInt32();
 			data[i].name       = this.ReadString();
@@ -602,8 +535,8 @@ class TerrariaWorldParser extends TerrariaUtilities {
 		}
 
 		//pillars, i guess
-		for (; this.ReadBoolean(); i++) {
-			
+		for (; this.ReadBoolean(); i++)
+		{
 			data[i] = {};
 			data[i].id = this.ReadInt32();
 
@@ -619,16 +552,16 @@ class TerrariaWorldParser extends TerrariaUtilities {
 		return data;
 	}
 
-	LoadTileEntities() {
-
+	LoadTileEntities()
+	{
 		let data = {};
 		this.JumpTo( this.world.pointers[5] );
 
 		data.tileEntitiesCount = this.ReadInt32();
 		if (data.tileEntitiesCount) data.tileEntities = [];
 
-		for (let i = 0; i < data.tileEntitiesCount; i++ ) {
-			
+		for (let i = 0; i < data.tileEntitiesCount; i++ )
+		{
 			data.tileEntities[i] = {};
 
 			const type              = this.ReadInt8();
@@ -638,8 +571,8 @@ class TerrariaWorldParser extends TerrariaUtilities {
 				y: this.ReadInt16()
 			};
 
-			switch (type) {
-
+			switch (type)
+			{
 				//dummy
 				case 0:
 
@@ -647,7 +580,6 @@ class TerrariaWorldParser extends TerrariaUtilities {
 						"npc": this.ReadInt16(),
 					}
 					break;
-
 				//item frame
 				case 1:
 					data.tileEntities[i].itemFrame = {
@@ -656,7 +588,6 @@ class TerrariaWorldParser extends TerrariaUtilities {
 						"stack" : this.ReadInt16(),
 					}
 					break;
-
 				//logic sensor
 				case 2:
 					data.tileEntities[i].logicSensor = {
@@ -674,16 +605,16 @@ class TerrariaWorldParser extends TerrariaUtilities {
 		return data;
 	}
 
-	LoadWeightedPressurePlates() {
-
+	LoadWeightedPressurePlates()
+	{
 		let data = {};
 		this.JumpTo( this.world.pointers[6] );
 
 		data.pressurePlatesCount = this.ReadInt32();
 		if (data.pressurePlatesCount) data.pressurePlates = [];
 
-		for (let i = 0; i < data.pressurePlatesCount; i++ ) {
-
+		for (let i = 0; i < data.pressurePlatesCount; i++ )
+		{
 			data.pressurePlates[i].position = {
 				x: this.ReadInt32(),
 				y: this.ReadInt32()
@@ -696,16 +627,16 @@ class TerrariaWorldParser extends TerrariaUtilities {
 		return data;
 	}
 
-	LoadTownManager() {
-
+	LoadTownManager()
+	{
 		let data = {};
 		this.JumpTo( this.world.pointers[7] );
 
 		data.roomsCount = this.ReadInt32();
 		data.rooms = [];
 
-		for (let i = 0; i < data.roomsCount; i++) {
-
+		for (let i = 0; i < data.roomsCount; i++)
+		{
 			data.rooms[i] = {};
 			data.rooms[i].npcId = this.ReadInt32();
 			data.rooms[i].position = {
@@ -718,4 +649,4 @@ class TerrariaWorldParser extends TerrariaUtilities {
 	}
 }
 
-module.exports = TerrariaWorldParser;
+module.exports = terrariaWorldParser;

@@ -1,11 +1,16 @@
-const TerrariaWorldParser = require("../terraria-world-parser.js");
+const terrariaWorldParser = require("../terraria-world-parser.js");
 
-try {
+const worlds = ["Canvas", "Doge", "Doge2"];
 
-	let world = new TerrariaWorldParser("./worlds/Canvas.wld").Load();
-	console.log( Object.keys(world) );
-
-} catch (e) {
-
+try
+{
+	worlds.forEach( map => {
+		let world = new terrariaWorldParser("./worlds/" + map + ".wld").Load();
+		console.log("\n" + map);
+		console.log( Object.keys(world) );
+	});
+}
+catch (e)
+{
 	console.log(e.message)
 }

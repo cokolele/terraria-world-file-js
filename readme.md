@@ -218,7 +218,7 @@ Type | Variable | Description
 Type | Variable | Description
 --- | --- | ---
 *int16* | chestsCount | number of chests in the world
-*int16* | chestSpace | number of slots for chests, 40 as for version 1.3.5.8
+*int16* | chestSpace | number of slots for chests, 40 as for version 1.3.5.3
 *number* | overflow | number of overflowing slots
 *object array* : | chests |
 \|&nbsp;&nbsp;&nbsp;&nbsp;*string* | name | name of the chest
