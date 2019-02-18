@@ -2,7 +2,6 @@ logs
 *.log
 npm-debug.log*
 node_modules/
-examples/pallete-generator.js
 /package-lock.json
-/test.js
-/package.json
+.cache
+src/tests/
