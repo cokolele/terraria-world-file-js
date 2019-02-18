@@ -5,19 +5,39 @@
   "main": "src/node/terraria-world-parser.js",
   "scripts": {
     "test:node": "node ./src/tests/node.js",
-    "server": "parcel serve --port 80 --open --out-dir src/tests --out-file browser-built.html --target browser --cache-dir src/tests/.cache src/tests/browser.html",
+    "server": "parcel serve --port 80 --open --out-dir src/tests/web --out-file browser-built.html --target browser --cache-dir src/tests/web/.cache src/tests/browser.html",
     "build:browser": "parcel build --out-dir ./ --out-file terraria-world-parser-browser.min.js --no-cache --target browser --no-source-maps src/browser/terraria-world-parser.js"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/cokolele/terraria-world-parser.git"
   },
-  "keywords": ["terraria", "world file", "file structure", "file dumper", "file format", "documentation", "data", "parsing", "parser", "map viewer", "tool", "javascript", "node", "browser"],
+  "keywords": [
+    "terraria",
+    "world file",
+    "file structure",
+    "file dumper",
+    "file format",
+    "documentation",
+    "data",
+    "parsing",
+    "parser",
+    "map viewer",
+    "tool",
+    "javascript",
+    "node",
+    "browser"
+  ],
   "author": "cokolele",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/cokolele/terraria-world-parser/issues"
   },
   "homepage": "https://github.com/cokolele/terraria-world-parser#readme",
-  "dependencies": {}
+  "dependencies": {
+    "aes-js": "^3.1.2"
+  },
+  "devDependencies": {
+    "@babel/polyfill": "^7.2.5"
+  }
 }

@@ -71,7 +71,7 @@ class terrariaWorldParser extends terrariaFileParser
     {
         let data = {};
         data.version        = this.readInt32();
-        data.magicNumber    = this.readBytes(7).toString("ascii");
+        data.magicNumber    = this.readString(7);
         data.fileType       = this.readUInt8();
         data.revision       = this.readUInt32();
         this.skipBytes(7);
