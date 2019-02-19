@@ -50,7 +50,7 @@ class terrariaWorldParser extends terrariaFileParser
                     this.jumpTo(this.world.pointers[i-1]);
 
                     if (selectedSections.includes(section)) {
-                        data[section] = this[parseFunction]();
+                        data[section.charAt(0).toLowerCase() + section.slice(1)] = this[parseFunction]();
                     } else if (section == "FileFormatHeader" || section == "Header") { // these sections contain data needed for further parsing
                         this[parseFunction]();
                         this.jumpTo(this.world.pointers[i]);

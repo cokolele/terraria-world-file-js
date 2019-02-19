@@ -1,4 +1,4 @@
-const aes = require("aes-js");
+const { utf8ByteArrayToString } = require("./string.js");
 
 module.exports = class terrariaFileParser
 {
@@ -87,8 +87,7 @@ module.exports = class terrariaFileParser
 
     readString(length)
     {
-        //return this.readBytes( length ? length : this.readUInt8() );
-        return aes.utils.utf8.fromBytes( this.readBytes( length ? length : this.readUInt8() ) );
+        return utf8ByteArrayToString( this.readBytes( length ? length : this.readUInt8() ) );
     }
 
     skipBytes(count)

@@ -2,12 +2,12 @@
   Title: terraria world parser
   Description: Terraria world file parser
   Author: cokolele
-  Tags: terraria, world file, file structure, file dumper, file format, documentation, data, parsing, parser, map viewer, tool
+  Tags: terraria, world file, file structure, file dumper, file format, documentation, data, parsing, parser, map viewer, tool, javascript, node, browser
   -->
 
 # Terraria world parser
 
-JavaScript based Terraria world file parser for Node.js
+Terraria world file parser written in javascript
 
 \- supports only maps generated in 1.3.5.3
 
@@ -16,38 +16,33 @@ Feel free to contribute 🌳
 ## Usage 
 
 ```javascript
-const TerrariaWorldParser = require("./terraria-world-parser.js");
+const terrariaWorldParser = require("terraria-world-parser.js");
 
-try {
+//node
+let world = new terrariaWorldParser("Canvas.wld");
+//browser
+let world = await new terrariaWorldParser(worldFile);
 
-    let world = new TerrariaWorldParser("./Canvas.wld");
-    world = world.Load();
+world = world.parse();
 
-    const name = world.header.mapName;
-    const size = world.header.maxTilesX + "x" + world.header.maxTilesY;
-    console.log( `Size of ${name} is ${size}`);
-
-} catch (e) {
-    console.log(e.message)
-}
+const name = world.header.mapName;
+const size = world.header.maxTilesX + "x" + world.header.maxTilesY;
+console.log( `Size of ${name} is ${size}`);
 ```
-
-Other examples in /examples directory:
-
-\- generate map image (png)
-
-\- count all trees
 
 ## Functions:
 
-  class constructor: new TerrariaWorldParser( "./path/to/file.wld" )
- - Opens the file, does not parse it yet
+*node class constructor* **new terrariaWorldParser( path )**  
+*browser class constructor* **new terrariaWorldParser( file )**  
 
+ \- Opens/loads the file, doesn't parse it yet
 
-  instance method: Load(["fileFormatHeader","header","worldTiles","chestsData","signsData","npcsData","tileEntities","pressurePlates","townManager"])
- - Parses the file
- - Parses only the sections passed by an argument (parses everything if undefined)
- - Returns an object
+*instance method* **parse( sections )**
+ \- *string array* **sections** parameter specifies world file sections that will be parsed
+ &nbsp;&nbsp;&nbsp;- by default all sections are parsed (if you don't define parameter)
+ &nbsp;&nbsp;&nbsp;- sections: FileFormatHeader, Header, WorldTiles, Chests, Signs, NPCs, TileEntities, WeightedPressurePlates, TownManager
+ \- Parses the file  
+ \- Returns an object
 
 ## Return object:
 
