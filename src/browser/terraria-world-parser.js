@@ -14,7 +14,8 @@ class terrariaWorldParser extends terrariaFileParser
 
     parse(selectedSections)
     {
-        //for reasons too brainbending this property cant be initialised in constructor.. design flaw but it works
+        //world property cant be initialized in constructor
+        //design flaw but it works
         this.world = {
             pointers:[],
             importants:[],
@@ -50,7 +51,10 @@ class terrariaWorldParser extends terrariaFileParser
                     this.jumpTo(this.world.pointers[i-1]);
 
                     if (selectedSections.includes(section)) {
-                        data[section.charAt(0).toLowerCase() + section.slice(1)] = this[parseFunction]();
+                        if (section == "NPCs") //return object properties with first letter lowercase except NPCs
+                            data[section] = this[parseFunction]();
+                        else
+                            data[section.charAt(0).toLowerCase() + section.slice(1)] = this[parseFunction]();
                     } else if (section == "FileFormatHeader" || section == "Header") { // these sections contain data needed for further parsing
                         this[parseFunction]();
                         this.jumpTo(this.world.pointers[i]);
@@ -102,7 +106,7 @@ class terrariaWorldParser extends terrariaFileParser
         this.world.pointers = data.pointers;
         this.world.importants = data.importants;
 
-        if ( data.version < 194 ||  data.fileType != 2)
+        if ( data.version < 194 || data.magicNumber != "relogic" || data.fileType != 2)
             throw new Error("world file version is not supported (only 1.3.5.3) or corrupted metadata");
 
         return data;

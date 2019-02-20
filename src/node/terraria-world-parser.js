@@ -1,7 +1,7 @@
 const terrariaFileParser = require("./utils/terraria-file-parser.js");
 const TerrariaPlayerParserError = require("./utils/terraria-player-parser-error.js");
 
-class terrariaWorldParser extends terrariaFileParser
+module.exports = class terrariaWorldParser extends terrariaFileParser
 {
     constructor(path)
     {
@@ -49,7 +49,10 @@ class terrariaWorldParser extends terrariaFileParser
                     this.jumpTo(this.world.pointers[i-1]);
 
                     if (selectedSections.includes(section)) {
-                        data[section.charAt(0).toLowerCase() + section.slice(1)] = this[parseFunction]();
+                        if (section == "NPCs") //return object properties with first letter lowercase except NPCs
+                            data[section] = this[parseFunction]();
+                        else
+                            data[section.charAt(0).toLowerCase() + section.slice(1)] = this[parseFunction]();
                     } else if (section == "FileFormatHeader" || section == "Header") { // these sections contain data needed for further parsing
                         this[parseFunction]();
                         this.jumpTo(this.world.pointers[i]);
@@ -600,5 +603,3 @@ class terrariaWorldParser extends terrariaFileParser
         return data;
     }
 }
-
-module.exports = terrariaWorldParser;

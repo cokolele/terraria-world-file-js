@@ -4,10 +4,8 @@
   "description": "Terraria world file parser in javascript",
   "main": "src/node/terraria-world-parser.js",
   "scripts": {
-    "test:node": "node ./src/tests/node.js",
-    "server": "parcel serve --port 80 --open --out-dir src/tests/web --out-file browser-built.html --target browser --cache-dir src/tests/web/.cache src/tests/browser.html",
-    "build:browser": "parcel build --out-dir ./ --out-file terraria-world-parser-browser.min.js --no-cache --target browser --no-source-maps src/browser/terraria-world-parser.js",
-    "build:example:mapgen": "cross-env NODE_ENV=production parcel build --out-dir ./examples --out-file map-rendering-in-browser.html --no-cache --target browser --no-source-maps src/tests/browser.html"
+    "test:node": "node src/tests/node.js",
+    "test:browser": "parcel serve --port 80 --open --out-dir src/tests/parcel-cache --out-file browser-built.html --target browser --cache-dir src/tests/parcel-cache/.cache src/tests/browser.html"
   },
   "repository": {
     "type": "git",

@@ -37,10 +37,10 @@ console.log( `Size of ${name} is ${size}`);
 
  \- Opens/loads the file, doesn't parse it yet
 
-*instance method* **parse( sections )**
- \- *string array* **sections** parameter specifies world file sections that will be parsed
- &nbsp;&nbsp;&nbsp;- by default all sections are parsed (if you don't define parameter)
- &nbsp;&nbsp;&nbsp;- sections: FileFormatHeader, Header, WorldTiles, Chests, Signs, NPCs, TileEntities, WeightedPressurePlates, TownManager
+*instance method* **parse( sections )**  
+ \- *string array* **sections** parameter specifies world file sections that will be parsed  
+ &nbsp;&nbsp;&nbsp;- by default all sections are parsed (if you don't define parameter)  
+ &nbsp;&nbsp;&nbsp;- sections: FileFormatHeader, Header, WorldTiles, Chests, Signs, NPCs, TileEntities, WeightedPressurePlates, TownManager  
  \- Parses the file  
  \- Returns an object
 
