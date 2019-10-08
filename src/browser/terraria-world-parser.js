@@ -24,8 +24,18 @@ class terrariaWorldParser extends terrariaFileParser
         return this;
     }
 
-    parse(selectedSections)
+    parse(param1, param2)
     {
+        let selectedSections;
+
+        if (typeof param1 == "object") { 
+            selectedSections = param1;
+            if (param2)
+                super.callback = param2;
+        } else if (typeof param1 == "function") {
+            super.callback = param1;
+        }
+
         const allSections = ["FileFormatHeader", "Header", "WorldTiles", "Chests", "Signs", "NPCs", "TileEntities", "WeightedPressurePlates", "TownManager"];
         if (selectedSections == undefined) selectedSections = allSections;
 
@@ -62,7 +72,7 @@ class terrariaWorldParser extends terrariaFileParser
                         this.jumpTo(this.world.pointers[i]);
                     }
 
-                //if (this.offset != this.world.pointers[i]) 
+                if (this.offset.value != this.world.pointers[i]) 
                     throw new Error(section + " section position did not end where it should");
             }
         } catch (e) {

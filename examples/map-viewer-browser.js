@@ -12,7 +12,11 @@ document.querySelector("button").addEventListener("click", async () => {
 
     const file = document.getElementsByTagName("input")[0].files[0];
     let world = await new terrariaWorldParser().loadFile(file);
-    world = world.parse(["header", "worldtiles"]);
+    world = world.parse(["header", "worldtiles"], (percentVal) => {
+        console.log(percentVal + "%");
+    });
+
+    console.log("rendering");
 
     const layers = {
         space: 80, // below

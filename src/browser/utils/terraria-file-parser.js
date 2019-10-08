@@ -2,67 +2,84 @@ const { utf8ByteArrayToString } = require("./string.js");
 
 module.exports = class terrariaFileParser
 {
-    loadFile(file)
+    async loadFile(file)
     {
-        return new Promise((resolve, reject) => {
+        let result = await new Promise((resolve, reject) => {
             const reader = new FileReader();
 
             reader.onload = () => {
-                this.buffer = new DataView(reader.result);
-                this.offset = 0;
-                resolve();
+                resolve(reader.result);
             }
 
             reader.onerror = () => {
                 reader.abort();
-                console.warn("TerrariaWorldParserError: failed loading the file");
+                console.warn("TerrariaWorldParserError: failed loading the file:");
                 throw new reader.error;
             }
 
             reader.readAsArrayBuffer(file);
         });
+
+        this.buffer = new DataView(result);
+        this.callback = () => {};
+        const _this = this;
+        this.offset = {
+            _value: 0,
+            percentil: file.size / 100,
+            percent: 0,
+            set value(val) {
+                this._value = val;
+                if (val > this.percent * this.percentil) {
+                    this.percent += 1;
+                    _this.callback(this.percent);
+                }
+            },
+            get value() {
+                return this._value;
+            },
+        };
     }
 
     readUInt8()
     {
-        this.offset += 1;
-        return this.buffer.getUint8( this.offset - 1, true );
+        this.offset.value += 1;
+        return this.buffer.getUint8( this.offset.value - 1, true );
     }
 
     readInt16()
     {
-        this.offset += 2;
-        return this.buffer.getInt16( this.offset - 2, true );
+        this.offset.value += 2;
+        return this.buffer.getInt16( this.offset.value - 2, true );
     }
 
     readUInt16()
     {
-        this.offset += 2;
-        return this.buffer.getUint16( this.offset - 2, true );
+        this.offset.value += 2;
+        return this.buffer.getUint16( this.offset.value - 2, true );
     }
 
     readInt32()
     {
-        this.offset += 4;
-        return this.buffer.getInt32( this.offset - 4, true );
+        this.offset.value += 4;
+        return this.buffer.getInt32( this.offset.value - 4, true );
     }
 
     readUInt32()
     {
-        this.offset += 4;
-        return this.buffer.getUint32( this.offset - 4, true );
+        this.offset.value += 4;
+        return this.buffer.getUint32( this.offset.value - 4, true );
     }
 
     readFloat32()
     {
-        this.offset += 4;
-        return this.buffer.getFloat32( this.offset - 4, true );
+        this.offset.value += 4;
+        return this.buffer.getFloat32( this.offset.value - 4, true );
     }
 
     readFloat64()
     {
-        this.offset += 8;
-        return this.buffer.getFloat64( this.offset - 8, true );
+        this.offset.value += 8;
+        return this.buffer.getFloat64( this.offset.value - 8, true );
     }
 
     readBoolean()
@@ -86,11 +103,11 @@ module.exports = class terrariaFileParser
 
     skipBytes(count)
     {
-        this.offset += count;
+        this.offset.value += count;
     }
 
     jumpTo(offset)
     {
-        this.offset = offset;
+        this.offset.value = offset;
     }
 }
