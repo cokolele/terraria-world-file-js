@@ -1,5 +1,6 @@
 import "../src/browser/terraria-world-parser.js";
 import palette from "./tile-colors.json";
+import "@babel/polyfill";
 
 document.querySelector("button").addEventListener("click", async () => {
 
@@ -10,12 +11,12 @@ document.querySelector("button").addEventListener("click", async () => {
     context.fillText("Wait a few seconds", 10, 50); 
 
     const file = document.getElementsByTagName("input")[0].files[0];
-    let world = await new terrariaWorldParser(file);
+    let world = await new terrariaWorldParser().loadFile(file);
     world = world.parse(["header", "worldtiles"]);
 
     const layers = {
         space: 80, // below
-        // sky - between
+        // sky - betweens
         ground: world.header.worldSurface, //above
         cavern: world.header.rockLayer, //above
         underworld: world.header.maxTilesY - 192, //above

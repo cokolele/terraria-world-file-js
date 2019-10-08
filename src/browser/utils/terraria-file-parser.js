@@ -2,31 +2,25 @@ const { utf8ByteArrayToString } = require("./string.js");
 
 module.exports = class terrariaFileParser
 {
-    constructor(file)
+    loadFile(file)
     {
-        const _this = this;
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
 
-        return (async () => {
-            await new Promise((resolve, reject) => {        
-                const reader = new FileReader();
+            reader.onload = () => {
+                this.buffer = new DataView(reader.result);
+                this.offset = 0;
+                resolve();
+            }
 
-                reader.onload = function(e) {
-                    _this.buffer = new DataView(reader.result);
-                    _this.offset = 0;
-                    resolve();
-                }
+            reader.onerror = () => {
+                reader.abort();
+                console.warn("TerrariaWorldParserError: failed loading the file");
+                throw new reader.error;
+            }
 
-                reader.onerror = function(e) {
-                    reader.abort();
-                    throw new Error(reader.error);
-                    reject();
-                }
-
-                reader.readAsArrayBuffer(file);
-            });
-
-            return _this;
-        })();
+            reader.readAsArrayBuffer(file);
+        });
     }
 
     readUInt8()

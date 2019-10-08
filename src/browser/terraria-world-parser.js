@@ -1,21 +1,12 @@
 const terrariaFileParser = require("./utils/terraria-file-parser.js");
-const TerrariaPlayerParserError = require("./utils/terraria-player-parser-error.js");
+const TerrariaWorldParserError = require("./utils/terraria-world-parser-error.js");
 
 class terrariaWorldParser extends terrariaFileParser
 {
-    constructor(file)
+    constructor()
     {
-        try {
-            super(file);
-        } catch (e) {
-            throw new TerrariaPlayerParserError(e, "Problem with opening the file");
-        }
-    }
+        super();
 
-    parse(selectedSections)
-    {
-        //world property cant be initialized in constructor
-        //design flaw but it works
         this.world = {
             pointers:[],
             importants:[],
@@ -25,7 +16,16 @@ class terrariaWorldParser extends terrariaFileParser
                 solids: [true,true,true,null,null,null,true,true,true,true,true,null,null,null,null,null,null,null,null,true,null,null,true,true,null,true,null,null,null,null,true,null,null,null,null,null,null,true,true,true,true,true,null,true,true,true,true,true,true,null,null,true,true,true,true,null,true,true,true,true,true,null,true,true,true,true,true,true,true,null,true,null,null,null,null,true,true,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,true,true,true,null,true,true,null,null,true,true,true,true,true,true,true,true,true,null,null,null,true,null,null,true,null,null,null,null,null,null,true,null,null,true,null,null,null,null,true,true,true,true,null,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,null,true,true,true,true,true,null,null,null,null,true,true,true,null,true,true,true,true,true,null,null,null,null,true,true,true,true,true,true,true,true,true,true,true,true,true,null,true,true,true,true,true,null,true,null,null,true,null,null,null,null,null,null,null,null,null,true,true,true,true,true,true,null,null,true,true,null,true,null,true,true,null,null,null,true,null,null,null,null,null,null,null,null,true,true,true,true,true,true,null,true,true,true,true,true,true,true,true,true,true,true,true,true,true,null,null,null,true,true,true,null,null,null,null,null,null,null,null,null,true,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,true,true,true,null,true,null,null,null,null,null,true,true,null,null,true,true,true,true,true,null,null,null,null,null,null,true,null,null,null,true,true,true,true,true,true,true,true,true,null,true,true,true,true,null,null,null,true,null,null,null,null,null,null,null,true,true,true,true,true,true,true,null,null,null,null,null,null,null,true,null,true,true,true,true,true,null,null,null,null,null,null,null,null,null,null,true,true,true,true,true,true,true,true,true,null,null,true,true,true,null,null,null,null,null,true,true,true,true,null,null,true,true,null,null,null,true,null,null,null,true,true,true,true,true,null,null,null,null,null,null,null,null,null,null,null,true,true,true,true,true,true,null,null,null,null,null,null,true,true,true],
             }
         }
+    }
 
+    async loadFile(file)
+    {
+        await super.loadFile(file);
+        return this;
+    }
+
+    parse(selectedSections)
+    {
         const allSections = ["FileFormatHeader", "Header", "WorldTiles", "Chests", "Signs", "NPCs", "TileEntities", "WeightedPressurePlates", "TownManager"];
         if (selectedSections == undefined) selectedSections = allSections;
 
@@ -62,11 +62,11 @@ class terrariaWorldParser extends terrariaFileParser
                         this.jumpTo(this.world.pointers[i]);
                     }
 
-                if (this.offset != this.world.pointers[i]) 
+                //if (this.offset != this.world.pointers[i]) 
                     throw new Error(section + " section position did not end where it should");
             }
         } catch (e) {
-            throw new TerrariaPlayerParserError(e, "Problem with parsing the file");
+            throw new TerrariaWorldParserError("problem with parsing the file", e);
         }
 
         return data;
