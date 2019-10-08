@@ -5,7 +5,7 @@
   "main": "src/node/terraria-world-parser.js",
   "scripts": {
     "test:node": "node src/tests/node.js",
-    "test:browser": "parcel serve --port 80 --open --out-dir src/tests/parcel-cache --out-file browser-built.html --target browser --cache-dir src/tests/parcel-cache/.cache src/tests/browser.html"
+    "test:browser": "parcel serve ./examples/map-viewer-browser.html --port 80 --open --out-dir ./test --cache-dir ./test/.cache --out-file ./test/browser-built.html --target browser"
   },
   "repository": {
     "type": "git",
@@ -34,5 +34,9 @@
   },
   "homepage": "https://github.com/cokolele/terraria-world-parser#readme",
   "dependencies": {},
-  "devDependencies": {}
+  "devDependencies": {
+    "@babel/polyfill": "^7.6.0",
+    "core-js": "^2.5.7",
+    "regenerator-runtime": "^0.13.3"
+  }
 }
