@@ -5,7 +5,8 @@
   "main": "src/node/terraria-world-parser.js",
   "scripts": {
     "test:node": "node src/tests/node.js",
-    "test:browser": "parcel serve ./examples/map-viewer-browser.html --port 80 --open --out-dir ./test --cache-dir ./test/.cache --out-file ./test/browser-built.html --target browser"
+    "test:browser": "parcel serve ./examples/map-viewer-browser.html --port 80 --open --out-dir ./test --cache-dir ./test/.cache --out-file ./test/browser-built.html --target browser",
+    "compile:browser": "parcel build ./src/browser/terraria-world-parser.js --out-file ./twp.min.js --no-source-maps --no-content-hash --no-cache --experimental-scope-hoisting"
   },
   "repository": {
     "type": "git",
@@ -37,6 +38,7 @@
   "devDependencies": {
     "@babel/polyfill": "^7.6.0",
     "core-js": "^2.5.7",
+    "parcel-bundler": "^1.12.4",
     "regenerator-runtime": "^0.13.3"
   }
 }
