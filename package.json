@@ -36,6 +36,7 @@
   "homepage": "https://github.com/cokolele/terraria-world-parser#readme",
   "dependencies": {},
   "devDependencies": {
+    "@babel/core": "^7.6.4",
     "@babel/polyfill": "^7.6.0",
     "core-js": "^2.5.7",
     "parcel-bundler": "^1.12.4",
