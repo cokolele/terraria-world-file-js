@@ -14,7 +14,7 @@ module.exports = class terrariaFileParser
             reader.onerror = () => {
                 reader.abort();
                 console.warn("TerrariaWorldParserError: failed loading the file:");
-                throw new reader.error;
+                throw reader.error;
             }
 
             reader.readAsArrayBuffer(file);
@@ -26,10 +26,12 @@ module.exports = class terrariaFileParser
         this.offset = {
             _value: 0,
             percentil: file.size / 100,
+            percentilNext: 0,
             percent: 0,
             set value(val) {
                 this._value = val;
-                if (val > this.percent * this.percentil) {
+                if (val > this.percentilNext) {
+                    this.percentilNext += this.percentil;
                     this.percent += 1;
                     _this.callback(this.percent);
                 }
