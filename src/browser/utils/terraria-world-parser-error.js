@@ -1,8 +1,9 @@
-function TerrariaPlayerParserError(msg, err)
+function TerrariaWorldParserError(msg, err)
 {
+    err.onlyMessage = err.message;
     err.message = msg + ":\n" + err.name + ": " + err.message;
-    err.name = "TerrariaPlayerParserError";
+    err.name = "TerrariaWorldParserError";
     return err;
 }
 
-module.exports = TerrariaPlayerParserError;
+module.exports = TerrariaWorldParserError;
