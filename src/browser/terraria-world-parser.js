@@ -230,10 +230,8 @@ class terrariaWorldParser extends terrariaFileParser
         data.setBG6                 = this.readUInt8();
         data.setBG7                 = this.readUInt8();
         data.cloudBGActive          = this.readInt32();
-        data.cloudBGAlpha           = data.cloudBGActive < 1 ? 0 : 1;
         data.numClouds              = this.readInt16();
-        data.windSpeedSet           = this.readFloat32();
-        data.windSpeed              = data.windSpeedSet;
+        data.windSpeed              = this.readFloat32();
 
         data.anglerWhoFinishedToday = [];
         for (let i = this.readInt32(); i > 0; --i) {
