@@ -56,7 +56,7 @@ const stringToUtf8ByteArray = function(str) {
   return out;
 };
 
-module.exports = {
-    utf8ByteArrayToString,
-    stringToUtf8ByteArray
-};
+export {
+    stringToUtf8ByteArray,
+    utf8ByteArrayToString
+}

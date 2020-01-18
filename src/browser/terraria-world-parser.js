@@ -1,10 +1,8 @@
-const terrariaFileParser = require("./utils/terraria-file-parser.js");
-const TerrariaWorldParserError = require("./utils/terraria-world-parser-error.js");
+import terrariaFileParser from "./utils/terraria-file-parser.js";
+import TerrariaWorldParserError from "./utils/terraria-world-parser-error.js";
 
-class terrariaWorldParser extends terrariaFileParser
-{
-    constructor()
-    {
+class terrariaWorldParser extends terrariaFileParser {
+    constructor() {
         super();
 
         this.world = {
@@ -31,9 +29,9 @@ class terrariaWorldParser extends terrariaFileParser
         if (typeof param1 == "object") {
             selectedSections = param1;
             if (param2)
-                super.callback = param2;
+                this.percentageCallback = param2;
         } else if (typeof param1 == "function") {
-            super.callback = param1;
+            this.percentageCallback = param1;
         }
 
         const allSections = ["FileFormatHeader", "Header", "WorldTiles", "Chests", "Signs", "NPCs", "TileEntities", "WeightedPressurePlates", "TownManager", "Footer"];
@@ -72,7 +70,7 @@ class terrariaWorldParser extends terrariaFileParser
                         this.jumpTo(this.world.pointers[i]);
                     }
 
-                if (this.offset.value != this.world.pointers[i] && this.offset.value != this.buffer.byteLength)
+                if (this.offset != this.world.pointers[i] && this.offset != this.buffer.byteLength)
                     throw new Error(section + " section position did not end where it should");
             }
         } catch (e) {
@@ -99,7 +97,7 @@ class terrariaWorldParser extends terrariaFileParser
             data.pointers[i] = this.readInt32();
         }
 
-        const importantsStartOffset = this.offset.value;
+        const importantsStartOffset = this.offset;
 
         const importantsCount = this.readInt16();
         let num3 = 0;
@@ -115,8 +113,8 @@ class terrariaWorldParser extends terrariaFileParser
                 data.importants[i] = true;
         }
 
-        const importantsEndOffset = this.offset.value;
-        this.offset.value = importantsStartOffset;
+        const importantsEndOffset = this.offset;
+        this.offset = importantsStartOffset;
         data._importantsSectionData = this.readBytes( importantsEndOffset - importantsStartOffset );
 
         this.world.pointers = data.pointers;

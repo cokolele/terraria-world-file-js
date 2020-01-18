@@ -7,7 +7,10 @@ class terrariaWorldSaver extends terrariaFileSaver {
         this.worldObject = worldObject;
     }
 
-    save() {
+    save(percentageCallback) {
+        if (percentageCallback)
+            this.percentageCallback = percentageCallback;
+
         const pointers = [
             this.saveFileFormatHeader(),
             this.saveHeader(),
@@ -194,7 +197,17 @@ class terrariaWorldSaver extends terrariaFileSaver {
     saveWorldTiles() {
         const data = this.worldObject.worldTiles;
 
+        const percentil = this.worldObject.header.maxTilesX / 100;
+        let percent = 0;
+        let percentilNext = 0;
+
         for (let x = 0; x < this.worldObject.header.maxTilesX; x++) {
+            if (x > percentilNext) {
+                percent++;
+                percentilNext += percentil
+                this.percentageCallback(percent);
+            }
+
             for (let y = 0; y < this.worldObject.header.maxTilesY;) {
                 const tile = data[x][y];
                 let flags1, flags2, flags3;
