@@ -1,10 +1,5 @@
 //stolen from https://github.com/google/closure-library/blob/e877b1eac410c0d842bcda118689759512e0e26f/closure/goog/crypt/crypt.js
 
-/**
- * Converts a UTF-8 byte array to JavaScript's 16-bit Unicode.
- * @param {Uint8Array|Array<number>} bytes UTF-8 byte array.
- * @return {string} 16-bit Unicode string.
- */
 const utf8ByteArrayToString = function(bytes) {
   var out = [], pos = 0, c = 0;
   while (pos < bytes.length) {
@@ -33,6 +28,35 @@ const utf8ByteArrayToString = function(bytes) {
   return out.join('');
 };
 
+const stringToUtf8ByteArray = function(str) {
+  // TODO(user): Use native implementations if/when available
+  var out = [], p = 0;
+  for (var i = 0; i < str.length; i++) {
+    var c = str.charCodeAt(i);
+    if (c < 128) {
+      out[p++] = c;
+    } else if (c < 2048) {
+      out[p++] = (c >> 6) | 192;
+      out[p++] = (c & 63) | 128;
+    } else if (
+        ((c & 0xFC00) == 0xD800) && (i + 1) < str.length &&
+        ((str.charCodeAt(i + 1) & 0xFC00) == 0xDC00)) {
+      // Surrogate Pair
+      c = 0x10000 + ((c & 0x03FF) << 10) + (str.charCodeAt(++i) & 0x03FF);
+      out[p++] = (c >> 18) | 240;
+      out[p++] = ((c >> 12) & 63) | 128;
+      out[p++] = ((c >> 6) & 63) | 128;
+      out[p++] = (c & 63) | 128;
+    } else {
+      out[p++] = (c >> 12) | 224;
+      out[p++] = ((c >> 6) & 63) | 128;
+      out[p++] = (c & 63) | 128;
+    }
+  }
+  return out;
+};
+
 module.exports = {
-    utf8ByteArrayToString
+    utf8ByteArrayToString,
+    stringToUtf8ByteArray
 };

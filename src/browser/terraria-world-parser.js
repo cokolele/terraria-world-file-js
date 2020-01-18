@@ -36,7 +36,7 @@ class terrariaWorldParser extends terrariaFileParser
             super.callback = param1;
         }
 
-        const allSections = ["FileFormatHeader", "Header", "WorldTiles", "Chests", "Signs", "NPCs", "TileEntities", "WeightedPressurePlates", "TownManager"];
+        const allSections = ["FileFormatHeader", "Header", "WorldTiles", "Chests", "Signs", "NPCs", "TileEntities", "WeightedPressurePlates", "TownManager", "Footer"];
         if (selectedSections == undefined) selectedSections = allSections;
 
         //fix parameter formatting (array order and strings casing)
@@ -72,7 +72,7 @@ class terrariaWorldParser extends terrariaFileParser
                         this.jumpTo(this.world.pointers[i]);
                     }
 
-                if (this.offset.value != this.world.pointers[i])
+                if (this.offset.value != this.world.pointers[i] && this.offset.value != this.buffer.byteLength)
                     throw new Error(section + " section position did not end where it should");
             }
         } catch (e) {
@@ -99,6 +99,8 @@ class terrariaWorldParser extends terrariaFileParser
             data.pointers[i] = this.readInt32();
         }
 
+        const importantsStartOffset = this.offset.value;
+
         const importantsCount = this.readInt16();
         let num3 = 0;
         let num4 = 128;
@@ -112,6 +114,10 @@ class terrariaWorldParser extends terrariaFileParser
             if ((num3 & num4) == num4)
                 data.importants[i] = true;
         }
+
+        const importantsEndOffset = this.offset.value;
+        this.offset.value = importantsStartOffset;
+        data._importantsSectionData = this.readBytes( importantsEndOffset - importantsStartOffset );
 
         this.world.pointers = data.pointers;
         this.world.importants = data.importants;
@@ -325,8 +331,8 @@ class terrariaWorldParser extends terrariaFileParser
     {
         let tile = {};
 
-        let flags2, flags3;
         const flags1 = this.readUInt8();
+        let flags2, flags3;
 
         // flags2 present
         if ((flags1 & 1) == 1) {
@@ -353,9 +359,8 @@ class terrariaWorldParser extends terrariaFileParser
 
             // painted block
             if ((flags3 & 8) == 8) {
-                if (!tile.color)
-                    tile.color = {};
-                tile.color.block = this.readUInt8();
+                if (!tile.colors) tile.colors = {};
+                tile.colors.block = this.readUInt8();
             }
         }
 
@@ -373,8 +378,7 @@ class terrariaWorldParser extends terrariaFileParser
         // liquid informations
         const liquidType = (flags1 & 24) >> 3;
         if (liquidType != 0) {
-            if (!tile.liquid)
-                tile.liquid = {};
+            if (!tile.liquid) tile.liquid = {};
             tile.liquid.amount = this.readUInt8();
             switch (liquidType) {
                 case 1: tile.liquid.type = "water"; break;
@@ -396,14 +400,14 @@ class terrariaWorldParser extends terrariaFileParser
             if ((flags2 & 8) == 8)
                 tile.wiring.wires.green = true;
 
-            const hammeredBlock = (flags2 & 112) >> 4;
-            if (hammeredBlock != 0 && this.world.tiles.solids[tile.blockId]) {
-                switch(hammeredBlock) {
-                    case 1: tile.hammered = "half"; break;
-                    case 2: tile.hammered = "TR"; break;
-                    case 3: tile.hammered = "TL"; break;
-                    case 4: tile.hammered = "BR"; break;
-                    case 5: tile.hammered = "BL"; break;
+            const slope = (flags2 & 112) >> 4;
+            if (slope != 0 && (this.world.tiles.solids[tile.blockId] || tile.blockId === undefined)) { //for whatever reason they save slope data for empty tiles
+                switch(slope) {
+                    case 1: tile.slope = "half"; break;
+                    case 2: tile.slope = "TR"; break;
+                    case 3: tile.slope = "TL"; break;
+                    case 4: tile.slope = "BR"; break;
+                    case 5: tile.slope = "BL"; break;
                 }
             }
         }
@@ -413,7 +417,7 @@ class terrariaWorldParser extends terrariaFileParser
             if (!tile.wiring)
                 tile.wiring = {};
             if ((flags3 & 2) == 2)
-                tile.wiring.hasActuator = true;
+                tile.wiring.actuator = true;
             if ((flags3 & 4) == 4)
                 tile.wiring.actuated = true;
             if ((flags3 & 32) == 32) {
@@ -452,21 +456,21 @@ class terrariaWorldParser extends terrariaFileParser
             if (data.chests[i].name == '')
                 delete data.chests[i].name;
 
-            for (let _i = 0; _i < data.chestSpace; _i++) {
+            for (let j = 0; j < data.chestSpace; j++) {
                 const stack = this.readInt16();
                 if (stack == 0)
                     continue;
 
                 if (!data.chests[i].items)
                     data.chests[i].items = [];
-                data.chests[i].items[_i] = {};
-                data.chests[i].items[_i].stack  = (stack < 0) ? 1 : stack;
-                data.chests[i].items[_i].id     = this.readInt32();
-                data.chests[i].items[_i].prefix = this.readUInt8();
+                data.chests[i].items[j] = {};
+                data.chests[i].items[j].stack  = stack;
+                data.chests[i].items[j].id     = this.readInt32();
+                data.chests[i].items[j].prefix = this.readUInt8();
             }
 
             // skipping overflow items
-            for (let _i = 0; _i < data.overflow; _i++) {
+            for (let j = 0; j < data.overflow; j++) {
                 if (this.readInt16() > 0)
                     this.skipBytes(5);
             }
@@ -480,9 +484,9 @@ class terrariaWorldParser extends terrariaFileParser
         let data = {};
 
         data.signsCount = this.readInt16();
+
         if (data.signsCount)
             data.signs = [];
-
         for (let i = 0; i < data.signsCount; i++) {
             data.signs[i] = {};
             data.signs[i].text = this.readString();
@@ -497,30 +501,34 @@ class terrariaWorldParser extends terrariaFileParser
 
     parseNPCs()
     {
-        let data = [];
+        let data = {};
 
         let i = 0;
         for (; this.readBoolean(); i++) {
-            data[i] = {};
-            data[i].id = this.readInt32();
-            data[i].name = this.readString();
-            data[i].position = {
+            if (!data.NPCs)
+                data.NPCs = [];
+            data.NPCs[i] = {};
+            data.NPCs[i].id = this.readInt32();
+            data.NPCs[i].name = this.readString();
+            data.NPCs[i].position = {
                 x: this.readFloat32(),
                 y: this.readFloat32(),
             };
-            data[i].homeless = this.readBoolean();
-            data[i].homePosition = {
+            data.NPCs[i].homeless = this.readBoolean();
+            data.NPCs[i].homePosition = {
                 x: this.readInt32(),
                 y: this.readInt32(),
             };
         }
 
-        //pillars, i guess
+        //pillars
         for (; this.readBoolean(); i++) {
-            data[i] = {};
-            data[i].id = this.readInt32();
+            if (!data.pillars)
+                data.pillars = [];
+            data.pillars[i] = {};
+            data.pillars[i].id = this.readInt32();
 
-            data[i].position = {
+            data.pillars[i].position = {
                 x: this.readFloat32(),
                 y: this.readFloat32(),
             };
@@ -609,6 +617,17 @@ class terrariaWorldParser extends terrariaFileParser
                 y: this.readInt32()
             };
         }
+
+        return data;
+    }
+
+    parseFooter()
+    {
+        let data = {};
+
+        data.signoff1 = this.readBoolean();
+        data.signoff2 = this.readString();
+        data.signoff3 = this.readInt32();
 
         return data;
     }
