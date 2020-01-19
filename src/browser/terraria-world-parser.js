@@ -140,11 +140,10 @@ export default class terrariaWorldParser extends terrariaFileParser {
         data.maxTilesY              = this.readInt32();
         data.maxTilesX              = this.readInt32();
 
-        if (onlyNeededData) {
-            this.world.tiles.x = data.maxTilesX;
-            this.world.tiles.y = data.maxTilesY;
+        this.world.tiles.x = data.maxTilesX;
+        this.world.tiles.y = data.maxTilesY;
+        if (onlyNeededData)
             return;
-        }
 
         data.expertMode             = this.readBoolean();
         data.creationTime           = this.readBytes(8);
@@ -184,7 +183,6 @@ export default class terrariaWorldParser extends terrariaFileParser {
         data.tempMoonPhase          = this.readInt32();
         data.tempBloodMoon          = this.readBoolean();
         data.tempEclipse            = this.readBoolean();
-        data.eclipse                = data.tempEclipse;
         data.dungeonX               = this.readInt32();
         data.dungeonY               = this.readInt32();
         data.crimson                = this.readBoolean();
@@ -293,9 +291,6 @@ export default class terrariaWorldParser extends terrariaFileParser {
         data.DD2Event_DownedInvasionT2      = this.readBoolean();
         data.DD2Event_DownedInvasionT3      = this.readBoolean();
 
-        this.world.tiles.x = data.maxTilesX;
-        this.world.tiles.y = data.maxTilesY;
-
         return data;
     }
 
@@ -329,18 +324,18 @@ export default class terrariaWorldParser extends terrariaFileParser {
         let flags2, flags3;
 
         // flags2 present
-        if ((flags1 & 1) == 1) {
+        if (flags1 & 1) {
             flags2 = this.readUInt8();
 
         // flags3 present
-            if ((flags2 & 1) == 1)
+            if (flags2 & 1)
                 flags3 = this.readUInt8();
         }
 
         // contains block
-        if ((flags1 & 2) == 2) {
+        if (flags1 & 2) {
             // block id has 1 byte / 2 bytes
-            if ((flags1 & 32) == 32)
+            if (flags1 & 32)
                 tile.blockId = this.readUInt16();
             else
                 tile.blockId = this.readUInt8();
@@ -352,18 +347,18 @@ export default class terrariaWorldParser extends terrariaFileParser {
             }
 
             // painted block
-            if ((flags3 & 8) == 8) {
+            if (flags3 & 8) {
                 if (!tile.colors) tile.colors = {};
                 tile.colors.block = this.readUInt8();
             }
         }
 
         // contains wall
-        if ((flags1 & 4) == 4) {
+        if (flags1 & 4) {
             tile.wallId = this.readUInt8();
 
             // painted wall
-            if ((flags3 & 16) == 16) {
+            if (flags3 & 16) {
                 if (!tile.colors) tile.colors = {};
                 tile.colors.wall = this.readUInt8();
             }
@@ -387,11 +382,11 @@ export default class terrariaWorldParser extends terrariaFileParser {
                 tile.wiring = {};
             if (!tile.wiring.wires)
                 tile.wiring.wires = {};
-            if ((flags2 & 2) == 2)
+            if (flags2 & 2)
                 tile.wiring.wires.red = true;
-            if ((flags2 & 4) == 4)
+            if (flags2 & 4)
                 tile.wiring.wires.blue = true;
-            if ((flags2 & 8) == 8)
+            if (flags2 & 8)
                 tile.wiring.wires.green = true;
 
             const slope = (flags2 & 112) >> 4;
@@ -409,11 +404,11 @@ export default class terrariaWorldParser extends terrariaFileParser {
         if (flags3 > 0) {
             if (!tile.wiring)
                 tile.wiring = {};
-            if ((flags3 & 2) == 2)
+            if (flags3 & 2)
                 tile.wiring.actuator = true;
-            if ((flags3 & 4) == 4)
+            if (flags3 & 4)
                 tile.wiring.actuated = true;
-            if ((flags3 & 32) == 32) {
+            if (flags3 & 32) {
                 if (!tile.wiring.wires)
                     tile.wiring.wires = {};
                 tile.wiring.wires.yellow = true;
