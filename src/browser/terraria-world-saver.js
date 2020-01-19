@@ -1,7 +1,7 @@
-const terrariaFileSaver = require("./utils/terraria-file-saver.js");
-const TerrariaWorldSaverError = require("./utils/terraria-world-saver-error.js");
+import terrariaFileSaver from "./utils/terraria-file-saver.js";
+import TerrariaWorldSaverError from "./utils/terraria-world-saver-error.js";
 
-class terrariaWorldSaver extends terrariaFileSaver {
+export default class terrariaWorldSaver extends terrariaFileSaver {
     constructor(worldObject) {
         super();
         this.worldObject = worldObject;
@@ -332,7 +332,7 @@ class terrariaWorldSaver extends terrariaFileSaver {
     }
 
     saveChests() {
-        const data = this.worldObject.chests;
+        const data = this.worldObject.chestsData;
 
         this.saveInt16( data.chestsCount );
         this.saveInt16( data.chestSpace );
@@ -367,7 +367,7 @@ class terrariaWorldSaver extends terrariaFileSaver {
     }
 
     saveSigns() {
-        const data = this.worldObject.signs;
+        const data = this.worldObject.signsData;
 
         this.saveInt16( data.signsCount );
 
@@ -381,7 +381,7 @@ class terrariaWorldSaver extends terrariaFileSaver {
     }
 
     saveNPCs() {
-        const data = this.worldObject.NPCs;
+        const data = this.worldObject.NPCsData;
 
         if (data.NPCs)
             data.NPCs.forEach(NPC => {
@@ -474,8 +474,3 @@ class terrariaWorldSaver extends terrariaFileSaver {
         return this.offset;
     }
 }
-
-if (module)
-    module.exports = terrariaWorldSaver;
-else if (window)
-    window.terrariaWorldSaver = terrariaWorldSaver;

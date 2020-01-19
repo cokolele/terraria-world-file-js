@@ -1,7 +1,7 @@
-const { stringToUtf8ByteArray } = require("./string.js");
-require("./polyfills/ArrayBuffer-transfer.js");
+import { stringToUtf8ByteArray } from "./string.js";
+import "./polyfills/ArrayBuffer-transfer.js";
 
-module.exports = class terrariaFileSave {
+export default class terrariaFileSave {
     constructor() {
         this.buffer = new ArrayBuffer(1024 * 1024);
         this.dataView = new DataView(this.buffer);

@@ -1,88 +1,82 @@
 import terrariaFileParser from "./utils/terraria-file-parser.js";
 import TerrariaWorldParserError from "./utils/terraria-world-parser-error.js";
 
-class terrariaWorldParser extends terrariaFileParser {
+export default class terrariaWorldParser extends terrariaFileParser {
     constructor() {
         super();
 
         this.world = {
-            pointers:[],
+            pointers:[0],
             importants:[],
             tiles: {
                 x:null,
                 y:null,
-                solids: [true,true,true,null,null,null,true,true,true,true,true,null,null,null,null,null,null,null,null,true,null,null,true,true,null,true,null,null,null,null,true,null,null,null,null,null,null,true,true,true,true,true,null,true,true,true,true,true,true,null,null,true,true,true,true,null,true,true,true,true,true,null,true,true,true,true,true,true,true,null,true,null,null,null,null,true,true,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,true,true,true,null,true,true,null,null,true,true,true,true,true,true,true,true,true,null,null,null,true,null,null,true,null,null,null,null,null,null,true,null,null,true,null,null,null,null,true,true,true,true,null,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,null,true,true,true,true,true,null,null,null,null,true,true,true,null,true,true,true,true,true,null,null,null,null,true,true,true,true,true,true,true,true,true,true,true,true,true,null,true,true,true,true,true,null,true,null,null,true,null,null,null,null,null,null,null,null,null,true,true,true,true,true,true,null,null,true,true,null,true,null,true,true,null,null,null,true,null,null,null,null,null,null,null,null,true,true,true,true,true,true,null,true,true,true,true,true,true,true,true,true,true,true,true,true,true,null,null,null,true,true,true,null,null,null,null,null,null,null,null,null,true,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,true,true,true,null,true,null,null,null,null,null,true,true,null,null,true,true,true,true,true,null,null,null,null,null,null,true,null,null,null,true,true,true,true,true,true,true,true,true,null,true,true,true,true,null,null,null,true,null,null,null,null,null,null,null,true,true,true,true,true,true,true,null,null,null,null,null,null,null,true,null,true,true,true,true,true,null,null,null,null,null,null,null,null,null,null,true,true,true,true,true,true,true,true,true,null,null,true,true,true,null,null,null,null,null,true,true,true,true,null,null,true,true,null,null,null,true,null,null,null,true,true,true,true,true,null,null,null,null,null,null,null,null,null,null,null,true,true,true,true,true,true,null,null,null,null,null,null,true,true,true],
             }
         }
     }
 
-    async loadFile(file)
-    {
+    async loadFile(file) {
         await super.loadFile(file);
         return this;
     }
 
-    async parse(param1, param2)
-    {
-        let selectedSections;
+    parse(param1, param2) {
+        const sections = ["fileformatheader", "header", "worldtiles", "chests", "signs", "npcs", "tileentities", "weightedpressureplates", "townmanager", "footer"];
+        const dataFormat = {
+            fileFormatHeader:       [sections[0], this.parseFileFormatHeader],
+            header:                 [sections[1], this.parseHeader],
+            worldTiles:             [sections[2], this.parseWorldTiles],
+            chestsData:             [sections[3], this.parseChests],
+            signsData:              [sections[4], this.parseSigns],
+            NPCsData:               [sections[5], this.parseNPCs],
+            tileEntities:           [sections[6], this.parseTileEntities],
+            weightedPressurePlates: [sections[7], this.parseWeightedPressurePlates],
+            townManager:            [sections[8], this.parseTownManager],
+            footer:                 [sections[9], this.parseFooter]
+        }
 
         if (typeof param1 == "object") {
-            selectedSections = param1;
-            if (param2)
-                this.percentageCallback = param2;
-        } else if (typeof param1 == "function") {
+            this.selectedSections = param1.map(section => section.toLowerCase());
+            this.percentageCallback = param2;
+        }
+        else if (typeof param1 == "function") {
+            this.selectedSections = sections;
             this.percentageCallback = param1;
         }
-
-        const allSections = ["FileFormatHeader", "Header", "WorldTiles", "Chests", "Signs", "NPCs", "TileEntities", "WeightedPressurePlates", "TownManager", "Footer"];
-        if (selectedSections == undefined) selectedSections = allSections;
-
-        //fix parameter formatting (array order and strings casing)
-        let fixedSelectedSections = [];
-        for (const section of allSections) {
-            for (const paramSection of selectedSections) {
-                if (section.toUpperCase() === paramSection.toUpperCase())
-                    fixedSelectedSections.push(section);
-            }
-        }
-        this.selectedSections = selectedSections = fixedSelectedSections;
+        else
+            this.selectedSections = sections;
 
         let data = {};
 
         try {
-            for (const [i, section] of allSections.entries()) {
-                const parseFunction = "parse" + section;
 
-                if (i == 0)
-                    this.jumpTo(0);
-                else
-                    this.jumpTo(this.world.pointers[i-1]);
+            for (let [sectionLabel, [section, parseFunction]] of Object.entries(dataFormat)) {
+                if (this.selectedSections.includes(section) || section == "fileformatheader" || section == "header") {
 
-                    if (selectedSections.includes(section)) {
-                        if (section == "NPCs") //return object properties with first letter lowercase except NPCs
-                            data[section] = this[parseFunction]();
-                        else
-                            data[section.charAt(0).toLowerCase() + section.slice(1)] = this[parseFunction]();
-                    } else if (section == "FileFormatHeader" || section == "Header") { // these sections contain data needed for further parsing
-                        this[parseFunction]();
-                        this.jumpTo(this.world.pointers[i]);
-                    } else {
-                        this.jumpTo(this.world.pointers[i]);
+                    this.jumpTo(this.world.pointers[ sections.indexOf(section) ])
+
+                    if (this.selectedSections.includes(section))
+                        data[sectionLabel] = parseFunction.call(this);
+                    else {
+                        parseFunction.call(this, true);
+                        this.offset = this.world.pointers[ sections.indexOf(section) + 1 ];
                     }
 
-                if (this.offset != this.world.pointers[i] && this.offset != this.buffer.byteLength)
-                    throw new Error(section + " section position did not end where it should");
+                    if (this.offset != this.world.pointers[ sections.indexOf(section) + 1 ] && this.offset != this.buffer.byteLength)
+                        throw new Error(section + " section position did not end where it should");
+                }
             }
-        } catch (e) {
-            throw new TerrariaWorldParserError("problem with parsing the file", e);
+
+        } catch(e) {
+            throw new TerrariaWorldParserError("Problem with parsing the file", e);
         }
 
         return data;
     }
 
-    parseFileFormatHeader()
-    {
+    parseFileFormatHeader() {
         let data = {};
+
         data.version        = this.readInt32();
         data.magicNumber    = this.readString(7);
         data.fileType       = this.readUInt8();
@@ -93,7 +87,7 @@ class terrariaWorldParser extends terrariaFileParser {
         data.importants     = [];
 
         const pointersCount = this.readInt16();
-        for (let i = 0; i < pointersCount; i++) {
+        for (let i = 1; i <= pointersCount; i++) {
             data.pointers[i] = this.readInt32();
         }
 
@@ -121,13 +115,12 @@ class terrariaWorldParser extends terrariaFileParser {
         this.world.importants = data.importants;
 
         if ( data.version < 194 || data.magicNumber != "relogic" || data.fileType != 2)
-            throw new Error("world file version is not supported (only 1.3.5.3) or corrupted metadata");
+            throw new Error("World file version is not supported (only 1.3.5.3) or corrupted metadata");
 
         return data;
     }
 
-    parseHeader()
-    {
+    parseHeader(onlyNeededData) {
         let data = {};
 
         data.mapName                = this.readString();
@@ -142,7 +135,7 @@ class terrariaWorldParser extends terrariaFileParser {
         data.maxTilesY              = this.readInt32();
         data.maxTilesX              = this.readInt32();
 
-        if (!this.selectedSections.includes("Header")) {
+        if (onlyNeededData) {
             this.world.tiles.x = data.maxTilesX;
             this.world.tiles.y = data.maxTilesY;
             return;
@@ -301,8 +294,7 @@ class terrariaWorldParser extends terrariaFileParser {
         return data;
     }
 
-    parseWorldTiles()
-    {
+    parseWorldTiles() {
         let data;
 
         data = new Array(this.world.tiles.x);
@@ -325,8 +317,7 @@ class terrariaWorldParser extends terrariaFileParser {
         return data;
     }
 
-    parseTileData()
-    {
+    parseTileData() {
         let tile = {};
 
         const flags1 = this.readUInt8();
@@ -399,7 +390,7 @@ class terrariaWorldParser extends terrariaFileParser {
                 tile.wiring.wires.green = true;
 
             const slope = (flags2 & 112) >> 4;
-            if (slope != 0 && (this.world.tiles.solids[tile.blockId] || tile.blockId === undefined)) { //for whatever reason they save slope data for empty tiles
+            if (slope != 0)
                 switch(slope) {
                     case 1: tile.slope = "half"; break;
                     case 2: tile.slope = "TR"; break;
@@ -407,7 +398,6 @@ class terrariaWorldParser extends terrariaFileParser {
                     case 4: tile.slope = "BR"; break;
                     case 5: tile.slope = "BL"; break;
                 }
-            }
         }
 
         // flags3 has any informations
@@ -434,8 +424,7 @@ class terrariaWorldParser extends terrariaFileParser {
         return tile;
     }
 
-    parseChests()
-    {
+    parseChests() {
         let data = {};
 
         data.chestsCount = this.readInt16();
@@ -477,8 +466,7 @@ class terrariaWorldParser extends terrariaFileParser {
         return data;
     }
 
-    parseSigns()
-    {
+    parseSigns() {
         let data = {};
 
         data.signsCount = this.readInt16();
@@ -497,8 +485,7 @@ class terrariaWorldParser extends terrariaFileParser {
         return data;
     }
 
-    parseNPCs()
-    {
+    parseNPCs() {
         let data = {};
 
         let i = 0;
@@ -535,8 +522,7 @@ class terrariaWorldParser extends terrariaFileParser {
         return data;
     }
 
-    parseTileEntities()
-    {
+    parseTileEntities() {
         let data = {};
 
         data.tileEntitiesCount = this.readInt32();
@@ -582,8 +568,7 @@ class terrariaWorldParser extends terrariaFileParser {
         return data;
     }
 
-    parseWeightedPressurePlates()
-    {
+    parseWeightedPressurePlates() {
         let data = {};
 
         data.pressurePlatesCount = this.readInt32();
@@ -600,8 +585,7 @@ class terrariaWorldParser extends terrariaFileParser {
         return data;
     }
 
-    parseTownManager()
-    {
+    parseTownManager() {
         let data = {};
 
         data.roomsCount = this.readInt32();
@@ -619,8 +603,7 @@ class terrariaWorldParser extends terrariaFileParser {
         return data;
     }
 
-    parseFooter()
-    {
+    parseFooter() {
         let data = {};
 
         data.signoff1 = this.readBoolean();
@@ -630,8 +613,3 @@ class terrariaWorldParser extends terrariaFileParser {
         return data;
     }
 }
-
-if (module)
-    module.exports = terrariaWorldParser;
-else if (window)
-    window.terrariaWorldParser = terrariaWorldParser;

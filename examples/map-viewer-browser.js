@@ -1,6 +1,6 @@
-import "../src/browser/terraria-world-parser.js";
+import terrariaWorldParser from "../src/browser/terraria-world-parser.js";
 import palette from "./tile-colors.json";
-import "@babel/polyfill";
+//import "@babel/polyfill";
 
 document.querySelector("button").addEventListener("click", async () => {
 
@@ -8,7 +8,7 @@ document.querySelector("button").addEventListener("click", async () => {
     let context = canvas.getContext("2d");
     context.font = "20px Arial";
 
-    context.fillText("Wait a few seconds", 10, 50); 
+    context.fillText("Wait a few seconds", 10, 50);
 
     const file = document.getElementsByTagName("input")[0].files[0];
     let world = await new terrariaWorldParser().loadFile(file);
