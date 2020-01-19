@@ -3,8 +3,7 @@
   "version": "2.0.0",
   "description": "Terraria world file parser in javascript",
   "main": "src/node/terraria-world-parser.js",
-  "scripts": {
-  },
+  "scripts": {},
   "repository": {
     "type": "git",
     "url": "git+https://github.com/cokolele/terraria-world-parser.git"

@@ -16,7 +16,12 @@ export default class terrariaWorldParser extends terrariaFileParser {
     }
 
     async loadFile(file) {
-        await super.loadFile(file);
+        try {
+            await super.loadFile(file);
+        } catch(e) {
+            throw new TerrariaWorldParserError("Problem with loading the file", e);
+        }
+
         return this;
     }
 
