@@ -45,28 +45,28 @@ newWorldFile = newWorldFile.save();
 
 ## Documentation:
 
-###### **new terrariaWorldParser( path )**
-— *node class constructor*
-###### **new terrariaWorldParser( )**
-— *browser class constructor*
-###### **async loadFile(  )**
-— *browser class method*
-\- loads the file, doesn't parse it yet
-&nbsp;
-###### **parse( [[sections], [percentageCallback]] )**
-###### &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; **sections**
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;— *string array*
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; - selected sections to be parsed
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; - default : ["fileFormatHeader", "header", "worldTiles", "chests", "signs", "NPCs", "tileEntities", "weightedPressureplates", "townManager", "footer"]
-###### &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; **percentageCallback( percentage )**
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**percentage**
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;— *number*
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;— *function*
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; - called when loading percentage changes
-— *class method*
-\- Parses the file
-\- Returns an object
-&nbsp;
+**new terrariaWorldParser( path )**
+<br>— *node class constructor*
+<br>**new terrariaWorldParser( )**
+<br>— *browser class constructor*
+<br>**async loadFile(  )**
+<br>— *browser class method*
+<br>\- loads the file, doesn't parse it yet
+<br><br>
+<br>**parse( [[sections], [percentageCallback]] )**
+<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; **sections**
+<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;— *string array*
+<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; - selected sections to be parsed
+<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; - default : ["fileFormatHeader", "header", "worldTiles", "chests", "signs", "NPCs", "tileEntities", "weightedPressureplates", "townManager", "footer"]
+<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; **percentageCallback( percentage )**
+<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**percentage**
+<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;— *number*
+<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;— *function*
+<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; - called when loading percentage changes
+<br>— *class method*
+<br>\- Parses the file
+<br>\- Returns an object
+<br>
 ## Return object:
 
 **fileFormatHeader** — *object*
