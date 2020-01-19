@@ -2,15 +2,13 @@
   Title: terraria world parser
   Description: Terraria world file parser
   Author: cokolele
-  Tags: terraria, world file, file structure, file dumper, file format, documentation, data, parsing, parser, map viewer, tool, javascript, node, browser, saver, editor, save, edit
+  Tags: terraria, world file, file structure, file dumper, file format, documentation, data, parsing, parser, map viewer, tool, javascript, node, browser
   -->
 
-# Terraria world file - js
+# Terraria world parser
 
-Terraria world file parser and saver written in javascript
+Terraria world file parser written in javascript
 
-\- version 2.0
-\- node version is still in version 1, check *readme_v1.md*
 \- supports only maps generated in 1.3.5.3
 
 Feel free to contribute 🌳
@@ -18,51 +16,38 @@ Feel free to contribute 🌳
 ## Usage
 
 ```javascript
-import terrariaWorldParser from "/terraria-world-parser.js";
-import terrariaWorldSaver from "/terraria-world-saver.js";
+const terrariaWorldParser = require("terraria-world-parser.js");
 
 //node
-let world = new terrariaWorldParser("path/to/worldFile.wld");
+let world = new terrariaWorldParser("Canvas.wld");
 //browser
-let world = await new terrariaWorldParser().loadFile(worldFile);
+let world = await new terrariaWorldParser(worldFile);
 
 world = world.parse();
 
-const name = world.header.name;
-const newName = "Canvas";
-
-console.log( "Old name: " + name );
-console.log( "New name: " + newName );
-
-world.header.name = newName;
-
-//browser
-let newWorldFile = new terrariaWorldSaver(world);
-//todo: node
-
-newWorldFile = newWorldFile.save();
+const name = world.header.mapName;
+const size = world.header.maxTilesX + "x" + world.header.maxTilesY;
+console.log( `Size of ${name} is ${size}`);
 ```
 
-## Documentation:
+## Functions:
 
-###### **new terrariaWorldParser( path )** — *node class constructor*
-###### **new terrariaWorldParser( )** — *browser class constructor*
-###### **async loadFile(  )** - *browser class method*
-######  - loads the file, doesn't parse it yet
-&nbsp;
-###### **parse( [[sections], [percentageCallback]] )** - *class method*
-###### &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; **sections** — *string array*
-###### &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; - selected sections to be parsed
-###### &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; - default : ["fileFormatHeader", "header", "worldTiles", "chests", "signs", "NPCs", "tileEntities", "weightedPressureplates", "townManager", "footer"]
-###### &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; **percentageCallback( percentage )** — *function*
-###### &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; **percentage** — *number*
-###### &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; - called when loading percentage changes
-###### - Parses the file
-###### - Returns an object
-&nbsp;
+*node class constructor* **new terrariaWorldParser( path )**
+*browser class constructor* **new terrariaWorldParser( file )**
+
+ \- Opens/loads the file, doesn't parse it yet
+
+*instance method* **parse( sections )**
+
+ \- *string array* **sections** parameter specifies world file sections that will be parsed
+ &nbsp;&nbsp;&nbsp;- by default all sections are parsed (if you don't define parameter)
+ &nbsp;&nbsp;&nbsp;- sections: FileFormatHeader, Header, WorldTiles, Chests, Signs, NPCs, TileEntities, WeightedPressurePlates, TownManager
+ \- Parses the file
+ \- Returns an object
+
 ## Return object:
 
-**fileFormatHeader** — *object*
+***object* fileFormatHeader**
 
 Type | Variable | Description
 --- | --- | ---
@@ -72,9 +57,9 @@ Type | Variable | Description
 *uint32* | revision | how many times this map was opened ingame
 *uint64* | favorite | is map favorite (always 0)
 *int32 array* | pointers | memory pointers for sections
-*bool array* | importants | tile frame important for blocks (animated, big sprite, more variants...)<br>\- *null*s instead of *false*s<br>\- array entry number == block id
+*bool array* | importants | tile frame important for blocks (animated, big sprite, more variants...)<br>\- contains *null*s instead of *false*s<br>\- array entry number == block id
 
-**header** — *object*
+***object* header**
 
 Type | Variable | Description
 --- | --- | ---
@@ -95,13 +80,13 @@ Type | Variable | Description
 *int32* | spawnTileY | position y of the spawn point
 *int32* | dungeonX | position x of the dungeon base
 *int32* | dungeonY | position y of the dungeon base
-*int32 array* | treeX | x positions where corresponding treeStyle ends
-*int32 array* | treeStyle | tree types
-*int32 array* | caveBackX | x positions where corresponding caveBackStyles ends
-*int32 array* | caveBackStyle | cave background type
-*int32* | iceBackStyle | ice background type
-*int32* | jungleBackStyle | jungle background type
-*int32* | hellBackStyle | underworld background type
+*int32 array* | treeX | ?
+*int32 array* | treeStyle | ?
+*int32 array* | caveBackX | ?
+*int32 array* | caveBackStyle | ?
+*int32* | iceBackStyle | ?
+*int32* | jungleBackStyle | ?
+*int32* | hellBackStyle | ?
 *double* | worldSurface | y dimension where ground level starts
 *double* | rockLayer | y dimension where cavern level starts
 *bool* | expertMode | expert mode map
@@ -116,18 +101,20 @@ Type | Variable | Description
 *double* | tempTime | current time
 *bool* | tempDayTime | is day time
 *bool* | spawnMeteor | ?
-*int8* | moonType | moon type
+*int8* | moonType | ?
 *bool* | tempRaining | is currently raining
 *int32* | tempRainTime | current rain time
 *float* | tempMaxRain | ?
 *int32* | cloudBGActive | ?
+*double* | cloudBGAlpha | ?
 *int16* | numClouds | ?
+*float* | windSpeedSet | ?
 *float* | windSpeed | ?
 *bool* | Temp_Sandstorm_Happening | is sandstorm happening
-*int32* | Temp_Sandstorm_TimeLeft | time left to sandstorm end
+*int32 | Temp_Sandstorm_TimeLeft | time left to sandstorm end
 *float* | Temp_Sandstorm_Severity | current severity of the sandstorm
 *float* | Temp_Sandstorm_IntendedSeverity | (? max / average) intented severity of the sandstorm
-*int32* | tempMoonPhase | moon phase
+*int32* | tempMoonPhase | moon phase (probably)
 *bool* | tempBloodMoon | is blood moon happening
 *bool* | tempEclipse | is eclipse happening
 *bool* | eclipse | is eclipse happening (^ copied)
@@ -198,15 +185,15 @@ Type | Variable | Description
 *string array* | anglerWhoFinishedToday | ?
 *int32* | anglerQuest | id of the current angler quest (probably)
 
-**worldTiles** — *2d object array*
+***2d object array* worldTiles**
 
 Type | Variable | Description
 --- | --- | ---
-*byte / unint16* | blockId | tile id
+*byte / unint16* | blockId | block id
 *int16* | frameX | frame x (tile frame important)
 *int16* | frameY | frame y (^)
 *int8* | wallId | wall id
-*string* | slope | edited block (half, TR, TL, BR, BL)
+*string* | hammered | edited block (half, TR, TL, BR, BL)
 *object* : | colors |
 \|&nbsp;&nbsp;&nbsp;&nbsp;*int8* | block | painted block
 \|&nbsp;&nbsp;&nbsp;&nbsp;*int8* | wall | painted wall
@@ -214,7 +201,7 @@ Type | Variable | Description
 \|&nbsp;&nbsp;&nbsp;&nbsp;*string* | type | liquid type (water, lava, honey)
 \|&nbsp;&nbsp;&nbsp;&nbsp;*int8* | amount | amount
 *object* : | wiring |
-\|&nbsp;&nbsp;&nbsp;&nbsp;*bool* | actuator | contains actuator
+\|&nbsp;&nbsp;&nbsp;&nbsp;*bool* | hasActuator | contains actuator
 \|&nbsp;&nbsp;&nbsp;&nbsp;*bool* | actuated | is actuated
 \|&nbsp;&nbsp;&nbsp;&nbsp;*object* : | wires |
 \|&nbsp;&nbsp;&nbsp;&nbsp;\|&nbsp;&nbsp;&nbsp;&nbsp;*bool* | red | contains red wire
@@ -222,7 +209,7 @@ Type | Variable | Description
 \|&nbsp;&nbsp;&nbsp;&nbsp;\|&nbsp;&nbsp;&nbsp;&nbsp;*bool* | green | contains green wire
 \|&nbsp;&nbsp;&nbsp;&nbsp;\|&nbsp;&nbsp;&nbsp;&nbsp;*bool* | yellow | contains yellow wire
 
-**chestsData** — *object*
+***object* chestsData**
 
 Type | Variable | Description
 --- | --- | ---
@@ -239,7 +226,7 @@ Type | Variable | Description
 \|&nbsp;&nbsp;&nbsp;&nbsp;\|&nbsp;&nbsp;&nbsp;&nbsp;*int32* | id | id of the item
 \|&nbsp;&nbsp;&nbsp;&nbsp;\|&nbsp;&nbsp;&nbsp;&nbsp;*int8* | prefix | id of the prefix for the item (modifier)
 
-**signsData** — *object*
+***object* signsData**
 
 Type | Variable | Description
 --- | --- | ---
@@ -250,28 +237,22 @@ Type | Variable | Description
 \|&nbsp;&nbsp;&nbsp;&nbsp;\|&nbsp;&nbsp;&nbsp;&nbsp;*int32* | x | position x of the sign
 \|&nbsp;&nbsp;&nbsp;&nbsp;\|&nbsp;&nbsp;&nbsp;&nbsp;*int32* | y | position y of the sign
 
-**NPCsData** — *object*
+***object array* npcsData**
 
 Type | Variable | Description
 --- | --- | ---
-\|&nbsp;&nbsp;&nbsp;&nbsp;*object array* : | NPCs |
-\|&nbsp;&nbsp;&nbsp;&nbsp;*int32* | id | id of an npc
-\|&nbsp;&nbsp;&nbsp;&nbsp;*string* | npc | type of an npc
-\|&nbsp;&nbsp;&nbsp;&nbsp;*string* | name | name of an npc
-\|&nbsp;&nbsp;&nbsp;&nbsp;*bool* | homeless | is homeless
-\|&nbsp;&nbsp;&nbsp;&nbsp;*object* : | position |
-\|&nbsp;&nbsp;&nbsp;&nbsp;\|&nbsp;&nbsp;&nbsp;&nbsp;*float* | x | position x of an npc
-\|&nbsp;&nbsp;&nbsp;&nbsp;\|&nbsp;&nbsp;&nbsp;&nbsp;*float* | y | position y of an npc
-\|&nbsp;&nbsp;&nbsp;&nbsp;*object* : | homePosition |
-\|&nbsp;&nbsp;&nbsp;&nbsp;\|&nbsp;&nbsp;&nbsp;&nbsp;*int32* | x | position x of npc's home
-\|&nbsp;&nbsp;&nbsp;&nbsp;\|&nbsp;&nbsp;&nbsp;&nbsp;*int32* | y | position y of npc's home
-\|&nbsp;&nbsp;&nbsp;&nbsp;*object array* : | pillars |
-\|&nbsp;&nbsp;&nbsp;&nbsp;*int32* | id | id of a pillar
-\|&nbsp;&nbsp;&nbsp;&nbsp;*object* : | position |
-\|&nbsp;&nbsp;&nbsp;&nbsp;\|&nbsp;&nbsp;&nbsp;&nbsp;*float* | x | position x of a pillar
-\|&nbsp;&nbsp;&nbsp;&nbsp;\|&nbsp;&nbsp;&nbsp;&nbsp;*float* | y | position y of a pillar
+*int32* | id | id of an npc
+*string* | npc | type of an npc
+*string* | name | name of an npc
+*bool* | homeless | is homeless
+*object* : | position |
+\|&nbsp;&nbsp;&nbsp;&nbsp;*float* | x | position x of an npc
+\|&nbsp;&nbsp;&nbsp;&nbsp;*float* | y | position y of an npc
+*object* : | homePosition |
+\|&nbsp;&nbsp;&nbsp;&nbsp;*int32* | x | position x of npc's home
+\|&nbsp;&nbsp;&nbsp;&nbsp;*int32* | y | position y of npc's home
 
-**tileEntities** — *object*
+***object* tileEntities**
 
 Type | Variable | Description
 --- | --- | ---
@@ -291,7 +272,8 @@ Type | Variable | Description
 \|&nbsp;&nbsp;&nbsp;&nbsp;\|&nbsp;&nbsp;&nbsp;&nbsp;*int8* | logicCheck | type of the logic check (probably)
 \|&nbsp;&nbsp;&nbsp;&nbsp;\|&nbsp;&nbsp;&nbsp;&nbsp;*bool* | on | is on
 
-**pressurePlates** — *object*
+
+***object* pressurePlates**
 
 Type | Variable | Description
 --- | --- | ---
@@ -301,7 +283,7 @@ Type | Variable | Description
 \|&nbsp;&nbsp;&nbsp;&nbsp;\|&nbsp;&nbsp;&nbsp;&nbsp;*int32* | x | position x of the pressurePlate
 \|&nbsp;&nbsp;&nbsp;&nbsp;\|&nbsp;&nbsp;&nbsp;&nbsp;*int32* | y | position y of the pressurePlate
 
-**townManager** — *object*
+***object* townManager**
 
 Type | Variable | Description
 --- | --- | ---
@@ -311,11 +293,3 @@ Type | Variable | Description
 \|&nbsp;&nbsp;&nbsp;&nbsp;*object* : | position |
 \|&nbsp;&nbsp;&nbsp;&nbsp;\|&nbsp;&nbsp;&nbsp;&nbsp;*int32* | x | position x of the room
 \|&nbsp;&nbsp;&nbsp;&nbsp;\|&nbsp;&nbsp;&nbsp;&nbsp;*int32* | y | position y of the room
-
-**footer** — *object*
-
-Type | Variable | Description
---- | --- | ---
-*bool* | signoff1 | always *true*
-*string* | signoff2 | map name
-*int32* | signoff3 | map id
