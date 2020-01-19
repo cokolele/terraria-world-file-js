@@ -10,8 +10,8 @@
 Terraria world file parser and saver written in javascript
 
 \- version 2.0
-\- node version is still in version 1, check *readme_v1.md*
-\- supports only maps generated in 1.3.5.3
+<br>\- node version is still in version 1, check *readme_v1.md*
+<br>\- supports only maps generated in 1.3.5.3
 
 Feel free to contribute 🌳
 
@@ -45,20 +45,27 @@ newWorldFile = newWorldFile.save();
 
 ## Documentation:
 
-###### **new terrariaWorldParser( path )** — *node class constructor*
-###### **new terrariaWorldParser( )** — *browser class constructor*
-###### **async loadFile(  )** - *browser class method*
-######  - loads the file, doesn't parse it yet
+###### **new terrariaWorldParser( path )**
+— *node class constructor*
+###### **new terrariaWorldParser( )**
+— *browser class constructor*
+###### **async loadFile(  )**
+— *browser class method*
+\- loads the file, doesn't parse it yet
 &nbsp;
-###### **parse( [[sections], [percentageCallback]] )** - *class method*
-###### &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; **sections** — *string array*
-###### &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; - selected sections to be parsed
-###### &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; - default : ["fileFormatHeader", "header", "worldTiles", "chests", "signs", "NPCs", "tileEntities", "weightedPressureplates", "townManager", "footer"]
-###### &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; **percentageCallback( percentage )** — *function*
-###### &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; **percentage** — *number*
-###### &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; - called when loading percentage changes
-###### - Parses the file
-###### - Returns an object
+###### **parse( [[sections], [percentageCallback]] )**
+###### &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; **sections**
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;— *string array*
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; - selected sections to be parsed
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; - default : ["fileFormatHeader", "header", "worldTiles", "chests", "signs", "NPCs", "tileEntities", "weightedPressureplates", "townManager", "footer"]
+###### &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; **percentageCallback( percentage )**
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**percentage**
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;— *number*
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;— *function*
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; - called when loading percentage changes
+— *class method*
+\- Parses the file
+\- Returns an object
 &nbsp;
 ## Return object:
 
