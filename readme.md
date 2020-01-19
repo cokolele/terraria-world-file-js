@@ -52,7 +52,7 @@ newWorldFile = newWorldFile.save();
 <br>**async loadFile(  )**
 <br>— *browser class method*
 <br>\- loads the file, doesn't parse it yet
-<br><br>
+<br>
 <br>**parse( [[sections], [percentageCallback]] )**
 <br>— *class method*
 <br>\- Parses the file
