@@ -9,9 +9,7 @@
 
 Terraria world file parser and saver written in javascript
 
-\- version 2.0
-<br>\- node version is still in version 1, check *readme_v1.md*
-<br>\- supports only maps generated in 1.3.5.3
+\- supports only maps generated in 1.3.5.3
 
 Feel free to contribute 🌳
 
