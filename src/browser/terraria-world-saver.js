@@ -213,7 +213,7 @@ export default class terrariaWorldSaver extends terrariaFileSaver {
                 let flags1, flags2, flags3;
 
                 const prevY = y;
-                while (y < this.worldObject.header.maxTilesY && JSON.stringify(tile) === JSON.stringify(data[x][++y])){}
+                while (y < this.worldObject.header.maxTilesY && JSON.stringify(tile) === JSON.stringify(data[x][   ++y   ])){}
                 const RLE = y - prevY - 1;
 
                 if (RLE) {
