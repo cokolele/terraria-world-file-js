@@ -62,7 +62,7 @@ export default class terrariaWorldParser extends terrariaFileParser {
                 if (this.selectedSections.includes(section) || section == "fileformatheader" || section == "header") {
 
                     //skip new sections if 1.3.5.3 is loaded
-                    if ((section == sections[9] || section == sections[10]) && this.world.version != 225)
+                    if ((section == sections[9] || section == sections[10]) && this.world.version < 225)
                         continue;
 
                     if (this.selectedSections.includes(section))
@@ -151,7 +151,7 @@ export default class terrariaWorldParser extends terrariaFileParser {
         if (onlyNeededData)
             return;
 
-        if (this.world.version == 225) {
+        if (this.world.version >= 225) {
             data.gameMode           = this.readInt32();
             data.drunkWorld         = this.readBoolean();
         } else {
@@ -245,14 +245,14 @@ export default class terrariaWorldParser extends terrariaFileParser {
         data.windSpeed              = this.readFloat32();
 
         data.anglerWhoFinishedToday = [];
-        for (let i = this.readInt32(); i > 0; --i) {
+        for (let i = this.readInt32(); i > 0; --i)
             data.anglerWhoFinishedToday.push(this.readString());
-        }
+
         data.savedAngler            = this.readBoolean();
         data.anglerQuest            = this.readInt32();
         data.savedStylist           = this.readBoolean();
         data.savedTaxCollector      = this.readBoolean();
-        if (this.world.version == 225)
+        if (this.world.version >= 225)
             data.savedGolfer        = this.readBoolean();
 
         data.invasionSizeStart      = this.readInt32();
@@ -305,7 +305,7 @@ export default class terrariaWorldParser extends terrariaFileParser {
         data.DD2Event_DownedInvasionT2      = this.readBoolean();
         data.DD2Event_DownedInvasionT3      = this.readBoolean();
 
-        if (this.world.version == 225) {
+        if (this.world.version >= 225) {
             data.setBG8 = this.readUInt8();
             data.setBG9 = this.readUInt8();
             data.setBG10 = this.readUInt8();
@@ -556,7 +556,7 @@ export default class terrariaWorldParser extends terrariaFileParser {
                 y: this.readInt32(),
             };
 
-            if (this.world.version == 225 && this.parseBitsByte(1)[0])
+            if (this.world.version >= 225 && this.parseBitsByte(1)[0])
                 data.NPCs[i].variationIndex = this.readInt32();
         }
 
