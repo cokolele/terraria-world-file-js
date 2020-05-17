@@ -312,7 +312,7 @@ export default class terrariaWorldParser extends terrariaFileParser {
             data.setBG11 = this.readUInt8();
             data.setBG12 = this.readUInt8();
 
-            data.combatBookWasUser = this.readBoolean();
+            data.combatBookWasUsed = this.readBoolean();
             data.lanternNightCooldown = this.readInt32();
             data.lanternNightGenuine = this.readBoolean();
             data.lanternNightManual = this.readBoolean();
@@ -327,10 +327,10 @@ export default class terrariaWorldParser extends terrariaFileParser {
             data.forceHalloweenForToday = this.readBoolean();
             data.forceXMasForToday = this.readBoolean();
 
-            data.SavedOreTierCooper = this.readInt32();
-            data.SavedOreTierIron = this.readInt32();
-            data.SavedOreTierSilver = this.readInt32();
-            data.SavedOreTierGold = this.readInt32();
+            data.savedOreTierCopper = this.readInt32();
+            data.savedOreTierIron = this.readInt32();
+            data.savedOreTierSilver = this.readInt32();
+            data.savedOreTierGold = this.readInt32();
 
             data.boughtCat = this.readBoolean();
             data.boughtDog = this.readBoolean();
