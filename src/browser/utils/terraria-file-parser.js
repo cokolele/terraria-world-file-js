@@ -97,4 +97,27 @@ export default class terrariaFileParse {
     jumpTo(offset) {
         this.offset = offset;
     }
+
+    parseBitsByte(size) {
+        /*
+         * returns an array of bits values, reversed, booleans
+         *
+         * example with size 10 (bits):
+         *  bytes [96,3]    0b_0110_00|00_0000_0011     BitsByte bool [t,t,f,f,f,f,f,f,f,f]
+         *                            ^cutoff
+         */
+
+        let bytes = [];
+        for (let i = size; i > 0; i = i - 8)
+            bytes.push( this.readUInt8() );
+
+        let bitValues = [];
+        for (let i = 0, j = 0; i < size; i++, j++) {
+            if (j == 8)
+                j = 0;
+            bitValues[i] = (bytes[~~(i / 8)] & (1 << j)) > 0;
+        }
+
+        return bitValues;
+    }
 }

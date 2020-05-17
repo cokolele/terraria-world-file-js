@@ -1,3 +1,7 @@
+/*
+ *  flags structure
+ */
+
 flags1:
 |    128     |    64    |      32      |      16     |   |      8      |     4     |     2      |    1     |
 |------------|----------|--------------|-------------|---|-------------|-----------|------------|----------|
@@ -16,6 +20,11 @@ flags3:
 |     | [wall_id_2] | [wire_yellow] | [wall_color] |   | [block_color] | [actuated] | [actuator] |   |
 |     |             |               |              |   |               |            |            |   |
 
+
+/*
+ *  some flag data meaning
+ */
+
 slope_id:
 | 1    | 2  | 3  | 4  | 5  |
 | half | TR | TL | BR | BL |
@@ -26,32 +35,34 @@ liquid_id:
 | water | lava | honey |
 |       |      |       |
 
-( block_id_2 ) block_id
-( 00000000   ) 00000000
+/*
+ *  parsed data from file, in order
+ */
 
-frameX
-00000000 00000000
+flags1 uint8
 
-frameY
-00000000 00000000
+flags2 uint8
 
-block_color
-00000000
+flags3 uint8
 
-              wall_id
-              00000000
-                                ^
-wall_color                      |
-00000000                        |
-                                |
-liquid_amount                   |
-00000000                        |
-                                |
-RLE_id_2                        |
-00000000                        |
-                                |
-RLE_id_2                        |
-00000000                        |
-                                |
-( wall_id_2 )                   |
-( 00000000  ) ------------------|
+(*block_id_2)   block_id uint8
+
+block_id_2 uint8
+
+frameX int16
+
+frameY int16
+
+block_color uint8
+
+(*wall_id_2)    wall_id uint8
+
+wall_color uint8
+
+liquid_amount uint8
+
+(*RLE_id_2)     RLE_id uint8
+
+RLE_id_2 uint8
+
+wall_id_2 uint8
