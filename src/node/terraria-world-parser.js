@@ -10,17 +10,18 @@ module.exports = class terrariaWorldParser extends terrariaFileParser {
         }
 
         this.world = {
-            pointers:[0],
-            importants:[],
+            version: null,
+            pointers: [0],
+            importants: [],
             tiles: {
-                x:null,
-                y:null
-            },
+                x: null,
+                y: null
+            }
         }
     }
 
     parse(param1, param2) {
-        const sections = ["fileformatheader", "header", "worldtiles", "chests", "signs", "npcs", "tileentities", "weightedpressureplates", "townmanager", "footer"];
+        const sections = ["fileformatheader", "header", "worldtiles", "chests", "signs", "npcs", "tileentities", "weightedpressureplates", "townmanager", "bestiary", "creativePowers", "footer"];
         const dataFormat = {
             fileFormatHeader:       [sections[0], this.parseFileFormatHeader],
             header:                 [sections[1], this.parseHeader],
@@ -31,7 +32,9 @@ module.exports = class terrariaWorldParser extends terrariaFileParser {
             tileEntities:           [sections[6], this.parseTileEntities],
             weightedPressurePlates: [sections[7], this.parseWeightedPressurePlates],
             townManager:            [sections[8], this.parseTownManager],
-            footer:                 [sections[9], this.parseFooter]
+            bestiary:               [sections[9], this.parseBestiary],
+            creativePowers:         [sections[10], this.parseCreativePowers],
+            footer:                 [sections[11], this.parseFooter]
         }
 
         if (typeof param1 == "object") {
@@ -52,7 +55,9 @@ module.exports = class terrariaWorldParser extends terrariaFileParser {
             for (let [sectionLabel, [section, parseFunction]] of Object.entries(dataFormat)) {
                 if (this.selectedSections.includes(section) || section == "fileformatheader" || section == "header") {
 
-                    this.jumpTo(this.world.pointers[ sections.indexOf(section) ])
+                    //skip new sections if 1.3.5.3 is loaded
+                    if ((section == sections[9] || section == sections[10]) && this.world.version != 225)
+                        continue;
 
                     if (this.selectedSections.includes(section))
                         data[sectionLabel] = parseFunction.call(this);
@@ -110,6 +115,7 @@ module.exports = class terrariaWorldParser extends terrariaFileParser {
         this.offset = importantsStartOffset;
         data._importantsSectionData = this.readBytes( importantsEndOffset - importantsStartOffset );
 
+        this.world.version = data.version;
         this.world.pointers = data.pointers;
         this.world.importants = data.importants;
 
@@ -139,7 +145,12 @@ module.exports = class terrariaWorldParser extends terrariaFileParser {
         if (onlyNeededData)
             return;
 
-        data.expertMode             = this.readBoolean();
+        if (this.world.version == 225) {
+            data.gameMode           = this.readInt32();
+            data.drunkWorld         = this.readBoolean();
+        } else {
+            data.expertMode             = this.readBoolean();
+        }
         data.creationTime           = this.readBytes(8);
         data.moonType               = this.readUInt8();
 
@@ -235,6 +246,9 @@ module.exports = class terrariaWorldParser extends terrariaFileParser {
         data.anglerQuest            = this.readInt32();
         data.savedStylist           = this.readBoolean();
         data.savedTaxCollector      = this.readBoolean();
+        if (this.world.version == 225)
+            data.savedGolfer        = this.readBoolean();
+
         data.invasionSizeStart      = this.readInt32();
         data.tempCultistDelay       = this.readInt32();
 
@@ -284,6 +298,41 @@ module.exports = class terrariaWorldParser extends terrariaFileParser {
         data.DD2Event_DownedInvasionT1      = this.readBoolean();
         data.DD2Event_DownedInvasionT2      = this.readBoolean();
         data.DD2Event_DownedInvasionT3      = this.readBoolean();
+
+        if (this.world.version == 225) {
+            data.setBG8 = this.readUInt8();
+            data.setBG9 = this.readUInt8();
+            data.setBG10 = this.readUInt8();
+            data.setBG11 = this.readUInt8();
+            data.setBG12 = this.readUInt8();
+
+            data.combatBookWasUser = this.readBoolean();
+            data.lanternNightCooldown = this.readInt32();
+            data.lanternNightGenuine = this.readBoolean();
+            data.lanternNightManual = this.readBoolean();
+            data.lanternNightNextNightIsGenuine = this.readBoolean();
+
+            data.treeTopsVariations = [];
+            const treeTopsCount = this.readInt32();
+            for (let i = 0; i < treeTopsCount; i++) {
+                data.treeTopsVariations.push(this.readInt32());
+            }
+
+            data.forceHalloweenForToday = this.readBoolean();
+            data.forceXMasForToday = this.readBoolean();
+
+            data.SavedOreTierCooper = this.readInt32();
+            data.SavedOreTierIron = this.readInt32();
+            data.SavedOreTierSilver = this.readInt32();
+            data.SavedOreTierGold = this.readInt32();
+
+            data.boughtCat = this.readBoolean();
+            data.boughtDog = this.readBoolean();
+            data.boughtBunny = this.readBoolean();
+
+            data.downedEmpressOfLight = this.readBoolean();
+            data.downedQueenSlime = this.readBoolean();
+        }
 
         return data;
     }
@@ -407,6 +456,8 @@ module.exports = class terrariaWorldParser extends terrariaFileParser {
                     tile.wiring.wires = {};
                 tile.wiring.wires.yellow = true;
             }
+            if (flags3 & 64)
+                tile.wallId = (this.readUInt8() << 8) | tile.wallId; //adding another byte
         }
 
         switch ((flags1 & 192) >> 6) {
@@ -498,6 +549,9 @@ module.exports = class terrariaWorldParser extends terrariaFileParser {
                 x: this.readInt32(),
                 y: this.readInt32(),
             };
+
+            if (this.world.version == 225 && this.parseBitsByte(1)[0])
+                data.NPCs[i].variationIndex = this.readInt32();
         }
 
         //pillars
@@ -537,26 +591,101 @@ module.exports = class terrariaWorldParser extends terrariaFileParser {
                 //dummy
                 case 0:
                     data.tileEntities[i].targetDummy = {
-                        "npc": this.readInt16(),
-                    }
+                        "npc": this.readInt16()
+                    };
                     break;
                 //item frame
                 case 1:
                     data.tileEntities[i].itemFrame = {
                         "itemId": this.readInt16(),
                         "prefix": this.readUInt8(),
-                        "stack" : this.readInt16(),
-                    }
+                        "stack" : this.readInt16()
+                    };
                     break;
                 //logic sensor
                 case 2:
                     data.tileEntities[i].logicSensor = {
                         "logicCheck": this.readUInt8(),
-                        "on"        : this.readBoolean(),
-                    }
+                        "on"        : this.readBoolean()
+                    };
+                    break;
+                //display doll
+                case 4:
+                    data.tileEntities[i].displayDoll = {
+                        items: [],
+                        dyes: []
+                    };
+
+                    var items = this.parseBitsByte(8);
+                    var dyes = this.parseBitsByte(8);
+
+                    for (let i = 0; i < 8; i++)
+                        if (items[i]) {
+                            data.tileEntities[i].displayDoll.items[i] = {
+                                "itemId": this.readInt16(),
+                                "prefix": this.readUInt8(),
+                                "stack": this.readInt16()
+                            };
+                        }
+                    for (let i = 0; i < 8; i++)
+                        if (dyes[i]) {
+                            data.tileEntities[i].displayDoll.dyes[i] = {
+                                "itemId": this.readInt16(),
+                                "prefix": this.readUInt8(),
+                                "stack": this.readInt16()
+                            };
+                        }
+
+                    break;
+                //weapons rack
+                case 5:
+                    data.tileEntities[i].weaponsRack = {
+                        "itemId": this.readInt16(),
+                        "prefix": this.readUInt8(),
+                        "stack" : this.readInt16()
+                    };
+                    break;
+                //hat rack
+                case 6:
+                    data.tileEntities[i].hatRack = {
+                        items: [],
+                        dyes: []
+                    };
+
+                    var items = this.parseBitsByte(4);
+                    var dyes = items.splice(2, 4);
+
+                    for (let i = 0; i < 2; i++)
+                        if (items[i]) {
+                            data.tileEntities[i].hatRack.items[i] = {
+                                "itemId": this.readInt16(),
+                                "prefix": this.readUInt8(),
+                                "stack": this.readInt16()
+                            };
+                        }
+                    for (let i = 0; i < 2; i++)
+                        if (dyes[i]) {
+                            data.tileEntities[i].hatRack.dyes[i] = {
+                                "itemId": this.readInt16(),
+                                "prefix": this.readUInt8(),
+                                "stack": this.readInt16()
+                            };
+                        }
+
+                    break;
+                //food platter
+                case 7:
+                    data.tileEntities[i].foodPlatter = {
+                        "itemId": this.readInt16(),
+                        "prefix": this.readUInt8(),
+                        "stack" : this.readInt16()
+                    };
+                    break;
+                //teleportation pylon
+                case 8:
+                    data.tileEntities[i].teleportationPylon = true;
                     break;
             }
-
         }
 
         return data;
@@ -592,6 +721,99 @@ module.exports = class terrariaWorldParser extends terrariaFileParser {
                 x: this.readInt32(),
                 y: this.readInt32()
             };
+        }
+
+        return data;
+    }
+
+    parseBestiary() {
+        let data = {};
+
+        data.NPCKills = {};
+        data.NPCKillsCount = this.readInt32();
+        for (let i = 0; i < data.NPCKillsCount; i++)
+            data.NPCKills[ this.readString() ] = this.readInt32();
+
+        data.NPCSights = [];
+        data.NPCSightsCount = this.readInt32();
+        for (let i = 0; i < data.NPCSightsCount; i++)
+            data.NPCSights.push(this.readString());
+
+        data.NPCChats = [];
+        data.NPCChatsCount = this.readInt32();
+        for (let i = 0; i < data.NPCChatsCount; i++)
+            data.NPCChats.push(this.readString());
+
+        return data;
+    }
+
+    parseCreativePowers() {
+        let data = {};
+
+        data.creativePowers = [];
+        while (this.readBoolean()) {
+            let creativePower = {
+                powerId: this.readInt16()
+            };
+
+            switch (creativePower.powerId) {
+                //freezeTime
+                case 0:
+                    creativePower.freezeTime = {
+                        enabled: this.readBoolean()
+                    };
+                    break;
+                //godmode
+                case 5:
+                    creativePower.godmode = {
+                        enabled: this.readBoolean()
+                    };
+                    break;
+                //modifyTimeRate
+                case 8:
+                    creativePower.modifyTimeRate = {
+                        sliderValue: this.readFloat32()
+                    };
+                    break;
+                //freezeRainPower
+                case 9:
+                    creativePower.freezeRainPower = {
+                        enabled: this.readBoolean()
+                    };
+                    break;
+                //freezeWindDirectionAndStrength
+                case 10:
+                    creativePower.freezeWindDirectionAndStrength = {
+                        enabled: this.readBoolean()
+                    };
+                    break;
+                //farPlacementRangePower
+                case 11:
+                    creativePower.farPlacementRangePower = {
+                        enabled: this.readBoolean()
+                    };
+                    break;
+                //difficultySliderPower
+                case 12:
+                    creativePower.difficultySliderPower = {
+                        sliderValue: this.readFloat32()
+                    };
+                    break;
+                //stopBiomeSpreadPower
+                case 13:
+                    creativePower.stopBiomeSpreadPower = {
+                        enabled: this.readBoolean()
+                    };
+                    break;
+                //spawnRateSliderPerPlayerPower
+                case 13:
+                    creativePower.spawnRateSliderPerPlayerPower = {
+                        sliderValue: this.readFloat32()
+                    };
+                    break;
+            }
+
+            data.creativePowers.push(creativePower);
         }
 
         return data;
