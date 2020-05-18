@@ -7,7 +7,7 @@ export default class terrariaWorldParser extends terrariaFileParser {
 
         this.world = {
             version: null,
-            pointers: [0],
+            pointers: [],
             importants: [],
             tiles: {
                 x: null,
@@ -27,7 +27,7 @@ export default class terrariaWorldParser extends terrariaFileParser {
     }
 
     parse(param1, param2) {
-        const sections = ["fileformatheader", "header", "worldtiles", "chests", "signs", "npcs", "tileentities", "weightedpressureplates", "townmanager", "bestiary", "creativePowers", "footer"];
+        const sections = ["fileformatheader", "header", "worldtiles", "chests", "signs", "npcs", "tileentities", "weightedpressureplates", "townmanager", "bestiary", "creativepowers", "footer"];
         const dataFormat = {
             fileFormatHeader:       [sections[0], this.parseFileFormatHeader],
             header:                 [sections[1], this.parseHeader],
@@ -57,26 +57,22 @@ export default class terrariaWorldParser extends terrariaFileParser {
         let data = {};
 
         try {
-
             for (let [sectionLabel, [section, parseFunction]] of Object.entries(dataFormat)) {
-                if (this.selectedSections.includes(section) || section == "fileformatheader" || section == "header") {
-
+                if (this.selectedSections.includes(section)) {
                     //skip new sections if 1.3.5.3 is loaded
-                    if ((section == sections[9] || section == sections[10]) && this.world.version < 225)
+                    if (this.world.version < 225 && (section == sections[9] || section == sections[10]))
                         continue;
 
-                    if (this.selectedSections.includes(section))
-                        data[sectionLabel] = parseFunction.call(this);
-                    else {
-                        parseFunction.call(this, true);
-                        this.offset = this.world.pointers[ sections.indexOf(section) + 1 ];
-                    }
+                    data[sectionLabel] = parseFunction.call(this);
 
-                    if (this.offset != this.world.pointers[ sections.indexOf(section) + 1 ] && this.offset != this.buffer.byteLength)
+                    if (this.offset != this.world.pointers[ sections.indexOf(section) ] && this.offset != this.buffer.byteLength)
                         throw new Error(section + " section position did not end where it should");
+
+                } else if (section == "fileformatheader" || section == "header") { //these are necessary for further parsing
+                    parseFunction.call(this, true);
+                    this.jumpTo( this.world.pointers[ sections.indexOf(section) ] );
                 }
             }
-
         } catch(e) {
             throw new TerrariaWorldParserError("Problem with parsing the file", e);
         }
@@ -95,31 +91,9 @@ export default class terrariaWorldParser extends terrariaFileParser {
         data.favorite       = this.readBoolean();
         data.pointers       = [];
         data.importants     = [];
-
-        const pointersCount = this.readInt16();
-        for (let i = 1; i <= pointersCount; i++) {
-            data.pointers[i] = this.readInt32();
-        }
-
-        const importantsStartOffset = this.offset;
-
-        const importantsCount = this.readInt16();
-        let num3 = 0;
-        let num4 = 128;
-        for (let i = 0; i < importantsCount; ++i) {
-            if (num4 == 128) {
-                num3 = this.readUInt8();
-                num4 = 1;
-            } else
-                num4 = num4 << 1 ;
-
-            if ((num3 & num4) == num4)
-                data.importants[i] = true;
-        }
-
-        const importantsEndOffset = this.offset;
-        this.offset = importantsStartOffset;
-        data._importantsSectionData = this.readBytes( importantsEndOffset - importantsStartOffset );
+        for (let i = this.readInt16(); i > 0; i--)
+            data.pointers.push(this.readInt32());
+        data.importants     = this.parseBitsByte(this.readInt16());
 
         this.world.version = data.version;
         this.world.pointers = data.pointers;
@@ -319,10 +293,8 @@ export default class terrariaWorldParser extends terrariaFileParser {
             data.lanternNightNextNightIsGenuine = this.readBoolean();
 
             data.treeTopsVariations = [];
-            const treeTopsCount = this.readInt32();
-            for (let i = 0; i < treeTopsCount; i++) {
+            for (let i = this.readInt32(); i > 0; i--)
                 data.treeTopsVariations.push(this.readInt32());
-            }
 
             data.forceHalloweenForToday = this.readBoolean();
             data.forceXMasForToday = this.readBoolean();
@@ -616,7 +588,7 @@ export default class terrariaWorldParser extends terrariaFileParser {
                     };
                     break;
                 //display doll
-                case 4:
+                case 3:
                     data.tileEntities[i].displayDoll = {
                         items: [],
                         dyes: []
@@ -644,7 +616,7 @@ export default class terrariaWorldParser extends terrariaFileParser {
 
                     break;
                 //weapons rack
-                case 5:
+                case 4:
                     data.tileEntities[i].weaponsRack = {
                         "itemId": this.readInt16(),
                         "prefix": this.readUInt8(),
@@ -652,7 +624,7 @@ export default class terrariaWorldParser extends terrariaFileParser {
                     };
                     break;
                 //hat rack
-                case 6:
+                case 5:
                     data.tileEntities[i].hatRack = {
                         items: [],
                         dyes: []
@@ -680,7 +652,7 @@ export default class terrariaWorldParser extends terrariaFileParser {
 
                     break;
                 //food platter
-                case 7:
+                case 6:
                     data.tileEntities[i].foodPlatter = {
                         "itemId": this.readInt16(),
                         "prefix": this.readUInt8(),
@@ -688,7 +660,7 @@ export default class terrariaWorldParser extends terrariaFileParser {
                     };
                     break;
                 //teleportation pylon
-                case 8:
+                case 7:
                     data.tileEntities[i].teleportationPylon = true;
                     break;
             }

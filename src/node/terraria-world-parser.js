@@ -213,9 +213,9 @@ module.exports = class terrariaWorldParser extends terrariaFileParser {
         data.windSpeed              = this.readFloat32();
 
         data.anglerWhoFinishedToday = [];
-        for (let i = this.readInt32(); i > 0; --i) {
+        for (let i = this.readInt32(); i > 0; --i)
             data.anglerWhoFinishedToday.push(this.readString());
-        }
+
         data.savedAngler            = this.readBoolean();
         data.anglerQuest            = this.readInt32();
         data.savedStylist           = this.readBoolean();
@@ -287,9 +287,8 @@ module.exports = class terrariaWorldParser extends terrariaFileParser {
             data.lanternNightNextNightIsGenuine = this.readBoolean();
 
             data.treeTopsVariations = [];
-            for (let i = this.readInt32(); i > 0; i--) {
+            for (let i = this.readInt32(); i > 0; i--)
                 data.treeTopsVariations.push(this.readInt32());
-            }
 
             data.forceHalloweenForToday = this.readBoolean();
             data.forceXMasForToday = this.readBoolean();
@@ -306,7 +305,6 @@ module.exports = class terrariaWorldParser extends terrariaFileParser {
             data.downedEmpressOfLight = this.readBoolean();
             data.downedQueenSlime = this.readBoolean();
         }
-
 
         return data;
     }
