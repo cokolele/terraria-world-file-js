@@ -591,21 +591,21 @@ module.exports = class terrariaWorldParser extends terrariaFileParser {
                     var items = this.parseBitsByte(8);
                     var dyes = this.parseBitsByte(8);
 
-                    for (let i = 0; i < 8; i++)
-                        if (items[i]) {
+                    for (let j = 0; j < 8; j++)
+                        if (items[j]) {
                             if (!data.tileEntities[i].displayDoll.items)
                                 data.tileEntities[i].displayDoll.items = [];
-                            data.tileEntities[i].displayDoll.items[i] = {
+                            data.tileEntities[i].displayDoll.items[j] = {
                                 "itemId": this.readInt16(),
                                 "prefix": this.readUInt8(),
                                 "stack": this.readInt16()
                             };
                         }
-                    for (let i = 0; i < 8; i++)
-                        if (dyes[i]) {
+                    for (let j = 0; j < 8; j++)
+                        if (dyes[j]) {
                             if (!data.tileEntities[i].displayDoll.dyes)
                                 data.tileEntities[i].displayDoll.dyes = [];
-                            data.tileEntities[i].displayDoll.dyes[i] = {
+                            data.tileEntities[i].displayDoll.dyes[j] = {
                                 "itemId": this.readInt16(),
                                 "prefix": this.readUInt8(),
                                 "stack": this.readInt16()
@@ -631,21 +631,21 @@ module.exports = class terrariaWorldParser extends terrariaFileParser {
                     var items = this.parseBitsByte(4);
                     var dyes = items.splice(2, 4);
 
-                    for (let i = 0; i < 2; i++)
-                        if (items[i]) {
+                    for (let j = 0; j < 2; j++)
+                        if (items[j]) {
                             if (!data.tileEntities[i].hatRack.items)
                                 data.tileEntities[i].hatRack.items = [];
-                            data.tileEntities[i].hatRack.items[i] = {
+                            data.tileEntities[i].hatRack.items[j] = {
                                 "itemId": this.readInt16(),
                                 "prefix": this.readUInt8(),
                                 "stack": this.readInt16()
                             };
                         }
-                    for (let i = 0; i < 2; i++)
-                        if (dyes[i]) {
+                    for (let j = 0; j < 2; j++)
+                        if (dyes[j]) {
                             if (!data.tileEntities[i].hatRack.dyes)
                                 data.tileEntities[i].hatRack.dyes = [];
-                            data.tileEntities[i].hatRack.dyes[i] = {
+                            data.tileEntities[i].hatRack.dyes[j] = {
                                 "itemId": this.readInt16(),
                                 "prefix": this.readUInt8(),
                                 "stack": this.readInt16()
