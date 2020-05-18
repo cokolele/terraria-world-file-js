@@ -87,7 +87,17 @@ export default class terrariaFileParse {
     }
 
     readString(length) {
-        return utf8ByteArrayToString( this.readBytes( length ? length : this.readUInt8() ) );
+        if (length === undefined) { //7 bit encoded int32
+            length = 0;
+            let shift = 0, offset = 0, byte;
+            do {
+                byte = this.readUInt8();
+                length |= (byte & 0x7F) << shift;
+                shift += 7;
+            } while (byte >= 0x80);
+        }
+
+        return utf8ByteArrayToString( this.readBytes(length) );
     }
 
     skipBytes(count) {
