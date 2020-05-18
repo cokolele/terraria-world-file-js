@@ -593,6 +593,8 @@ module.exports = class terrariaWorldParser extends terrariaFileParser {
 
                     for (let i = 0; i < 8; i++)
                         if (items[i]) {
+                            if (!data.tileEntities[i].displayDoll.items)
+                                data.tileEntities[i].displayDoll.items = [];
                             data.tileEntities[i].displayDoll.items[i] = {
                                 "itemId": this.readInt16(),
                                 "prefix": this.readUInt8(),
@@ -601,6 +603,8 @@ module.exports = class terrariaWorldParser extends terrariaFileParser {
                         }
                     for (let i = 0; i < 8; i++)
                         if (dyes[i]) {
+                            if (!data.tileEntities[i].displayDoll.dyes)
+                                data.tileEntities[i].displayDoll.dyes = [];
                             data.tileEntities[i].displayDoll.dyes[i] = {
                                 "itemId": this.readInt16(),
                                 "prefix": this.readUInt8(),
@@ -629,6 +633,8 @@ module.exports = class terrariaWorldParser extends terrariaFileParser {
 
                     for (let i = 0; i < 2; i++)
                         if (items[i]) {
+                            if (!data.tileEntities[i].hatRack.items)
+                                data.tileEntities[i].hatRack.items = [];
                             data.tileEntities[i].hatRack.items[i] = {
                                 "itemId": this.readInt16(),
                                 "prefix": this.readUInt8(),
@@ -637,6 +643,8 @@ module.exports = class terrariaWorldParser extends terrariaFileParser {
                         }
                     for (let i = 0; i < 2; i++)
                         if (dyes[i]) {
+                            if (!data.tileEntities[i].hatRack.dyes)
+                                data.tileEntities[i].hatRack.dyes = [];
                             data.tileEntities[i].hatRack.dyes[i] = {
                                 "itemId": this.readInt16(),
                                 "prefix": this.readUInt8(),
