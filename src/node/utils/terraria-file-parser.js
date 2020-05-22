@@ -1,8 +1,13 @@
-const { readFileSync } = require("fs");
+const { readFile, readFileSync } = require("fs");
 
 module.exports = class terrariaFileParser {
-    constructor(path) {
-        this.buffer = readFileSync(path, [null, "r+"]);
+    loadFileSync(file) {
+        this.buffer = readFileSync(file, [null, "r+"]);
+        this.offset = 0;
+    }
+
+    async loadFile(file) {
+        this.buffer = await readFile(file, [null, "r+"]);
         this.offset = 0;
     }
 
@@ -76,14 +81,6 @@ module.exports = class terrariaFileParser {
     }
 
     parseBitsByte(size) {
-        /*
-         * returns an array of bits values, reversed, booleans
-         *
-         * example with size 10 (bits):
-         *  bytes [96,3]    0b_0110_00|00_0000_0011     BitsByte bool [t,t,f,f,f,f,f,f,f,f]
-         *                            ^cutoff
-         */
-
         let bytes = [];
         for (let i = size; i > 0; i = i - 8)
             bytes.push( this.readUInt8() );

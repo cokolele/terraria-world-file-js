@@ -18,25 +18,7 @@ export default class terrariaFileParse {
         });
 
         this.buffer = new DataView(buffer);
-
-        let percent = 0;
-        let percentilNext = 0;
-        let percentil = this.buffer.byteLength / 100;
-
-        let _offset = 0;
-        Object.defineProperty(this, "offset", {
-            get: () => {
-                if (this.percentageCallback && _offset > percentilNext){
-                    percent++;
-                    percentilNext += percentil;
-                    this.percentageCallback(percent);
-                }
-                return _offset;
-            },
-            set: (value) => {
-                _offset = value;
-            }
-        });
+        this.offset = 0;
     }
 
     readUInt8() {
@@ -109,14 +91,6 @@ export default class terrariaFileParse {
     }
 
     parseBitsByte(size) {
-        /*
-         * returns an array of bits values, reversed, booleans
-         *
-         * example with size 10 (bits):
-         *  bytes [96,3]    0b_0110_00|00_0000_0011     BitsByte bool [t,t,f,f,f,f,f,f,f,f]
-         *                            ^cutoff
-         */
-
         let bytes = [];
         for (let i = size; i > 0; i = i - 8)
             bytes.push( this.readUInt8() );

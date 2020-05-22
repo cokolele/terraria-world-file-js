@@ -84,4 +84,20 @@ export default class terrariaFileSave {
     skipBytes(count) {
         this.offset += count;
     }
+
+    saveBitsByte(_bitsArray) {
+        const bitsArray = [..._bitsArray]; // we dont wanna remove data from the passed reference
+        let bytes = [];
+
+        for (let i = bitsArray.length; i > 0; i -= 8) {
+            let byte = 0;
+
+            for (let j = 0; j < 8; j++)
+                byte |= (bitsArray.shift() << j);
+
+            bytes.push(byte);
+        }
+
+        this.saveBytes(bytes);
+    }
 }

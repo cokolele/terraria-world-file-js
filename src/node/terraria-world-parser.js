@@ -2,69 +2,95 @@ const terrariaFileParser = require("./utils/terraria-file-parser.js");
 const TerrariaWorldParserError = require("./utils/terraria-world-parser-error.js");
 
 module.exports = class terrariaWorldParser extends terrariaFileParser {
-    constructor(path) {
+    constructor() {
+        super();
+    }
+
+    loadFileSync(file) {
         try {
-            super(path);
-        } catch (e) {
+            super.loadFileSync(file);
+        } catch(e) {
             throw new TerrariaWorldParserError("Problem with loading the file", e);
         }
 
-        this.world = {
-            version: null,
-            pointers: [],
-            importants: [],
-            tiles: {
-                x: null,
-                y: null
-            }
-        }
+        return this;
     }
 
-    parse(param1, param2) {
-        const sections = ["fileformatheader", "header", "worldtiles", "chests", "signs", "npcs", "tileentities", "weightedpressureplates", "townmanager", "bestiary", "creativepowers", "footer"];
-        const dataFormat = {
-            fileFormatHeader:       [sections[0], this.parseFileFormatHeader],
-            header:                 [sections[1], this.parseHeader],
-            worldTiles:             [sections[2], this.parseWorldTiles],
-            chestsData:             [sections[3], this.parseChests],
-            signsData:              [sections[4], this.parseSigns],
-            NPCsData:               [sections[5], this.parseNPCs],
-            tileEntities:           [sections[6], this.parseTileEntities],
-            weightedPressurePlates: [sections[7], this.parseWeightedPressurePlates],
-            townManager:            [sections[8], this.parseTownManager],
-            bestiary:               [sections[9], this.parseBestiary],
-            creativePowers:         [sections[10], this.parseCreativePowers],
-            footer:                 [sections[11], this.parseFooter]
+    async loadFile(file) {
+        try {
+            await super.loadFile(file);
+        } catch(e) {
+            throw new TerrariaWorldParserError("Problem with loading the file", e);
         }
 
-        if (typeof param1 == "object") {
-            this.selectedSections = param1.map(section => section.toLowerCase());
-            this.percentageCallback = param2;
+        return this;
+    }
+
+    parse(options) {
+        const sections = {
+            fileFormatHeader:       this.parseFileFormatHeader,
+            header:                 this.parseHeader,
+            tiles:                  this.parseWorldTiles,
+            chests:                 this.parseChests,
+            signs:                  this.parseSigns,
+            NPCs:                   this.parseNPCs,
+            tileEntities:           this.parseTileEntities,
+            weightedPressurePlates: this.parseWeightedPressurePlates,
+            rooms:                  this.parseTownManager,
+            bestiary:               this.parseBestiary,
+            creativePowers:         this.parseCreativePowers,
+            footer:                 this.parseFooter
         }
-        else if (typeof param1 == "function") {
-            this.selectedSections = sections;
-            this.percentageCallback = param1;
+
+        this.options = {
+            sections: Object.keys(sections),
+            progressCallback: undefined,
+            ignorePointers: false,
+            ...options,
+        };
+        this.options.sections = this.options.sections.map(section => section.toLowerCase());
+
+        if (this.options.progressCallback) {
+            const onePercentSize = Math.floor(this.buffer.byteLength / 100);
+            let nextPercentSize = onePercentSize;
+            let percent = 0;
+
+            let _offset = this.offset;
+            Object.defineProperty(this, "offset", {
+                get: () => _offset,
+                set: (value) => {
+                    _offset = value;
+                    if (_offset >= nextPercentSize){
+                        percent++;
+                        nextPercentSize += onePercentSize;
+                        this.options.progressCallback(percent);
+                    }
+                }
+            });
         }
-        else
-            this.selectedSections = sections;
 
         let data = {};
 
         try {
-            for (let [sectionLabel, [section, parseFunction]] of Object.entries(dataFormat)) {
-                if (this.selectedSections.includes(section)) {
-                    //skip new sections if 1.3.5.3 is loaded
-                    if (this.world.version < 225 && (section == sections[9] || section == sections[10]))
-                        continue;
+            this.world = this.parseNeededData();
 
-                    data[sectionLabel] = parseFunction.call(this);
+            if (this.world.version < 225) {
+                delete sections.bestiary;
+                delete sections.creativePowers;
+            }
 
-                    if (this.offset != this.world.pointers[ sections.indexOf(section) ] && this.offset != this.buffer.byteLength)
-                        throw new Error(section + " section position did not end where it should");
+            for (let [sectionName, parseFunction] of Object.entries(sections)) {
+                if (this.options.sections.includes( sectionName.toLowerCase() )) {
+                    const sectionIndex = Object.keys(sections).indexOf(sectionName);
 
-                } else if (section == "fileformatheader" || section == "header") { //these are necessary for further parsing
-                    parseFunction.call(this, true);
-                    this.jumpTo( this.world.pointers[ sections.indexOf(section) ] );
+                    this.offset = this.world.pointers[sectionIndex];
+                    data[sectionName] = parseFunction.call(this);
+
+                    if (this.offset != this.world.pointers[sectionIndex + 1] && this.offset != this.buffer.byteLength)
+                        if (this.options.ignorePointers)
+                            this.offset = this.world.pointers[sectionIndex + 1];
+                        else
+                            throw new Error("Bad " + sectionName + " section end offset.");
                 }
             }
         } catch(e) {
@@ -74,6 +100,40 @@ module.exports = class terrariaWorldParser extends terrariaFileParser {
         return data;
     }
 
+    parseNeededData() {
+        this.offset = 0;
+
+        const version = this.readInt32();
+        const magicNumber = this.readString(7);
+        const fileType = this.readUInt8();
+        this.skipBytes(12);
+        const pointers = [0];
+        for (let i = this.readInt16(); i > 0; i--)
+            pointers.push(this.readInt32());
+        const importants = this.parseBitsByte(this.readInt16());
+        this.readString();
+        this.readString();
+        this.skipBytes(44);
+        const height = this.readInt32();
+        const width = this.readInt32();
+
+        this.offset = 0;
+
+        if (magicNumber != "relogic" || fileType != 2)
+            throw new Error("Invalid file type.");
+
+        if (version < 194)
+            throw new Error("Map version is older than 1.3.5.3 and cannot be parsed.");
+
+        return {
+            version,
+            pointers,
+            importants,
+            width,
+            height
+        };
+    }
+
     parseFileFormatHeader() {
         let data = {};
 
@@ -81,25 +141,17 @@ module.exports = class terrariaWorldParser extends terrariaFileParser {
         data.magicNumber    = this.readString(7);
         data.fileType       = this.readUInt8();
         data.revision       = this.readUInt32();
-        this.skipBytes(7);
         data.favorite       = this.readBoolean();
+        this.skipBytes(7);
         data.pointers       = [];
-        data.importants     = [];
         for (let i = this.readInt16(); i > 0; i--)
             data.pointers.push(this.readInt32());
         data.importants     = this.parseBitsByte(this.readInt16());
 
-        this.world.version = data.version;
-        this.world.pointers = data.pointers;
-        this.world.importants = data.importants;
-
-        if ( data.version < 194 || data.magicNumber != "relogic" || data.fileType != 2)
-            throw new Error("World file version is not supported (only 1.3.5.3) or corrupted metadata");
-
         return data;
     }
 
-    parseHeader(onlyNeededData) {
+    parseHeader() {
         let data = {};
 
         data.mapName                = this.readString();
@@ -113,15 +165,12 @@ module.exports = class terrariaWorldParser extends terrariaFileParser {
         data.bottomWorld            = this.readInt32();
         data.maxTilesY              = this.readInt32();
         data.maxTilesX              = this.readInt32();
-
-        this.world.tiles.x = data.maxTilesX;
-        this.world.tiles.y = data.maxTilesY;
-        if (onlyNeededData)
-            return;
-
         if (this.world.version >= 225) {
             data.gameMode           = this.readInt32();
             data.drunkWorld         = this.readBoolean();
+
+            if (this.world.version >= 227)
+                data.getGoodWorld   = this.readBoolean();
         } else {
             data.expertMode             = this.readBoolean();
         }
@@ -227,13 +276,8 @@ module.exports = class terrariaWorldParser extends terrariaFileParser {
         data.tempCultistDelay       = this.readInt32();
 
         data.killCount = [];
-        const num1 = this.readInt16();
-        for (let i = 0; i < num1; ++i) {
-            if (i < 580)
-                data.killCount[i] = this.readInt32();
-            else
-                this.skipBytes(4);
-        }
+        for (let i = this.readInt16(); i > 0; i--)
+            data.killCount.push(this.readInt32());
 
         data.fastForwardTime        = this.readBoolean();
         data.downedFishron          = this.readBoolean();
@@ -259,10 +303,8 @@ module.exports = class terrariaWorldParser extends terrariaFileParser {
         data.tempPartyCooldown      = this.readInt32();
 
         data.tempPartyCelebratingNPCs = [];
-        const num2 = this.readInt32();
-        for (let i = 0; i < num2; ++i) {
+        for (let i = this.readInt32(); i > 0; i--)
             data.tempPartyCelebratingNPCs.push(this.readInt32());
-        }
 
         data.Temp_Sandstorm_Happening       = this.readBoolean();
         data.Temp_Sandstorm_TimeLeft        = this.readInt32();
@@ -311,20 +353,18 @@ module.exports = class terrariaWorldParser extends terrariaFileParser {
 
     parseWorldTiles() {
         let data;
+        this.RLE = 0;
 
-        data = new Array(this.world.tiles.x);
-        for (let x = 0; x < this.world.tiles.x; x++) {
-            data[x] = new Array(this.world.tiles.y);
-            for (let y = 0; y < this.world.tiles.y; y++) {
-                const tile = this.parseTileData();
-                data[x][y] = tile;
-                let RLE = tile.RLE;
-                delete tile.RLE;
+        data = new Array(this.world.width);
+        for (let x = 0; x < this.world.width; x++) {
+            data[x] = new Array(this.world.height);
+            for (let y = 0; y < this.world.height; y++) {
+                data[x][y] = this.parseTileData();
 
-                while(RLE > 0) {
+                while(this.RLE > 0) {
+                    data[x][y+1] = data[x][y];
                     y++;
-                    RLE--;
-                    data[x][y] = tile;
+                    this.RLE--;
                 }
             }
         }
@@ -433,50 +473,44 @@ module.exports = class terrariaWorldParser extends terrariaFileParser {
         }
 
         switch ((flags1 & 192) >> 6) {
-            case 0: tile.RLE = 0; break;
-            case 1: tile.RLE = this.readUInt8(); break;
-            default: tile.RLE = this.readInt16(); break;
+            case 1: this.RLE = this.readUInt8(); break;
+            case 2: this.RLE = this.readInt16(); break;
         }
 
         return tile;
     }
 
     parseChests() {
-        let data = {};
+        let data = [];
 
-        data.chestsCount = this.readInt16();
-        data.chestSpace = this.readInt16();
-        data.overflow = data.chestSpace <= 40 ? 0 : data.chestSpace - 40;
-        if (data.chestsCount)
-            data.chests = [];
+        const chestsCount = this.readInt16(); //use world.chests.length instead
+        this.readInt16(); //chestsSpace = 40 - constant in all supported map version files
 
-        for (let i = 0; i < data.chestsCount; i++) {
-            data.chests[i] = {};
-            data.chests[i].position = {
-                x: this.readInt32(),
-                y: this.readInt32()
-            };
-            data.chests[i].name = this.readString();
-            if (data.chests[i].name == '')
-                delete data.chests[i].name;
+        for (let i = 0; i < chestsCount; i++) {
+            data[i] = {
+                position: {
+                    x: this.readInt32(),
+                    y: this.readInt32()
+                },
+                name: this.readString()
+            }
 
-            for (let j = 0; j < data.chestSpace; j++) {
-                const stack = this.readInt16();
+            if (data[i].name == "")
+                delete data[i].name;
+
+            for (let j = 0, stack; j < 40; j++) {
+                stack = this.readInt16();
                 if (stack == 0)
                     continue;
 
-                if (!data.chests[i].items)
-                    data.chests[i].items = [];
-                data.chests[i].items[j] = {};
-                data.chests[i].items[j].stack  = stack;
-                data.chests[i].items[j].id     = this.readInt32();
-                data.chests[i].items[j].prefix = this.readUInt8();
-            }
+                if (!data[i].items)
+                    data[i].items = [];
 
-            // skipping overflow items
-            for (let j = 0; j < data.overflow; j++) {
-                if (this.readInt16() > 0)
-                    this.skipBytes(5);
+                data[i].items[j] = {
+                    stack,
+                    id: this.readInt32(),
+                    prefix: this.readUInt8()
+                };
             }
         }
 
@@ -484,106 +518,97 @@ module.exports = class terrariaWorldParser extends terrariaFileParser {
     }
 
     parseSigns() {
-        let data = {};
+        let data = [];
 
-        data.signsCount = this.readInt16();
-
-        if (data.signsCount)
-            data.signs = [];
-        for (let i = 0; i < data.signsCount; i++) {
-            data.signs[i] = {};
-            data.signs[i].text = this.readString();
-            data.signs[i].position = {
-                x: this.readInt32(),
-                y: this.readInt32()
+        const signsCount = this.readInt16(); //use world.signs.count instead
+        for (let i = 0; i < signsCount; i++)
+            data[i] = {
+                text: this.readString(),
+                position: {
+                    x: this.readInt32(),
+                    y: this.readInt32()
+                }
             };
-        }
 
         return data;
     }
 
     parseNPCs() {
-        let data = {};
+        let data = [];
 
         let i = 0;
         for (; this.readBoolean(); i++) {
-            if (!data.NPCs)
-                data.NPCs = [];
-            data.NPCs[i] = {};
-            data.NPCs[i].id = this.readInt32();
-            data.NPCs[i].name = this.readString();
-            data.NPCs[i].position = {
-                x: this.readFloat32(),
-                y: this.readFloat32(),
-            };
-            data.NPCs[i].homeless = this.readBoolean();
-            data.NPCs[i].homePosition = {
-                x: this.readInt32(),
-                y: this.readInt32(),
+            data[i] = {
+                townNPC: true,
+                id: this.readInt32(),
+                name: this.readString(),
+                position: {
+                    x: this.readFloat32(),
+                    y: this.readFloat32()
+                },
+                homeless: this.readBoolean(),
+                homePosition: {
+                    x: this.readInt32(),
+                    y: this.readInt32()
+                }
             };
 
             if (this.world.version >= 225 && this.parseBitsByte(1)[0])
-                data.NPCs[i].variationIndex = this.readInt32();
+                data[i].variationIndex = this.readInt32();
         }
 
-        //pillars
-        for (; this.readBoolean(); i++) {
-            if (!data.pillars)
-                data.pillars = [];
-            data.pillars[i] = {};
-            data.pillars[i].id = this.readInt32();
-
-            data.pillars[i].position = {
-                x: this.readFloat32(),
-                y: this.readFloat32(),
+        for (; this.readBoolean(); i++)
+            data[i] = {
+                pillar: true,
+                id: this.readInt32(),
+                position: {
+                    x: this.readFloat32(),
+                    y: this.readFloat32()
+                }
             };
-        }
 
         return data;
     }
 
     parseTileEntities() {
-        let data = {};
+        let data = [];
 
-        data.tileEntitiesCount = this.readInt32();
-        if (data.tileEntitiesCount)
-            data.tileEntities = [];
+        const tileEntitiesCount = this.readInt32(); //use world.tileEntities.length instead
+        for (let i = 0; i < tileEntitiesCount; i++ ) {
+            data[i] = {
+                type: this.readUInt8(),
+                id: this.readInt32(),
+                position: {
+                    x: this.readInt16(),
+                    y: this.readInt16()
+                }
+            };;
 
-        for (let i = 0; i < data.tileEntitiesCount; i++ ) {
-            data.tileEntities[i] = {};
-
-            const type = this.readUInt8();
-            data.tileEntities[i].id = this.readInt32();
-            data.tileEntities[i].position = {
-                x: this.readInt16(),
-                y: this.readInt16()
-            };
-
-            switch (type) {
+            switch (data[i].type) {
                 //dummy
                 case 0:
-                    data.tileEntities[i].targetDummy = {
-                        "npc": this.readInt16()
+                    data[i].targetDummy = {
+                        npc: this.readInt16()
                     };
                     break;
                 //item frame
                 case 1:
-                    data.tileEntities[i].itemFrame = {
-                        "itemId": this.readInt16(),
-                        "prefix": this.readUInt8(),
-                        "stack" : this.readInt16()
+                    data[i].itemFrame = {
+                        itemId: this.readInt16(),
+                        prefix: this.readUInt8(),
+                        stack: this.readInt16()
                     };
                     break;
                 //logic sensor
                 case 2:
-                    data.tileEntities[i].logicSensor = {
-                        "logicCheck": this.readUInt8(),
-                        "on"        : this.readBoolean()
+                    data[i].logicSensor = {
+                        logicCheck: this.readUInt8(),
+                        on: this.readBoolean()
                     };
                     break;
                 //display doll
                 case 3:
-                    data.tileEntities[i].displayDoll = {
+                    data[i].displayDoll = {
                         items: [],
                         dyes: []
                     };
@@ -593,37 +618,37 @@ module.exports = class terrariaWorldParser extends terrariaFileParser {
 
                     for (let j = 0; j < 8; j++)
                         if (items[j]) {
-                            if (!data.tileEntities[i].displayDoll.items)
-                                data.tileEntities[i].displayDoll.items = [];
-                            data.tileEntities[i].displayDoll.items[j] = {
-                                "itemId": this.readInt16(),
-                                "prefix": this.readUInt8(),
-                                "stack": this.readInt16()
+                            if (!data[i].displayDoll.items)
+                                data[i].displayDoll.items = [];
+                            data[i].displayDoll.items[j] = {
+                                itemId: this.readInt16(),
+                                prefix: this.readUInt8(),
+                                stack: this.readInt16()
                             };
                         }
                     for (let j = 0; j < 8; j++)
                         if (dyes[j]) {
-                            if (!data.tileEntities[i].displayDoll.dyes)
-                                data.tileEntities[i].displayDoll.dyes = [];
-                            data.tileEntities[i].displayDoll.dyes[j] = {
-                                "itemId": this.readInt16(),
-                                "prefix": this.readUInt8(),
-                                "stack": this.readInt16()
+                            if (!data[i].displayDoll.dyes)
+                                data[i].displayDoll.dyes = [];
+                            data[i].displayDoll.dyes[j] = {
+                                itemId: this.readInt16(),
+                                prefix: this.readUInt8(),
+                                stack: this.readInt16()
                             };
                         }
 
                     break;
                 //weapons rack
                 case 4:
-                    data.tileEntities[i].weaponsRack = {
-                        "itemId": this.readInt16(),
-                        "prefix": this.readUInt8(),
-                        "stack" : this.readInt16()
+                    data[i].weaponsRack = {
+                        itemId: this.readInt16(),
+                        prefix: this.readUInt8(),
+                        stack : this.readInt16()
                     };
                     break;
                 //hat rack
                 case 5:
-                    data.tileEntities[i].hatRack = {
+                    data[i].hatRack = {
                         items: [],
                         dyes: []
                     };
@@ -633,37 +658,37 @@ module.exports = class terrariaWorldParser extends terrariaFileParser {
 
                     for (let j = 0; j < 2; j++)
                         if (items[j]) {
-                            if (!data.tileEntities[i].hatRack.items)
-                                data.tileEntities[i].hatRack.items = [];
-                            data.tileEntities[i].hatRack.items[j] = {
-                                "itemId": this.readInt16(),
-                                "prefix": this.readUInt8(),
-                                "stack": this.readInt16()
+                            if (!data[i].hatRack.items)
+                                data[i].hatRack.items = [];
+                            data[i].hatRack.items[j] = {
+                                itemId: this.readInt16(),
+                                prefix: this.readUInt8(),
+                                stack: this.readInt16()
                             };
                         }
                     for (let j = 0; j < 2; j++)
                         if (dyes[j]) {
-                            if (!data.tileEntities[i].hatRack.dyes)
-                                data.tileEntities[i].hatRack.dyes = [];
-                            data.tileEntities[i].hatRack.dyes[j] = {
-                                "itemId": this.readInt16(),
-                                "prefix": this.readUInt8(),
-                                "stack": this.readInt16()
+                            if (!data[i].hatRack.dyes)
+                                data[i].hatRack.dyes = [];
+                            data[i].hatRack.dyes[j] = {
+                                itemId: this.readInt16(),
+                                prefix: this.readUInt8(),
+                                stack: this.readInt16()
                             };
                         }
 
                     break;
                 //food platter
                 case 6:
-                    data.tileEntities[i].foodPlatter = {
-                        "itemId": this.readInt16(),
-                        "prefix": this.readUInt8(),
-                        "stack" : this.readInt16()
+                    data[i].foodPlatter = {
+                        itemId: this.readInt16(),
+                        prefix: this.readUInt8(),
+                        stack : this.readInt16()
                     };
                     break;
                 //teleportation pylon
                 case 7:
-                    data.tileEntities[i].teleportationPylon = true;
+                    data[i].teleportationPylon = true;
                     break;
             }
         }
@@ -672,36 +697,32 @@ module.exports = class terrariaWorldParser extends terrariaFileParser {
     }
 
     parseWeightedPressurePlates() {
-        let data = {};
+        let data = [];
 
-        data.pressurePlatesCount = this.readInt32();
-        if (data.pressurePlatesCount)
-            data.pressurePlates = [];
-
-        for (let i = 0; i < data.pressurePlatesCount; i++ ) {
-            data.pressurePlates[i].position = {
-                x: this.readInt32(),
-                y: this.readInt32()
+        const pressurePlatesCount = this.readInt32(); //use world.weightedPressurePlates.length instead
+        for (let i = 0; i < pressurePlatesCount; i++)
+            data[i] = {
+                position: {
+                    x: this.readInt32(),
+                    y: this.readInt32()
+                }
             };
-        }
 
         return data;
     }
 
     parseTownManager() {
-        let data = {};
+        let data = [];
 
-        data.roomsCount = this.readInt32();
-        data.rooms = [];
-
-        for (let i = 0; i < data.roomsCount; i++) {
-            data.rooms[i] = {};
-            data.rooms[i].npcId = this.readInt32();
-            data.rooms[i].position = {
-                x: this.readInt32(),
-                y: this.readInt32()
+        const roomsCount = this.readInt32(); //use world.townManager.length
+        for (let i = 0; i < roomsCount; i++)
+            data[i] = {
+                npcId: this.readInt32(),
+                position: {
+                    x: this.readInt32(),
+                    y: this.readInt32()
+                }
             };
-        }
 
         return data;
     }
@@ -728,9 +749,8 @@ module.exports = class terrariaWorldParser extends terrariaFileParser {
     }
 
     parseCreativePowers() {
-        let data = {};
+        let data = [];
 
-        data.creativePowers = [];
         while (this.readBoolean()) {
             let creativePower = {
                 powerId: this.readInt16()
@@ -793,19 +813,17 @@ module.exports = class terrariaWorldParser extends terrariaFileParser {
                     break;
             }
 
-            data.creativePowers.push(creativePower);
+            data.push(creativePower);
         }
 
         return data;
     }
 
     parseFooter() {
-        let data = {};
-
-        data.signoff1 = this.readBoolean();
-        data.signoff2 = this.readString();
-        data.signoff3 = this.readInt32();
-
-        return data;
+        return {
+            signoff1: this.readBoolean(),
+            signoff2: this.readString(),
+            signoff3: this.readInt32()
+        }
     }
 }

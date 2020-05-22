@@ -2,59 +2,70 @@ import terrariaFileSaver from "./utils/terraria-file-saver.js";
 import TerrariaWorldSaverError from "./utils/terraria-world-saver-error.js";
 
 export default class terrariaWorldSaver extends terrariaFileSaver {
-    constructor(worldObject) {
+    constructor() {
         super();
-        this.worldObject = worldObject;
     }
 
-    save(percentageCallback) {
-        if (percentageCallback)
-            this.percentageCallback = percentageCallback;
+    save(options) {
+        this.options = options;
 
-        const pointers = [
-            this.saveFileFormatHeader(),
-            this.saveHeader(),
-            this.saveWorldTiles(),
-            this.saveChests(),
-            this.saveSigns(),
-            this.saveNPCs(),
-            this.saveTileEntities(),
-            this.saveWeightedPressurePlates(),
-            this.saveTownManager(),
-            0
-        ];
+        try {
+            const pointers = [
+                this.saveFileFormatHeader(),
+                this.saveHeader(),
+                this.saveWorldTiles(),
+                this.saveChests(),
+                this.saveSigns(),
+                this.saveNPCs(),
+                this.saveTileEntities(),
+                this.saveWeightedPressurePlates(),
+                this.saveTownManager()
+            ];
+            if (this.options.world.fileFormatHeader.version >= 225) {
+                pointers.push( this.saveBestiary() );
+                pointers.push( this.saveCreativePowers() );
+            } else {
+                pointers.push(0);
+            }
 
-        this.saveFooter();
-        this.trimBuffer();
+            this.saveFooter();
+            this.trimBuffer();
 
-        this.offset = this.pointersOffset;
-        for (let i = 0; i < pointers.length; i++)
-            this.saveInt32(pointers[i]);
+            this.offset = this.pointersOffset;
+            for (let i = 0; i < pointers.length; i++)
+                this.saveInt32(pointers[i]);
+        } catch (e) {
+            throw new TerrariaWorldSaverError("Problem with saving the file", e);
+        }
 
         return this.buffer;
     }
 
     saveFileFormatHeader() {
-        const data = this.worldObject.fileFormatHeader;
+        const data = this.options.world.fileFormatHeader;
 
         this.saveInt32( data.version );
         this.saveString( "relogic", false );
         this.saveUInt8( data.fileType );
         this.saveUInt32( data.revision );
-        this.skipBytes(7);
         this.saveBoolean( data.favorite );
+        this.skipBytes(7);
 
-        this.saveInt16(10);
+        if (this.options.world.fileFormatHeader.version >= 225)
+            this.saveInt16(11);
+        else
+            this.saveInt16(10);
         this.pointersOffset = this.offset;
-        this.skipBytes(40);
+        this.skipBytes( this.options.world.fileFormatHeader.version >= 225 ? 44 : 40);
 
-        this.saveBytes( data._importantsSectionData );
+        this.saveInt16( data.importants.length );
+        this.saveBitsByte( data.importants );
 
         return this.offset;
     }
 
     saveHeader() {
-        const data = this.worldObject.header;
+        const data = this.options.world.header;
 
         this.saveString( data.mapName );
         this.saveString( data.seedText );
@@ -67,7 +78,14 @@ export default class terrariaWorldSaver extends terrariaFileSaver {
         this.saveInt32( data.bottomWorld );
         this.saveInt32( data.maxTilesY );
         this.saveInt32( data.maxTilesX );
-        this.saveBoolean( data.expertMode );
+        if (this.options.world.fileFormatHeader.version >= 225) {
+            this.saveInt32( data.gameMode );
+            this.saveBoolean( data.drunkWorld )
+
+            if (this.options.world.fileFormatHeader.version >= 227)
+                this.saveBoolean( data.getGoodWorld );
+        } else
+            this.saveBoolean( data.expertMode );
         this.saveBytes( data.creationTime );
         this.saveUInt8( data.moonType );
         this.saveInt32( data.treeX[0] );
@@ -152,10 +170,12 @@ export default class terrariaWorldSaver extends terrariaFileSaver {
         this.saveInt32( data.anglerQuest );
         this.saveBoolean( data.savedStylist );
         this.saveBoolean( data.savedTaxCollector );
+        if (this.options.world.fileFormatHeader.version >= 225)
+            this.saveBoolean( data.savedGolfer );
         this.saveInt32( data.invasionSizeStart );
         this.saveInt32( data.tempCultistDelay );
         this.saveInt16( data.killCount.length );
-        for (let i = 0; i < data.killCount.length; ++i)
+        for (let i = 0; i < data.killCount.length; i++)
             this.saveInt32( data.killCount[i] );
         this.saveBoolean( data.fastForwardTime );
         this.saveBoolean( data.downedFishron );
@@ -191,30 +211,72 @@ export default class terrariaWorldSaver extends terrariaFileSaver {
         this.saveBoolean( data.DD2Event_DownedInvasionT2 );
         this.saveBoolean( data.DD2Event_DownedInvasionT3 );
 
+        if (this.options.world.fileFormatHeader.version >= 225) {
+            this.saveUInt8( data.setBG8 );
+            this.saveUInt8( data.setBG9 );
+            this.saveUInt8( data.setBG10 );
+            this.saveUInt8( data.setBG11 );
+            this.saveUInt8( data.setBG12 );
+
+            this.saveBoolean( data.combatBookWasUsed );
+            this.saveInt32( data.lanternNightCooldown );
+            this.saveBoolean( data.lanternNightGenuine );
+            this.saveBoolean( data.lanternNightManual );
+            this.saveBoolean( data.lanternNightNextNightIsGenuine );
+
+            this.saveInt32(data.treeTopsVariations.length);
+            for (let i = 0; i < data.treeTopsVariations.length; i++)
+                this.saveInt32( data.treeTopsVariations[i] );
+
+            this.saveBoolean( data.forceHalloweenForToday );
+            this.saveBoolean( data.forceXMasForToday );
+
+            this.saveInt32( data.savedOreTierCopper );
+            this.saveInt32( data.savedOreTierIron );
+            this.saveInt32( data.savedOreTierSilver );
+            this.saveInt32( data.savedOreTierGold );
+
+            this.saveBoolean( data.boughtCat );
+            this.saveBoolean( data.boughtDog );
+            this.saveBoolean( data.boughtBunny );
+
+            this.saveBoolean( data.downedEmpressOfLight );
+            this.saveBoolean( data.downedQueenSlime );
+        }
+
         return this.offset;
     }
 
     saveWorldTiles() {
-        const data = this.worldObject.worldTiles;
+        const data = this.options.world.tiles;
 
-        const percentil = this.worldObject.header.maxTilesX / 100;
-        let percent = 0;
-        let percentilNext = 0;
+        let onePercentSize, onePercentSizeNext, percent;
+        if (this.options.progressCallback) {
+            onePercentSize = Math.floor(this.options.world.header.maxTilesX / 100);
+            onePercentSizeNext = onePercentSize;
+            percent = 0;
+        }
 
-        for (let x = 0; x < this.worldObject.header.maxTilesX; x++) {
-            if (x > percentilNext) {
-                percent++;
-                percentilNext += percentil
-                this.percentageCallback(percent);
+        for (let x = 0; x < this.options.world.header.maxTilesX; x++) {
+
+            if (this.options.progressCallback) {
+                if (x >= onePercentSizeNext) {
+                    percent++;
+                    onePercentSizeNext += onePercentSize;
+                    this.options.progressCallback(percent);
+                }
             }
 
-            for (let y = 0; y < this.worldObject.header.maxTilesY;) {
+            for (let y = 0; y < this.options.world.header.maxTilesY;) {
                 const tile = data[x][y];
                 let flags1, flags2, flags3;
 
-                const prevY = y;
-                while (y < this.worldObject.header.maxTilesY && JSON.stringify(tile) === JSON.stringify(data[x][   ++y   ])){}
-                const RLE = y - prevY - 1;
+                const startY = y;
+                do
+                    y++;
+                while (y < this.options.world.header.maxTilesY && JSON.stringify(tile) === JSON.stringify(data[x][y]))
+
+                const RLE = y - startY - 1;
 
                 if (RLE) {
                     if (RLE > 255)
@@ -230,8 +292,12 @@ export default class terrariaWorldSaver extends terrariaFileSaver {
                         flags1 |= 32;
                 }
 
-                if (tile.wallId !== undefined)
+                if (tile.wallId !== undefined) {
                     flags1 |= 4;
+
+                    if (tile.wallId > 255)
+                        flags3 |= 64
+                }
 
                 if (tile.liquid) {
                     switch(tile.liquid.type) {
@@ -300,9 +366,9 @@ export default class terrariaWorldSaver extends terrariaFileSaver {
                     else
                         this.saveUInt8( tile.blockId );
 
-                    if (this.worldObject.fileFormatHeader.importants[tile.blockId]) {
-                        this.saveUInt16( tile.frameX );
-                        tile.blockId != 144 && this.saveUInt16( tile.frameY );
+                    if (this.options.world.fileFormatHeader.importants[tile.blockId]) {
+                        this.saveInt16( tile.frameX );
+                        tile.blockId != 144 && this.saveInt16( tile.frameY );
                     }
 
                     if (flags3 & 8)
@@ -310,7 +376,7 @@ export default class terrariaWorldSaver extends terrariaFileSaver {
                 }
 
                 if (flags1 & 4) {
-                    this.saveUInt8( tile.wallId );
+                    this.saveUInt8( tile.wallId & 255 );
 
                     if (flags3 & 16)
                         this.saveUInt8( tile.colors.wall );
@@ -318,6 +384,9 @@ export default class terrariaWorldSaver extends terrariaFileSaver {
 
                 if (tile.liquid)
                     this.saveUInt8( tile.liquid.amount );
+
+                if (flags3 & 64)
+                    this.saveUInt8(1);
 
                 if (RLE) {
                     if (RLE > 255)
@@ -332,22 +401,22 @@ export default class terrariaWorldSaver extends terrariaFileSaver {
     }
 
     saveChests() {
-        const data = this.worldObject.chestsData;
+        const data = this.options.world.chests;
 
-        this.saveInt16( data.chestsCount );
-        this.saveInt16( data.chestSpace );
+        this.saveInt16( data.length );
+        this.saveInt16( 40 );
 
-        for (let i = 0; i < data.chestsCount; i++) {
-            this.saveInt32( data.chests[i].position.x );
-            this.saveInt32( data.chests[i].position.y );
-            if (data.chests[i].name)
-                this.saveString( data.chests[i].name );
+        data.forEach(chest => {
+            this.saveInt32( chest.position.x );
+            this.saveInt32( chest.position.y );
+            if (chest.name)
+                this.saveString( chest.name );
             else
                 this.saveUInt8( 0 );
 
-            const chestItems = Array(data.chestSpace).fill(null);
-            if (data.chests[i].items) {
-                data.chests[i].items.forEach((item, i) => {
+            const chestItems = Array(40).fill(null);
+            if (chest.items) {
+                chest.items.forEach((item, i) => {
                     chestItems[i] = item;
                 });
             }
@@ -361,30 +430,30 @@ export default class terrariaWorldSaver extends terrariaFileSaver {
                     this.saveUInt8( item.prefix );
                 }
             });
-        }
+        });
 
         return this.offset
     }
 
     saveSigns() {
-        const data = this.worldObject.signsData;
+        const data = this.options.world.signs;
 
-        this.saveInt16( data.signsCount );
+        this.saveInt16( data.length );
 
-        for (let i = 0; i < data.signsCount; i++) {
-            this.saveString( data.signs[i].text );
-            this.saveInt32( data.signs[i].position.x );
-            this.saveInt32( data.signs[i].position.y );
-        }
+        data.forEach(sign => {
+            this.saveString( sign.text );
+            this.saveInt32( sign.position.x );
+            this.saveInt32( sign.position.y );
+        });
 
         return this.offset;
     }
 
     saveNPCs() {
-        const data = this.worldObject.NPCsData;
+        const data = this.options.world.NPCs;
 
-        if (data.NPCs)
-            data.NPCs.forEach(NPC => {
+        data.forEach(NPC => {
+            if (NPC.townNPC) {
                 this.saveBoolean( true );
                 this.saveInt32( NPC.id );
                 this.saveString( NPC.name );
@@ -393,84 +462,235 @@ export default class terrariaWorldSaver extends terrariaFileSaver {
                 this.saveBoolean( NPC.homeless );
                 this.saveInt32( NPC.homePosition.x );
                 this.saveInt32( NPC.homePosition.y );
-            });
+
+                if (this.options.world.fileFormatHeader.version >= 225) {
+                    if (NPC.variationIndex !== undefined) {
+                        this.saveBitsByte([true]);
+                        this.saveInt32( NPC.variationIndex );
+                    }
+                    else
+                        this.saveBitsByte([false]);
+                }
+            }
+        });
         this.saveBoolean( false );
 
-        if (data.pillars)
-            data.pillars.forEach(pillar => {
+        data.forEach(NPC => {
+            if (NPC.pillar) {
                 this.saveBoolean( true );
-                this.saveInt32( pillar.id );
-                this.saveFloat32( pillar.position.x );
-                this.saveFloat32( pillar.position.y );
-            });
+                this.saveInt32( NPC.id );
+                this.saveFloat32( NPC.position.x );
+                this.saveFloat32( NPC.position.y );
+            }
+        });
         this.saveBoolean( false );
 
         return this.offset;
     }
 
     saveTileEntities() {
-        const data = this.worldObject.tileEntities;
+        const data = this.options.world.tileEntities;
 
-        this.saveInt32( data.tileEntitiesCount );
+        this.saveInt32( data.length );
 
-        if (data.tileEntities)
-            data.tileEntities.forEach(tileEntity => {
-                this.saveUInt8( tileEntity.targetDummy ? 0 : ( tileEntity.itemFrame ? 1 : 2 ) );
-                this.saveInt32( tileEntity.id );
-                this.saveInt16( tileEntity.position.x );
-                this.saveInt16( tileEntity.position.y );
+        data.forEach(tileEntity => {
+            if (tileEntity.targetDummy)
+                this.saveUInt8(0);
+            else if (tileEntity.itemFrame)
+                this.saveUInt8(1);
+            else if (tileEntity.logicSensor)
+                this.saveUInt8(2);
+            else if (tileEntity.displayDoll)
+                this.saveUInt8(3);
+            else if (tileEntity.weaponsRack)
+                this.saveUInt8(4);
+            else if (tileEntity.hatRack)
+                this.saveUInt8(5);
+            else if (tileEntity.foodPlatter)
+                this.saveUInt8(6);
+            else if (tileEntity.teleportationPylon)
+                this.saveUInt8(7);
 
-                if (tileEntity.targetDummy) {
-                    this.saveInt16( tileEntity.targetDummy.npc );
-                } else if (tileEntity.itemFrame) {
-                    this.saveInt16( tileEntity.itemFrame.itemId );
-                    this.saveUInt8( tileEntity.itemFrame.prefix );
-                    this.saveInt16( tileEntity.itemFrame.stack );
-                } else {
-                    this.saveUInt8( tileEntity.logicSensor.logicCheck );
-                    this.saveBoolean( tileEntity.logicSensor.on );
-                }
-            });
+            this.saveInt32( tileEntity.id );
+            this.saveInt16( tileEntity.position.x );
+            this.saveInt16( tileEntity.position.y );
+
+            if (tileEntity.targetDummy) {
+                this.saveInt16( tileEntity.targetDummy.npc );
+            } else if (tileEntity.itemFrame) {
+                this.saveInt16( tileEntity.itemFrame.itemId );
+                this.saveUInt8( tileEntity.itemFrame.prefix );
+                this.saveInt16( tileEntity.itemFrame.stack );
+            } else if (tileEntity.logicSensor) {
+                this.saveUInt8( tileEntity.logicSensor.logicCheck );
+                this.saveBoolean( tileEntity.logicSensor.on );
+            } else if (tileEntity.displayDoll) {
+                let itemsBits = [], dyesBits = [];
+
+                if (tileEntity.displayDoll.items)
+                    for (let i = 0; i < 8; i++)
+                        itemsBits[i] = tileEntity.displayDoll.items[i] ? true : false;
+                this.saveBitsByte(itemsBits);
+
+                if (tileEntity.displayDoll.dyes)
+                    for (let i = 0; i < 8; i++)
+                        dyesBits[i] = tileEntity.displayDoll.dyes[i] ? true : false;
+                this.saveBitsByte(dyesBits);
+
+                for (let j = 0; j < 8; j++)
+                    if (itemsBits[j]) {
+                        this.saveInt16( tileEntity.displayDoll.items[j].itemId );
+                        this.saveUInt8( tileEntity.displayDoll.items[j].prefix );
+                        this.saveInt16( tileEntity.displayDoll.items[j].stack );
+                    }
+
+                for (let j = 0; j < 8; j++)
+                    if (dyesBits[j]) {
+                        this.saveInt16( tileEntity.displayDoll.dyes[j].itemId );
+                        this.saveUInt8( tileEntity.displayDoll.dyes[j].prefix );
+                        this.saveInt16( tileEntity.displayDoll.dyes[j].stack );
+                    }
+            } else if (tileEntity.weaponsRack) {
+                this.saveInt16( tileEntity.weaponsRack.itemId );
+                this.saveUInt8( tileEntity.weaponsRack.prefix );
+                this.saveInt16( tileEntity.weaponsRack.stack );
+            } else if (tileEntity.hatRack) {
+                let itemsBits = [], dyesBits = [];
+
+                if (tileEntity.hatRack.items)
+                    for (let i = 0; i < 2; i++)
+                        itemsBits[i] = tileEntity.hatRack.items[i] ? true : false;
+
+                if (tileEntity.hatRack.dyes)
+                    for (let i = 0; i < 2; i++)
+                        dyesBits[i] = tileEntity.hatRack.dyes[i] ? true : false;
+
+                this.saveBitsByte([...itemsBits, ...dyesBits]);
+
+                for (let j = 0; j < 2; j++)
+                    if (itemsBits[j]) {
+                        this.saveInt16( tileEntity.hatRack.items[j].itemId );
+                        this.saveUInt8( tileEntity.hatRack.items[j].prefix );
+                        this.saveInt16( tileEntity.hatRack.items[j].stack );
+                    }
+
+                for (let j = 0; j < 2; j++)
+                    if (dyesBits[j]) {
+                        this.saveInt16( tileEntity.hatRack.dyes[j].itemId );
+                        this.saveUInt8( tileEntity.hatRack.dyes[j].prefix );
+                        this.saveInt16( tileEntity.hatRack.dyes[j].stack );
+                    }
+            } else if (tileEntity.foodPlatter) {
+                this.saveInt16( tileEntity.foodPlatter.itemId );
+                this.saveUInt8( tileEntity.foodPlatter.prefix );
+                this.saveInt16( tileEntity.foodPlatter.stack );
+            }
+        });
 
         return this.offset;
     }
 
     saveWeightedPressurePlates() {
-        const data = this.worldObject.weightedPressurePlates;
+        const data = this.options.world.weightedPressurePlates;
 
-        this.saveInt32( data.pressurePlatesCount );
+        this.saveInt32( data.length );
 
-        if (data.pressurePlates)
-            data.pressurePlates.forEach(pressurePlate => {
-                this.saveInt32( pressurePlate.position.x );
-                this.saveInt32( pressurePlate.position.y );
-            });
+        data.forEach(pressurePlate => {
+            this.saveInt32( pressurePlate.position.x );
+            this.saveInt32( pressurePlate.position.y );
+        });
 
         return this.offset;
     }
 
     saveTownManager() {
-        const data = this.worldObject.townManager;
+        const data = this.options.world.rooms;
 
-        this.saveInt32( data.roomsCount );
+        this.saveInt32( data.length );
 
-        if (data.rooms)
-            data.rooms.forEach(room => {
-                this.saveInt32( room.npcId );
-                this.saveInt32( room.position.x );
-                this.saveInt32( room.position.y );
-            });
+        data.forEach(room => {
+            this.saveInt32( room.npcId );
+            this.saveInt32( room.position.x );
+            this.saveInt32( room.position.y );
+        });
+
+        return this.offset;
+    }
+
+    saveBestiary() {
+        const data = this.options.world.bestiary;
+
+        this.saveInt32( data.NPCKillsCount );
+        data.NPCKills = Object.entries(data.NPCKills);
+        for (let i = 0; i < data.NPCKillsCount; i++) {
+            this.saveString( data.NPCKills[i][0] );
+            this.saveInt32( data.NPCKills[i][1] );
+        }
+
+        this.saveInt32( data.NPCSightsCount );
+        for (let i = 0; i < data.NPCSightsCount; i++)
+            this.saveString( data.NPCSights.shift() );
+
+        this.saveInt32( data.NPCChatsCount );
+        for (let i = 0; i < data.NPCChatsCount; i++)
+            this.saveString( data.NPCChats.shift() );
+
+        return this.offset;
+    }
+
+    saveCreativePowers() {
+        const creativePowers = this.options.world.creativePowers;
+
+        for (let i = 0; i < creativePowers.length; i++) {
+            this.saveBoolean(true);
+
+            if (creativePowers[i].freezeTime) {
+                this.saveInt16(0);
+                this.saveBoolean(creativePowers[i].freezeTime.enabled);
+            }
+            else if (creativePowers[i].godmode) {
+                this.saveInt16(5);
+                this.saveBoolean(creativePowers[i].godmode.enabled);
+            }
+            else if (creativePowers[i].modifyTimeRate) {
+                this.saveInt16(8);
+                this.saveFloat32( creativePowers[i].modifyTimeRate.sliderValue );
+            }
+            else if (creativePowers[i].freezeRainPower) {
+                this.saveInt16(9);
+                this.saveBoolean(creativePowers[i].freezeRainPower.enabled);
+            }
+            else if (creativePowers[i].freezeWindDirectionAndStrength) {
+                this.saveInt16(10);
+                this.saveBoolean(creativePowers[i].freezeWindDirectionAndStrength.enabled);
+            }
+            else if (creativePowers[i].farPlacementRangePower) {
+                this.saveInt16(11);
+                this.saveBoolean(creativePowers[i].farPlacementRangePower.enabled);
+            }
+            else if (creativePowers[i].difficultySliderPower) {
+                this.saveInt16(12);
+                this.saveFloat32( creativePowers[i].difficultySliderPower.sliderValue );
+            }
+            else if (creativePowers[i].stopBiomeSpreadPower) {
+                this.saveInt16(13);
+                this.saveBoolean(creativePowers[i].stopBiomeSpreadPower.enabled);
+            }
+            else if (creativePowers[i].spawnRateSliderPerPlayerPower) {
+                this.saveInt16(14);
+                this.saveFloat32( creativePowers[i].spawnRateSliderPerPlayerPower.sliderValue );
+            }
+        }
+        this.saveBoolean(false);
 
         return this.offset;
     }
 
     saveFooter() {
-        const data = this.worldObject.footer;
+        const data = this.options.world.footer;
 
         this.saveBoolean( data.signoff1 );
         this.saveString( data.signoff2 );
         this.saveInt32( data.signoff3 );
-
-        return this.offset;
     }
 }
