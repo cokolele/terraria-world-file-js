@@ -9,7 +9,7 @@
 
 Terraria world file parser and saver written in javascript
 
-\- supports only maps generated in 1.3.5.3
+\- supports maps from 1.3.5.3 to 1.4.0.3
 
 Feel free to contribute 🌳
 
@@ -19,12 +19,11 @@ Feel free to contribute 🌳
 import terrariaWorldParser from "/terraria-world-parser.js";
 import terrariaWorldSaver from "/terraria-world-saver.js";
 
-//node
-let world = new terrariaWorldParser("path/to/worldFile.wld");
-//browser
-let world = await new terrariaWorldParser().loadFile(worldFile);
+let world = await new terrariaWorldParser().loadFile(mapFile || "/map.wld");
 
-world = world.parse();
+world = world.parse({
+    sections: ["tiles"]
+});
 
 const name = world.header.name;
 const newName = "Canvas";
@@ -34,53 +33,79 @@ console.log( "New name: " + newName );
 
 world.header.name = newName;
 
-//browser
-let newWorldFile = new terrariaWorldSaver(world);
-//todo: node
-
-newWorldFile = newWorldFile.save();
+let newWorldFile = new terrariaWorldSaver().save({
+    world
+});
 ```
 
 ## Documentation:
 
-**new terrariaWorldParser( path )**
-<br>— *node class constructor*
-<br>**new terrariaWorldParser( )**
-<br>— *browser class constructor*
-<br>**async loadFile(  )**
-<br>— *browser class method*
-<br>\- loads the file, doesn't parse it yet
+*parser class constructor*&nbsp;&nbsp;**new terrariaWorldParser()**
 <br>
-<br>**parse( [[sections], [percentageCallback]] )**
-<br>— *class method*
-<br>\- Parses the file
-<br>\- Returns an object
-<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; **sections**
-<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;— *string array*
-<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\- selected sections to be parsed
-<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\- default : ["fileFormatHeader", "header", "worldTiles", "chests", "signs", "NPCs", "tileEntities",
-<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"weightedPressureplates", "townManager", "footer"]
-<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; **percentageCallback( percentage )**
-<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;— *function*
-<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\- called when loading percentage changes
-<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**percentage**
-<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;— *number*
+<br>*saver class constructor*&nbsp;&nbsp;**new terrariaWorldSaver()**
 <br>
+<br>*node parser class method*&nbsp;&nbsp;**loadFileSync(*string* path)**
+<br>*node parser class method*&nbsp;&nbsp;**async loadFile(*string* path)**
+<br>*browser parser class method*&nbsp;&nbsp;**async loadFile(*File* file)**
+<br>— Loads file buffer
+<br>— Returns instance
+<br>
+<br>*parser class method*&nbsp;&nbsp;**parse([*object* options])**
+<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*string array*&nbsp;&nbsp;**options.sections**
+<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;— Sections to parse
+<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;— Default: ["fileFormatHeader", "header", "tiles", "chests", "signs", "NPCs", "tileEntities",
+<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"weightedPressurePlates", "rooms", "bestiary", "creativePowers", "footer"]
+<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*boolean*&nbsp;&nbsp;**options.ignorePointers**
+<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;— Disables checking whether buffer offset matches the next section pointer
+<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;— Can be useful when some sections are corrupted
+<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;— Default: false
+<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*function*&nbsp;&nbsp;**options.progressCallback(*int* percent)**
+<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;— Called when loading progress changes
+<br>— Parses file
+<br>— Returns buffer
+<br>
+<br>*node saver class method*&nbsp;&nbsp;**save(*object* options)**
+<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*object*&nbsp;&nbsp;**options.world**
+<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;— Same object structure as parser return object
+<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;— Required
+<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*function*&nbsp;&nbsp;**[options.progressCallback(*int* percent)]**
+<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;— Called when loading progress changes
+<br>— Saves object
+<br>— Returns buffer
+<br>
+<br>TODO: *node saver class method*&nbsp;&nbsp;**save(*object* options)**
+<br>— If you are reading this and want to help me, you can create a pull request :)
+<br>
+<br>*Error*&nbsp;&nbsp;**TerrariaWorldParserError**
+<br>| or
+<br>*Error*&nbsp;&nbsp;**TerrariaWorldSaverError**
+<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*string*&nbsp;&nbsp;**name** = "TerrariaWorldParserError"
+<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| or
+<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*string*&nbsp;&nbsp;**name** = "TerrariaWorldSaverError"
+<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*string*&nbsp;&nbsp;**message** = onlyFriendlyMessage + ":\n" + onlyName + ": " + onlyMessage
+<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*string*&nbsp;&nbsp;**onlyFriendlyMessage**
+<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;— user friendly error message
+<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*string*&nbsp;&nbsp;**onlyName**
+<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;— original thrown error name
+<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*string*&nbsp;&nbsp;**onlyMessage**
+<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;— original thrown error message
+<br>
+
 ## Return object:
 
-**fileFormatHeader** — *object*
+*object*&nbsp;&nbsp;**fileFormatHeader**
 
 Type | Variable | Description
 --- | --- | ---
 *int32* | version | map file version
-*7 bytes string* | magicNumber | file format magic number ("relogic")
-*int8* | fileType | file format type
-*uint32* | revision | map saved count
-*uint64* | favorite | favorite (always 0)
-*int32 array* | pointers | file offsets of sections
-*bool array* | importants | tile frame importants (animated, big sprite, more variants...)<br>\- *null*s instead of *false*s<br>\- array entry number == block id
+*7 bytes string* | magicNumber | file format magic number
+*uint8* | fileType | terraria's file type
+*uint32* | revision | map was saved count
+*uint64* | favorite | favorite
+*int32 array* | pointers | offsets of sections
+*bool array* | importants | tile frame importants (animated, big sprite, more variants...)<br>index = block id
 
-**header** — *object*
+*object*&nbsp;&nbsp;**header**
 
 Type | Variable | Description
 --- | --- | ---
@@ -88,16 +113,19 @@ Type | Variable | Description
 *string* | seedText | map seed
 *uint64* | worldGeneratorVersion | version of the world generator, returns 8 bytes array
 *guid* | guid | guid of the map, returns 16 bytes array
-*int32* | worldId | id of the world
+*int32* | worldId | map ID
 *int32* | leftWorld | map dimesion in pixels
 *int32* | rightWorld | ^
 *int32* | topWorld | ^
 *int32* | bottomWorld | ^
-*int32* | maxTilesX | map dimension x in tiles
 *int32* | maxTilesY | map dimension y in tiles
-*bool* | expertMode | expert mode
+*int32* | maxTilesX | map dimension x in tiles
+*int32* | gameMode | map game mode<br>only >1.4.0.1
+*bool* | drunkWorld | drunk world (seed) enabled<br>only >1.4.0.1
+*bool* | getGoodWorld | good world (seed) enabled<br>only >1.4.0.3
+*bool* | expertMode | expert mode<br>only 1.3.5.3
 *int64* | creationTime | time of creation, returns 8 bytes array (Datetime.ToBinary)
-*int8* | moonType | moon type
+*uint8* | moonType | moon type
 *int32 array* | treeX | x positions where corresponding treeStyle ends
 *int32 array* | treeStyle | tree styles
 *int32 array* | caveBackX | x positions where corresponding caveBackStyles ends
@@ -116,7 +144,7 @@ Type | Variable | Description
 *bool* | tempEclipse | is eclipse happening
 *int32* | dungeonX | position x of the dungeon base
 *int32* | dungeonY | position y of the dungeon base
-*bool* | crimson | crimson
+*bool* | crimson | has crimson
 *bool* | downedBoss1 | eye of cthulu killed
 *bool* | downedBoss2 | eater of worlds killed
 *bool* | downedBoss3 | skeletron killed
@@ -137,7 +165,7 @@ Type | Variable | Description
 *bool* | downedPirates | pirates endured
 *bool* | shadowOrbSmashed | shadow orb / crimson heart smashed
 *bool* | spawnMeteor | can meteor spawn
-*int8* | shadowOrbCount | shadow orbs / crimson hearts smashed count (x/3)
+*uint8* | shadowOrbCount | shadow orbs / crimson hearts smashed count (x/3)
 *int32* | altarCount | altars smashed count
 *bool* | hardMode | hardmode
 *int32* | invasionDelay | ?
@@ -145,25 +173,25 @@ Type | Variable | Description
 *int32* | invasionType | type of an event
 *double* | invasionX | ?
 *double* | slimeRainTime | ?
-*int8* | sundialCooldown | cooldown of the Enchanted Sundial
+*uint8* | sundialCooldown | cooldown of the Enchanted Sundial
 *bool* | tempRaining | is currently raining
 *int32* | tempRainTime | current rain time
 *float* | tempMaxRain | ?
 *int32* | oreTier1 | tier 1 hardmode ore block id
 *int32* | oreTier2 | tier 2 hardmode ore block id
 *int32* | oreTier3 | tier 3 hardmode ore block id
-*int8* | setBG0 | forest background style
-*int8* | setBG1 | corruption background style
-*int8* | setBG2 | jungle background style
-*int8* | setBG3 | snow background style
-*int8* | setBG4 | hallow background style
-*int8* | setBG5 | crimson background style
-*int8* | setBG6 | desert background style
-*int8* | setBG7 | ocean background style
+*uint8* | setBG0 | forest background style
+*uint8* | setBG1 | corruption background style
+*uint8* | setBG2 | jungle background style
+*uint8* | setBG3 | snow background style
+*uint8* | setBG4 | hallow background style
+*uint8* | setBG5 | crimson background style
+*uint8* | setBG6 | desert background style
+*uint8* | setBG7 | ocean background style
 *int32* | cloudBGActive | ?
 *int16* | numClouds | clouds count (max 200)
 *float* | windSpeed | wind speed
-*string array* | anglerWhoFinishedToday | ?
+*string array* | anglerWhoFinishedToday | name of players that completed angler quest
 *bool* | savedAngler | angler saved
 *int32* | anglerQuest | id of the current angler quest (probably)
 *bool* | savedStylist | stylist saved
@@ -202,122 +230,159 @@ Type | Variable | Description
 *bool* | DD2Event_DownedInvasionT1 | old one's army tier 1 killed
 *bool* | DD2Event_DownedInvasionT2 | old one's army tier 2 killed
 *bool* | DD2Event_DownedInvasionT3 | old one's army tier 3 killed
+*uint8* | setBG8 | mushroom biome background style<br>only 1.4
+*uint8* | setBG9 | underworld background style<br>only 1.4
+*uint8* | setBG10 | Forest 2 background style<br>only 1.4
+*uint8* | setBG11 | Forest 3 background style<br>only 1.4
+*uint8* | setBG12 | Forest 4 background style<br>only 1.4
+*bool* | combatBookWasUsed | ?<br>only 1.4
+*int32 array* | treeTopsVariations | ?<br>only 1.4
+*bool* | forceHalloweenForToday | ?<br>only 1.4
+*bool* | forceXMasForToday | ?<br>only 1.4
+*int32* | savedOreTierCopper | tier 1 normalmode block id<br>only 1.4
+*int32* | savedOreTierIron | tier 2 normalmode block id<br>only 1.4
+*int32* | savedOreTierSilver | tier 3 normalmode block id<br>only 1.4
+*int32* | savedOreTierGold | tier 4 normalmode block id<br>only 1.4
+*bool* | boughtCat | bought cat<br>only 1.4
+*bool* | boughtDog | bought dog<br>only 1.4
+*bool* | boughtBunny | bought bunny<br>only 1.4
+*bool* | downedEmpressOfLight | killed empress of light<br>only 1.4
+*bool* | downedQueenSlime | killed queen slime<br>only 1.4
 
-**worldTiles** — *2d object array*
+*2D objects array*&nbsp;&nbsp;**tiles**
 
 Type | Variable | Description
 --- | --- | ---
 *byte / unint16* | blockId | tile id
 *int16* | frameX | frame x (tile frame important)
 *int16* | frameY | frame y (^)
-*int8* | wallId | wall id
+*uint8* | wallId | wall id
 *string* | slope | edited block (half, TR, TL, BR, BL)
-*object* : | colors |
-\|&nbsp;&nbsp;&nbsp;&nbsp;*int8* | block | painted block
-\|&nbsp;&nbsp;&nbsp;&nbsp;*int8* | wall | painted wall
-*object* : | liquid |
+*object* | colors |
+\|&nbsp;&nbsp;&nbsp;&nbsp;*uint8* | block | painted block
+\|&nbsp;&nbsp;&nbsp;&nbsp;*uint8* | wall | painted wall
+*object* | liquid |
 \|&nbsp;&nbsp;&nbsp;&nbsp;*string* | type | liquid type (water, lava, honey)
-\|&nbsp;&nbsp;&nbsp;&nbsp;*int8* | amount | amount
-*object* : | wiring |
+\|&nbsp;&nbsp;&nbsp;&nbsp;*uint8* | amount | amount
+*object* | wiring |
 \|&nbsp;&nbsp;&nbsp;&nbsp;*bool* | actuator | contains actuator
 \|&nbsp;&nbsp;&nbsp;&nbsp;*bool* | actuated | is actuated
-\|&nbsp;&nbsp;&nbsp;&nbsp;*object* : | wires |
+\|&nbsp;&nbsp;&nbsp;&nbsp;*object* | wires |
 \|&nbsp;&nbsp;&nbsp;&nbsp;\|&nbsp;&nbsp;&nbsp;&nbsp;*bool* | red | contains red wire
 \|&nbsp;&nbsp;&nbsp;&nbsp;\|&nbsp;&nbsp;&nbsp;&nbsp;*bool* | blue | contains blue wire
 \|&nbsp;&nbsp;&nbsp;&nbsp;\|&nbsp;&nbsp;&nbsp;&nbsp;*bool* | green | contains green wire
 \|&nbsp;&nbsp;&nbsp;&nbsp;\|&nbsp;&nbsp;&nbsp;&nbsp;*bool* | yellow | contains yellow wire
 
-**chestsData** — *object*
+*objects array*&nbsp;&nbsp;**chests**
 
 Type | Variable | Description
 --- | --- | ---
-*int16* | chestsCount | number of chests in the world
-*int16* | chestSpace | number of slots for chests, 40 as for version 1.3.5.3
-*number* | overflow | number of overflowing slots
-*object array* : | chests |
-\|&nbsp;&nbsp;&nbsp;&nbsp;*string* | name | name of the chest
-\|&nbsp;&nbsp;&nbsp;&nbsp;*object* : | position |
-\|&nbsp;&nbsp;&nbsp;&nbsp;\|&nbsp;&nbsp;&nbsp;&nbsp;*int32* | x | position x of the chest
-\|&nbsp;&nbsp;&nbsp;&nbsp;\|&nbsp;&nbsp;&nbsp;&nbsp;*int32* | y | position y of the chest
-\|&nbsp;&nbsp;&nbsp;&nbsp;*object array* : | items |
-\|&nbsp;&nbsp;&nbsp;&nbsp;\|&nbsp;&nbsp;&nbsp;&nbsp;*int16* | stack | stack of the item
-\|&nbsp;&nbsp;&nbsp;&nbsp;\|&nbsp;&nbsp;&nbsp;&nbsp;*int32* | id | id of the item
-\|&nbsp;&nbsp;&nbsp;&nbsp;\|&nbsp;&nbsp;&nbsp;&nbsp;*int8* | prefix | id of the prefix for the item (modifier)
+*string* | name | name of the chest
+*object* | position |
+\|&nbsp;&nbsp;&nbsp;&nbsp;*int32* | x | position x of the chest
+\|&nbsp;&nbsp;&nbsp;&nbsp;*int32* | y | position y of the chest
+*object array* | items |
+\|&nbsp;&nbsp;&nbsp;&nbsp;*int16* | stack | stack of the item
+\|&nbsp;&nbsp;&nbsp;&nbsp;*int32* | id | id of the item
+\|&nbsp;&nbsp;&nbsp;&nbsp;*uint8* | prefix | id of the prefix for the item (modifier)
 
-**signsData** — *object*
+*objects array*&nbsp;&nbsp;**signs**
 
 Type | Variable | Description
 --- | --- | ---
-*int16* | signsCount | number of signs in the world
-*object array* : | signs |
-\|&nbsp;&nbsp;&nbsp;&nbsp;*string* | text | text of the sign
-\|&nbsp;&nbsp;&nbsp;&nbsp;*object* : | position |
-\|&nbsp;&nbsp;&nbsp;&nbsp;\|&nbsp;&nbsp;&nbsp;&nbsp;*int32* | x | position x of the sign
-\|&nbsp;&nbsp;&nbsp;&nbsp;\|&nbsp;&nbsp;&nbsp;&nbsp;*int32* | y | position y of the sign
+*string* | text | text of the sign
+*object* | position |
+\|&nbsp;&nbsp;&nbsp;&nbsp;*int32* | x | position x of the sign
+\|&nbsp;&nbsp;&nbsp;&nbsp;*int32* | y | position y of the sign
 
-**NPCsData** — *object*
+*objects array*&nbsp;&nbsp;**NPCs**
 
 Type | Variable | Description
 --- | --- | ---
-*object array* : | NPCs |
-\|&nbsp;&nbsp;&nbsp;&nbsp;*int32* | id | id of an npc
-\|&nbsp;&nbsp;&nbsp;&nbsp;*string* | npc | type of an npc
-\|&nbsp;&nbsp;&nbsp;&nbsp;*string* | name | name of an npc
-\|&nbsp;&nbsp;&nbsp;&nbsp;*bool* | homeless | is homeless
-\|&nbsp;&nbsp;&nbsp;&nbsp;*object* : | position |
-\|&nbsp;&nbsp;&nbsp;&nbsp;\|&nbsp;&nbsp;&nbsp;&nbsp;*float* | x | position x of an npc
-\|&nbsp;&nbsp;&nbsp;&nbsp;\|&nbsp;&nbsp;&nbsp;&nbsp;*float* | y | position y of an npc
-\|&nbsp;&nbsp;&nbsp;&nbsp;*object* : | homePosition |
-\|&nbsp;&nbsp;&nbsp;&nbsp;\|&nbsp;&nbsp;&nbsp;&nbsp;*int32* | x | position x of npc's home
-\|&nbsp;&nbsp;&nbsp;&nbsp;\|&nbsp;&nbsp;&nbsp;&nbsp;*int32* | y | position y of npc's home
-*object array* : | pillars |
-\|&nbsp;&nbsp;&nbsp;&nbsp;*int32* | id | id of a pillar
-\|&nbsp;&nbsp;&nbsp;&nbsp;*object* : | position |
-\|&nbsp;&nbsp;&nbsp;&nbsp;\|&nbsp;&nbsp;&nbsp;&nbsp;*float* | x | position x of a pillar
-\|&nbsp;&nbsp;&nbsp;&nbsp;\|&nbsp;&nbsp;&nbsp;&nbsp;*float* | y | position y of a pillar
+*int32* | id | id
+*bool* | townNPC | is townNPC
+*bool* | pillar | is pillar
+*string* | name | name<br>only townNPCs
+*bool* | homeless | is homeless<br>only townNPCs
+*object* | position |
+\|&nbsp;&nbsp;&nbsp;&nbsp;*float* | x | position x of an npc
+\|&nbsp;&nbsp;&nbsp;&nbsp;*float* | y | position y of an npc
+*object* | homePosition | only townNPCs
+\|&nbsp;&nbsp;&nbsp;&nbsp;*int32* | x | position x of npc's home
+\|&nbsp;&nbsp;&nbsp;&nbsp;*int32* | y | position y of npc's home
 
-**tileEntities** — *object*
+*objects array*&nbsp;&nbsp;**tileEntities**
 
 Type | Variable | Description
 --- | --- | ---
-*int32* | tileEntitiesCount | number of tile entities in the world
-*object array* : | tileEntities |
-\|&nbsp;&nbsp;&nbsp;&nbsp;*int32* | id | ID of the tile entity
-\|&nbsp;&nbsp;&nbsp;&nbsp;*object* : | position |
-\|&nbsp;&nbsp;&nbsp;&nbsp;\|&nbsp;&nbsp;&nbsp;&nbsp;*int16* | x | position x of the tile entity
-\|&nbsp;&nbsp;&nbsp;&nbsp;\|&nbsp;&nbsp;&nbsp;&nbsp;*int16* | y | position y of the tile entity
-\|&nbsp;&nbsp;&nbsp;&nbsp;*object* : | targetDummy |
-\|&nbsp;&nbsp;&nbsp;&nbsp;\|&nbsp;&nbsp;&nbsp;&nbsp;*int16* | npc | ?
-\|&nbsp;&nbsp;&nbsp;&nbsp;*object* : | itemFrame |
-\|&nbsp;&nbsp;&nbsp;&nbsp;\|&nbsp;&nbsp;&nbsp;&nbsp;*int16* | itemId | ID of the framed item
-\|&nbsp;&nbsp;&nbsp;&nbsp;\|&nbsp;&nbsp;&nbsp;&nbsp;*int8* | prefix | prefix of the framed item (modifier)
-\|&nbsp;&nbsp;&nbsp;&nbsp;\|&nbsp;&nbsp;&nbsp;&nbsp;*int16* | stack | stack of the framed item
-\|&nbsp;&nbsp;&nbsp;&nbsp;*object* : | logicSensor |
-\|&nbsp;&nbsp;&nbsp;&nbsp;\|&nbsp;&nbsp;&nbsp;&nbsp;*int8* | logicCheck | type of the logic check (probably)
-\|&nbsp;&nbsp;&nbsp;&nbsp;\|&nbsp;&nbsp;&nbsp;&nbsp;*bool* | on | is on
+*uint8* | type | tile entity type
+*int32* | id | tile entity ID
+*object* | position |
+\|&nbsp;&nbsp;&nbsp;&nbsp;*int16* | x | position x of the tile entity
+\|&nbsp;&nbsp;&nbsp;&nbsp;*int16* | y | position y of the tile entity
+*object* | targetDummy |
+\|&nbsp;&nbsp;&nbsp;&nbsp;*int16* | npc | ?
+*object* | itemFrame |
+\|&nbsp;&nbsp;&nbsp;&nbsp;*int16* | itemId | ID of the framed item
+\|&nbsp;&nbsp;&nbsp;&nbsp;*uint8* | prefix | prefix of the framed item (modifier)
+\|&nbsp;&nbsp;&nbsp;&nbsp;*int16* | stack | stack of the framed item
+*object* | logicSensor |
+\|&nbsp;&nbsp;&nbsp;&nbsp;*uint8* | logicCheck | type of the logic check (probably)
+\|&nbsp;&nbsp;&nbsp;&nbsp;*bool* | on | is on
+*object* | displayDoll | only 1.4
+\|&nbsp;&nbsp;&nbsp;&nbsp;*objects array* | items | size = 8
+\|&nbsp;&nbsp;&nbsp;&nbsp;\|&nbsp;&nbsp;&nbsp;&nbsp;*int16* | itemId | item ID
+\|&nbsp;&nbsp;&nbsp;&nbsp;\|&nbsp;&nbsp;&nbsp;&nbsp;*uint8* | prefix |item modifier
+\|&nbsp;&nbsp;&nbsp;&nbsp;\|&nbsp;&nbsp;&nbsp;&nbsp;*int16* | stack | items stack
+\|&nbsp;&nbsp;&nbsp;&nbsp;*objects array* | dyes | size = 8
+\|&nbsp;&nbsp;&nbsp;&nbsp;\|&nbsp;&nbsp;&nbsp;&nbsp;*int16* | itemId | dye ID
+\|&nbsp;&nbsp;&nbsp;&nbsp;\|&nbsp;&nbsp;&nbsp;&nbsp;*uint8* | prefix |dye modifier
+\|&nbsp;&nbsp;&nbsp;&nbsp;\|&nbsp;&nbsp;&nbsp;&nbsp;*int16* | stack | dye stack
+*object* | weaponRack | only 1.4
+\|&nbsp;&nbsp;&nbsp;&nbsp;*int16* | itemId | item ID
+\|&nbsp;&nbsp;&nbsp;&nbsp;*uint8* | prefix | item modifier
+\|&nbsp;&nbsp;&nbsp;&nbsp;*int16* | stack | item stack
+*object* | hatRack | only 1.4
+\|&nbsp;&nbsp;&nbsp;&nbsp;*objects array* | items | size = 2
+\|&nbsp;&nbsp;&nbsp;&nbsp;\|&nbsp;&nbsp;&nbsp;&nbsp;*int16* | itemId | item ID
+\|&nbsp;&nbsp;&nbsp;&nbsp;\|&nbsp;&nbsp;&nbsp;&nbsp;*uint8* | prefix |item modifier
+\|&nbsp;&nbsp;&nbsp;&nbsp;\|&nbsp;&nbsp;&nbsp;&nbsp;*int16* | stack | items stack
+\|&nbsp;&nbsp;&nbsp;&nbsp;*objects array* | dyes | size = 2
+\|&nbsp;&nbsp;&nbsp;&nbsp;\|&nbsp;&nbsp;&nbsp;&nbsp;*int16* | itemId | dye ID
+\|&nbsp;&nbsp;&nbsp;&nbsp;\|&nbsp;&nbsp;&nbsp;&nbsp;*uint8* | prefix |dye modifier
+\|&nbsp;&nbsp;&nbsp;&nbsp;\|&nbsp;&nbsp;&nbsp;&nbsp;*int16* | stack | dye stack
+*object* | foodPlatter | only 1.4
+\|&nbsp;&nbsp;&nbsp;&nbsp;*int16* | itemId | item ID
+\|&nbsp;&nbsp;&nbsp;&nbsp;*uint8* | prefix | item modifier
+\|&nbsp;&nbsp;&nbsp;&nbsp;*int16* | stack | item stack
+*bool* | teleportationPylon | is pylon<br>type is determined by its position in the world<br>only 1.4
 
-**pressurePlates** — *object*
+*objects array*&nbsp;&nbsp;**weightedPressurePlates**
 
 Type | Variable | Description
 --- | --- | ---
-*int32* | pressurePlatesCount | number of pressurePlates in the world
-*object array* : | pressurePlates |
-\|&nbsp;&nbsp;&nbsp;&nbsp;*object* : | position |
-\|&nbsp;&nbsp;&nbsp;&nbsp;\|&nbsp;&nbsp;&nbsp;&nbsp;*int32* | x | position x of the pressurePlate
-\|&nbsp;&nbsp;&nbsp;&nbsp;\|&nbsp;&nbsp;&nbsp;&nbsp;*int32* | y | position y of the pressurePlate
+*object* : | position |
+\|&nbsp;&nbsp;&nbsp;&nbsp;*int32* | x | position x of the pressurePlate
+\|&nbsp;&nbsp;&nbsp;&nbsp;*int32* | y | position y of the pressurePlate
 
-**townManager** — *object*
+*objects array*&nbsp;&nbsp;**rooms**
 
 Type | Variable | Description
 --- | --- | ---
-*int32* | roomsCount | number of rooms in the world
-*object array* : | rooms |
-\|&nbsp;&nbsp;&nbsp;&nbsp;*int32* | npcId | ID of an NPC
-\|&nbsp;&nbsp;&nbsp;&nbsp;*object* : | position |
-\|&nbsp;&nbsp;&nbsp;&nbsp;\|&nbsp;&nbsp;&nbsp;&nbsp;*int32* | x | position x of the room
-\|&nbsp;&nbsp;&nbsp;&nbsp;\|&nbsp;&nbsp;&nbsp;&nbsp;*int32* | y | position y of the room
+*int32* | npcId | ID of the NPC that occupies the room
+*object* : | position |
+\|&nbsp;&nbsp;&nbsp;&nbsp;*int32* | x | position x of the room
+\|&nbsp;&nbsp;&nbsp;&nbsp;*int32* | y | position y of the room
 
-**footer** — *object*
+*object*&nbsp;&nbsp;**bestiary**<br>— only 1.4
+
+TODO, im lazy
+
+*object*&nbsp;&nbsp;**creativePowers**<br>— only 1.4
+
+TODO, im lazy
+
+*object*&nbsp;&nbsp;**footer**
 
 Type | Variable | Description
 --- | --- | ---
