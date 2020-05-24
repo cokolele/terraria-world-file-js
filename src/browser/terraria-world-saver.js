@@ -164,7 +164,7 @@ export default class terrariaWorldSaver extends terrariaFileSaver {
         this.saveInt16( data.numClouds );
         this.saveFloat32( data.windSpeed );
         this.saveInt32( data.anglerWhoFinishedToday.length );
-        for (let i = 0; i < data.anglerWhoFinishedToday.length; --i)
+        for (let i = 0; i < data.anglerWhoFinishedToday.length; i++)
             this.saveString( data.anglerWhoFinishedToday.shift() );
         this.saveBoolean( data.savedAngler );
         this.saveInt32( data.anglerQuest );
