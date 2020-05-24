@@ -72,7 +72,9 @@ module.exports = class terrariaWorldParser extends terrariaFileParser {
         let data = {};
 
         try {
-            this.world = this.parseNeededData();
+            this.world = this.parseNecessaryData();
+            if (this.options.sections.includes("necessary"))
+                data.necessary = this.world;
 
             if (this.world.version < 225) {
                 delete sections.bestiary;
@@ -100,7 +102,7 @@ module.exports = class terrariaWorldParser extends terrariaFileParser {
         return data;
     }
 
-    parseNeededData() {
+    parseNecessaryData() {
         this.offset = 0;
 
         const version = this.readInt32();
