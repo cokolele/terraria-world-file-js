@@ -368,7 +368,7 @@ export default class terrariaWorldSaver extends terrariaFileSaver {
 
                     if (this.options.world.fileFormatHeader.importants[tile.blockId]) {
                         this.saveInt16( tile.frameX );
-                        tile.blockId != 144 && this.saveInt16( tile.frameY );
+                        this.saveInt16( tile.frameY );
                     }
 
                     if (flags3 & 8)

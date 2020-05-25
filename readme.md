@@ -21,9 +21,7 @@ import terrariaWorldSaver from "/terraria-world-saver.js";
 
 let world = await new terrariaWorldParser().loadFile(mapFile || "/map.wld");
 
-world = world.parse({
-    sections: ["tiles"]
-});
+world = world.parse();
 
 const name = world.header.name;
 const newName = "Canvas";
