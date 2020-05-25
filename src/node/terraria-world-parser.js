@@ -400,7 +400,9 @@ module.exports = class terrariaWorldParser extends terrariaFileParser {
             // important tile (animated, big sprite, more variants...)
             if (this.world.importants[tile.blockId]) {
                 tile.frameX = this.readInt16();
-                tile.frameY = tile.blockId == 144 ? 0 : this.readInt16();
+                tile.frameY = this.readInt16();
+                if (tile.blockId == 144)
+                    tile.frameY = 0;
             }
 
             // painted block
