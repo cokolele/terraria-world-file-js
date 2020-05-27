@@ -66,12 +66,12 @@ module.exports = class terrariaFileParser {
     readString(length) {
         if (length === undefined) { //7 bit encoded int32
             length = 0;
-            let shift = 0, offset = 0, byte;
+            let shift = 0, byte;
             do {
                 byte = this.readUInt8();
-                length |= (byte & 0x7F) << shift;
+                length |= (byte & 127) << shift;
                 shift += 7;
-            } while (byte >= 0x80);
+            } while (byte & 128);
         }
 
         return this.readBytes(length).toString("utf8");

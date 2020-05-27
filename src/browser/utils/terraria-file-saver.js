@@ -73,10 +73,21 @@ export default class terrariaFileSave {
     }
 
     saveString(string, saveLength = true) {
-        const stringBytes = stringToUtf8ByteArray(string);
+        const stringBytes = new TextEncoder().encode(string);
 
-        if (saveLength)
-            this.saveUInt8(stringBytes.length);
+        if (saveLength) {
+            let length = stringBytes.length, length7BitBytes = [], byte;
+
+            do {
+                byte = length & 127;
+                length >>= 7;
+                if (length)
+                    byte |= 128;
+                length7BitBytes.push(byte);
+            } while (length)
+
+            this.saveBytes(length7BitBytes);
+        }
 
         this.saveBytes(stringBytes);
     }

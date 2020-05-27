@@ -1,5 +1,3 @@
-import { utf8ByteArrayToString } from "./string.js";
-
 export default class terrariaFileParse {
     async loadFile(file) {
         let buffer = await new Promise((resolve, reject) => {
@@ -71,15 +69,15 @@ export default class terrariaFileParse {
     readString(length) {
         if (length === undefined) { //7 bit encoded int32
             length = 0;
-            let shift = 0, offset = 0, byte;
+            let shift = 0, byte;
             do {
                 byte = this.readUInt8();
-                length |= (byte & 0x7F) << shift;
+                length |= (byte & 127) << shift;
                 shift += 7;
-            } while (byte >= 0x80);
+            } while (byte & 128);
         }
 
-        return utf8ByteArrayToString( this.readBytes(length) );
+        return new TextDecoder().decode(this.readBytes(length));
     }
 
     skipBytes(count) {

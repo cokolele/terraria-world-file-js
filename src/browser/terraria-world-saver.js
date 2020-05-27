@@ -687,10 +687,8 @@ export default class terrariaWorldSaver extends terrariaFileSaver {
     }
 
     saveFooter() {
-        const data = this.options.world.footer;
-
-        this.saveBoolean( data.signoff1 );
-        this.saveString( data.signoff2 );
-        this.saveInt32( data.signoff3 );
+        this.saveBoolean( true );
+        this.saveString( this.options.world.header.mapName );
+        this.saveInt32( this.options.world.header.worldId );
     }
 }
