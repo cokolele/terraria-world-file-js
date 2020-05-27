@@ -26,6 +26,16 @@ module.exports = class terrariaWorldParser extends terrariaFileParser {
         return this;
     }
 
+    loadBuffer(buffer) {
+        try {
+            super.loadBuffer(buffer);
+        } catch(e) {
+            throw new TerrariaWorldParserError("Problem with loading the buffer", e);
+        }
+
+        return this;
+    }
+
     parse(options) {
         const sections = {
             fileFormatHeader:       this.parseFileFormatHeader,
@@ -92,7 +102,7 @@ module.exports = class terrariaWorldParser extends terrariaFileParser {
                         if (this.options.ignorePointers)
                             this.offset = this.world.pointers[sectionIndex + 1];
                         else
-                            throw new Error("Bad " + sectionName + " section end offset.");
+                            throw new Error("Bad " + sectionName + " section end offset");
                 }
             }
         } catch(e) {
@@ -103,29 +113,35 @@ module.exports = class terrariaWorldParser extends terrariaFileParser {
     }
 
     parseNecessaryData() {
+        let version, magicNumber, fileType, pointers, importants, height, width;
+
         this.offset = 0;
 
-        const version = this.readInt32();
-        const magicNumber = this.readString(7);
-        const fileType = this.readUInt8();
-        this.skipBytes(12);
-        const pointers = [0];
-        for (let i = this.readInt16(); i > 0; i--)
-            pointers.push(this.readInt32());
-        const importants = this.parseBitsByte(this.readInt16());
-        this.readString();
-        this.readString();
-        this.skipBytes(44);
-        const height = this.readInt32();
-        const width = this.readInt32();
+        try {
+            version = this.readInt32();
+            magicNumber = this.readString(7);
+            fileType = this.readUInt8();
+            this.skipBytes(12);
+            pointers = [0];
+            for (let i = this.readInt16(); i > 0; i--)
+                pointers.push(this.readInt32());
+            importants = this.parseBitsByte(this.readInt16());
+            this.readString();
+            this.readString();
+            this.skipBytes(44);
+            height = this.readInt32();
+            width = this.readInt32();
+        } catch(e) {
+            throw new Error("Invalid file type");
+        }
 
         this.offset = 0;
 
         if (magicNumber != "relogic" || fileType != 2)
-            throw new Error("Invalid file type.");
+            throw new Error("Invalid file type");
 
         if (version < 194)
-            throw new Error("Map version is older than 1.3.5.3 and cannot be parsed.");
+            throw new Error("Map version is older than 1.3.5.3 and cannot be parsed");
 
         return {
             version,

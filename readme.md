@@ -42,6 +42,7 @@ let newWorldFile = new terrariaWorldSaver().save({
 <br>
 <br>*saver class constructor*&nbsp;&nbsp;**new terrariaWorldSaver()**
 <br>
+<br>*node parser class method*&nbsp;&nbsp;**loadBuffer(*buffer* buffer)**
 <br>*node parser class method*&nbsp;&nbsp;**loadFileSync(*string* path)**
 <br>*node parser class method*&nbsp;&nbsp;**async loadFile(*string* path)**
 <br>*browser parser class method*&nbsp;&nbsp;**async loadFile(*File* file)**

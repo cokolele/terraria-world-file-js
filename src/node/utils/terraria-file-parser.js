@@ -11,6 +11,11 @@ module.exports = class terrariaFileParser {
         this.offset = 0;
     }
 
+    loadBuffer(buffer) {
+        this.buffer = buffer;
+        this.offset = 0;
+    }
+
     readUInt8() {
         this.offset += 1;
         return this.buffer[this.offset - 1];
