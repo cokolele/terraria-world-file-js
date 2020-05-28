@@ -33,6 +33,7 @@ export default class terrariaWorldParser extends terrariaFileParser {
         }
 
         this.options = {
+            ...this.options,
             sections: Object.keys(sections),
             progressCallback: undefined,
             ignorePointers: false,
