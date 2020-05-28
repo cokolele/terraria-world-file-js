@@ -1,4 +1,3 @@
-import { stringToUtf8ByteArray } from "./string.js";
 import "./polyfills/ArrayBuffer-transfer.js";
 
 export default class terrariaFileSave {
