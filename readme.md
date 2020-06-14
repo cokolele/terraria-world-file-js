@@ -38,18 +38,16 @@ let newWorldFile = new terrariaWorldSaver().save({
 
 ## Documentation:
 
-*parser class constructor*&nbsp;&nbsp;**new terrariaWorldParser()**
+*constructor*&nbsp;&nbsp;**new terrariaWorldParser()**
 <br>
-<br>*saver class constructor*&nbsp;&nbsp;**new terrariaWorldSaver()**
-<br>
-<br>*node parser class method*&nbsp;&nbsp;**loadBuffer(*buffer* buffer)**
-<br>*node parser class method*&nbsp;&nbsp;**loadFileSync(*string* path)**
-<br>*node parser class method*&nbsp;&nbsp;**async loadFile(*string* path)**
-<br>*browser parser class method*&nbsp;&nbsp;**async loadFile(*File* file)**
+<br>*node method*&nbsp;&nbsp;**loadBuffer(*buffer* buffer)**
+<br>*node method*&nbsp;&nbsp;**loadFileSync(*string* path)**
+<br>*node method*&nbsp;&nbsp;**async loadFile(*string* path)**
+<br>*browser method*&nbsp;&nbsp;**async loadFile(*File* file)**
 <br>— Loads file buffer
 <br>— Returns instance
 <br>
-<br>*parser class method*&nbsp;&nbsp;**parse([*object* options])**
+<br>*method*&nbsp;&nbsp;**parse([*object* options])**
 <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*string array*&nbsp;&nbsp;**options.sections**
 <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;— Sections to parse
 <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;— Default: ["fileFormatHeader", "header", "tiles", "chests", "signs", "NPCs", "tileEntities",
@@ -66,8 +64,10 @@ let newWorldFile = new terrariaWorldSaver().save({
 <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;— Called when loading progress changes
 <br>— Parses file
 <br>— Returns buffer
+##
+<br>*constructor*&nbsp;&nbsp;**new terrariaWorldSaver()**
 <br>
-<br>*node saver class method*&nbsp;&nbsp;**save(*object* options)**
+<br>*browser method*&nbsp;&nbsp;**save(*object* options)**
 <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*object*&nbsp;&nbsp;**options.world**
 <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;— Same object structure as parser return object
 <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;— Required
@@ -76,9 +76,9 @@ let newWorldFile = new terrariaWorldSaver().save({
 <br>— Saves object
 <br>— Returns buffer
 <br>
-<br>TODO: *node saver class method*&nbsp;&nbsp;**save(*object* options)**
-<br>— If you are reading this and want to help me, you can create a pull request :)
-<br>
+<br>TODO: *node method*&nbsp;&nbsp;**save(*object* options)**
+<br>— If you are reading this and want to help, you can create a pull request :)
+##
 <br>*Error*&nbsp;&nbsp;**TerrariaWorldParserError**
 <br>| or
 <br>*Error*&nbsp;&nbsp;**TerrariaWorldSaverError**
@@ -372,18 +372,44 @@ Type | Variable | Description
 
 Type | Variable | Description
 --- | --- | ---
-*int32* | npcId | ID of the NPC that occupies the room
+*int32* | NPCId |
 *object* : | position |
 \|&nbsp;&nbsp;&nbsp;&nbsp;*int32* | x | position x of the room
 \|&nbsp;&nbsp;&nbsp;&nbsp;*int32* | y | position y of the room
 
 *object*&nbsp;&nbsp;**bestiary**<br>— only 1.4
 
-TODO, im lazy
+Type | Variable | Description
+--- | --- | ---
+*object* : | NPCKills |
+\|&nbsp;&nbsp;&nbsp;&nbsp;*string* | [key] | name of the NPC
+\|&nbsp;&nbsp;&nbsp;&nbsp;*int32* | [value] | given NPC kill count
+*strings array* : | NPCSights | name of NPCs that player encountered
+*strings array* : | NPCChats | name of NPCs that player chatted with
 
-*object*&nbsp;&nbsp;**creativePowers**<br>— only 1.4
+*objects array*&nbsp;&nbsp;**creativePowers**<br>— only 1.4
 
-TODO, im lazy
+Type | Variable | Description
+--- | --- | ---
+*int16* | powerId | id of the power (order of the CreativePowerManager.Initialize in source code)<br>each object has only one power listed below
+*object* : | freezeTime | id 0
+\|&nbsp;&nbsp;&nbsp;&nbsp;*bool* | enabled | is enabled
+*object* : | godMode | id 5
+\|&nbsp;&nbsp;&nbsp;&nbsp;*bool* | enabled | is enabled
+*object* : | modifyTimeRate | id 8
+\|&nbsp;&nbsp;&nbsp;&nbsp;*float32* | sliderValue | value of the slider
+*object* : | freezeRainPower | id 9
+\|&nbsp;&nbsp;&nbsp;&nbsp;*bool* | enabled | is enabled
+*object* : | freezeWindDirectionAndStrength | id 10
+\|&nbsp;&nbsp;&nbsp;&nbsp;*bool* | enabled | is enabled
+*object* : | farPlacementRangePower | id 11
+\|&nbsp;&nbsp;&nbsp;&nbsp;*bool* | enabled | is enabled
+*object* : | difficultySliderPower | id 12
+\|&nbsp;&nbsp;&nbsp;&nbsp;*float32* | sliderValue | value of the slider
+*object* : | stopBiomeSpreadPower | id 13
+\|&nbsp;&nbsp;&nbsp;&nbsp;*bool* | enabled | is enabled
+*object* : | spawnRateSliderPerPlayerPower | id 14
+\|&nbsp;&nbsp;&nbsp;&nbsp;*float32* | sliderValue | value of the slider
 
 *object*&nbsp;&nbsp;**footer**
 

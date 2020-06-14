@@ -27,49 +27,49 @@ export default class terrariaFileParse {
 
     readUInt8() {
         this.offset += 1;
-        if (this.offset > this.buffer.byteLength && this.options.ignoreBounds)
+        if (this.options.ignoreBounds && this.offset > this.buffer.byteLength)
             return 0;
         return this.buffer.getUint8( this.offset - 1, true );
     }
 
     readInt16() {
         this.offset += 2;
-        if (this.offset > this.buffer.byteLength && this.options.ignoreBounds)
+        if (this.options.ignoreBounds && this.offset > this.buffer.byteLength)
             return 0;
         return this.buffer.getInt16( this.offset - 2, true );
     }
 
     readUInt16() {
         this.offset += 2;
-        if (this.offset > this.buffer.byteLength && this.options.ignoreBounds)
+        if (this.options.ignoreBounds && this.offset > this.buffer.byteLength)
             return 0;
         return this.buffer.getUint16( this.offset - 2, true );
     }
 
     readInt32() {
         this.offset += 4;
-        if (this.offset > this.buffer.byteLength && this.options.ignoreBounds)
+        if (this.options.ignoreBounds && this.offset > this.buffer.byteLength)
             return 0;
         return this.buffer.getInt32( this.offset - 4, true );
     }
 
     readUInt32() {
         this.offset += 4;
-        if (this.offset > this.buffer.byteLength && this.options.ignoreBounds)
+        if (this.options.ignoreBounds && this.offset > this.buffer.byteLength)
             return 0;
         return this.buffer.getUint32( this.offset - 4, true );
     }
 
     readFloat32() {
         this.offset += 4;
-        if (this.offset > this.buffer.byteLength && this.options.ignoreBounds)
+        if (this.options.ignoreBounds && this.offset > this.buffer.byteLength)
             return 0;
         return this.buffer.getFloat32( this.offset - 4, true );
     }
 
     readFloat64() {
         this.offset += 8;
-        if (this.offset > this.buffer.byteLength && this.options.ignoreBounds)
+        if (this.options.ignoreBounds && this.offset > this.buffer.byteLength)
             return 0;
         return this.buffer.getFloat64( this.offset - 8, true );
     }

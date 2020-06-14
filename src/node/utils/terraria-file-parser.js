@@ -22,49 +22,49 @@ module.exports = class terrariaFileParser {
 
     readUInt8() {
         this.offset += 1;
-        if (this.offset > this.buffer.byteLength && this.options.ignoreBounds)
+        if (this.options.ignoreBounds && this.offset > this.buffer.byteLength)
             return 0;
         return this.buffer[this.offset - 1];
     }
 
     readInt16() {
         this.offset += 2;
-        if (this.offset > this.buffer.byteLength && this.options.ignoreBounds)
+        if (this.options.ignoreBounds && this.offset > this.buffer.byteLength)
             return 0;
         return this.buffer.readInt16LE( this.offset - 2 );
     }
 
     readUInt16() {
         this.offset += 2;
-        if (this.offset > this.buffer.byteLength && this.options.ignoreBounds)
+        if (this.options.ignoreBounds && this.offset > this.buffer.byteLength)
             return 0;
         return this.buffer.readUInt16LE( this.offset - 2 );
     }
 
     readInt32() {
         this.offset += 4;
-        if (this.offset > this.buffer.byteLength && this.options.ignoreBounds)
+        if (this.options.ignoreBounds && this.offset > this.buffer.byteLength)
             return 0;
         return this.buffer.readInt32LE( this.offset - 4 );
     }
 
     readUInt32() {
         this.offset += 4;
-        if (this.offset > this.buffer.byteLength && this.options.ignoreBounds)
+        if (this.options.ignoreBounds && this.offset > this.buffer.byteLength)
             return 0;
         return this.buffer.readUInt32LE( this.offset - 4 );
     }
 
     readFloat32() {
         this.offset += 4;
-        if (this.offset > this.buffer.byteLength && this.options.ignoreBounds)
+        if (this.options.ignoreBounds && this.offset > this.buffer.byteLength)
             return 0;
         return this.buffer.readFloatLE( this.offset - 4 );
     }
 
     readFloat64() {
         this.offset += 8;
-        if (this.offset > this.buffer.byteLength && this.options.ignoreBounds)
+        if (this.options.ignoreBounds && this.offset > this.buffer.byteLength)
             return 0;
         return this.buffer.readDoubleLE( this.offset - 8 );
     }

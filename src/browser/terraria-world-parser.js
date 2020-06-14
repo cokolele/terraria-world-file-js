@@ -79,11 +79,8 @@ export default class terrariaWorldParser extends terrariaFileParser {
                     this.offset = this.world.pointers[sectionIndex];
                     data[sectionName] = parseFunction.call(this);
 
-                    if (this.offset != this.world.pointers[sectionIndex + 1] && this.offset != this.buffer.byteLength)
-                        if (this.options.ignorePointers)
-                            this.offset = this.world.pointers[sectionIndex + 1];
-                        else
-                            throw new Error("Bad " + sectionName + " section end offset");
+                    if (!this.options.ignorePointers && this.offset != this.world.pointers[sectionIndex + 1] && this.offset != this.buffer.byteLength)
+                        throw new Error("Bad " + sectionName + " section end offset");
                 }
             }
         } catch(e) {
@@ -718,7 +715,7 @@ export default class terrariaWorldParser extends terrariaFileParser {
         const roomsCount = this.readInt32(); //use world.townManager.length
         for (let i = 0; i < roomsCount; i++)
             data[i] = {
-                npcId: this.readInt32(),
+                NPCId: this.readInt32(),
                 position: {
                     x: this.readInt32(),
                     y: this.readInt32()
@@ -732,18 +729,15 @@ export default class terrariaWorldParser extends terrariaFileParser {
         let data = {};
 
         data.NPCKills = {};
-        data.NPCKillsCount = this.readInt32();
-        for (let i = 0; i < data.NPCKillsCount; i++)
+        for (let i = this.readInt32(); i > 0; --i)
             data.NPCKills[ this.readString() ] = this.readInt32();
 
         data.NPCSights = [];
-        data.NPCSightsCount = this.readInt32();
-        for (let i = 0; i < data.NPCSightsCount; i++)
+        for (let i = this.readInt32(); i > 0; --i)
             data.NPCSights.push(this.readString());
 
         data.NPCChats = [];
-        data.NPCChatsCount = this.readInt32();
-        for (let i = 0; i < data.NPCChatsCount; i++)
+        for (let i = this.readInt32(); i > 0; --i)
             data.NPCChats.push(this.readString());
 
         return data;
@@ -758,56 +752,47 @@ export default class terrariaWorldParser extends terrariaFileParser {
             };
 
             switch (creativePower.powerId) {
-                //freezeTime
                 case 0:
                     creativePower.freezeTime = {
                         enabled: this.readBoolean()
                     };
                     break;
-                //godmode
                 case 5:
-                    creativePower.godmode = {
+                    creativePower.godMode = {
                         enabled: this.readBoolean()
                     };
                     break;
-                //modifyTimeRate
                 case 8:
                     creativePower.modifyTimeRate = {
                         sliderValue: this.readFloat32()
                     };
                     break;
-                //freezeRainPower
                 case 9:
                     creativePower.freezeRainPower = {
                         enabled: this.readBoolean()
                     };
                     break;
-                //freezeWindDirectionAndStrength
                 case 10:
                     creativePower.freezeWindDirectionAndStrength = {
                         enabled: this.readBoolean()
                     };
                     break;
-                //farPlacementRangePower
                 case 11:
                     creativePower.farPlacementRangePower = {
                         enabled: this.readBoolean()
                     };
                     break;
-                //difficultySliderPower
                 case 12:
                     creativePower.difficultySliderPower = {
                         sliderValue: this.readFloat32()
                     };
                     break;
-                //stopBiomeSpreadPower
                 case 13:
                     creativePower.stopBiomeSpreadPower = {
                         enabled: this.readBoolean()
                     };
                     break;
-                //spawnRateSliderPerPlayerPower
-                case 13:
+                case 14:
                     creativePower.spawnRateSliderPerPlayerPower = {
                         sliderValue: this.readFloat32()
                     };
