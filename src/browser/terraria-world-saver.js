@@ -285,22 +285,22 @@ export default class terrariaWorldSaver extends terrariaFileSaver {
                         flags1 |= 64;
                 }
 
-                if (tile.blockId !== undefined) {
+                if (typeof tile.blockId == "number") {
                     flags1 |= 2;
 
                     if (tile.blockId > 255)
                         flags1 |= 32;
                 }
 
-                if (tile.wallId !== undefined) {
+                if (tile.wallId) {
                     flags1 |= 4;
 
                     if (tile.wallId > 255)
                         flags3 |= 64
                 }
 
-                if (tile.liquid) {
-                    switch(tile.liquid.type) {
+                if (tile.liquidType) {
+                    switch(tile.liquidType) {
                         case "water": flags1 |= (1 << 3); break;
                         case "lava": flags1 |= (2 << 3); break;
                         case "honey": flags1 |= (3 << 3); break;
@@ -317,35 +317,29 @@ export default class terrariaWorldSaver extends terrariaFileSaver {
                     }
                 }
 
-                if (tile.wiring) {
-                    if (tile.wiring.wires) {
-                        if (tile.wiring.wires.yellow)
-                            flags3 |= 32;
+                if (tile.redWire)
+                    flags2 |= 2;
 
-                        if (tile.wiring.wires.red)
-                            flags2 |= 2;
+                if (tile.blueWire)
+                    flags2 |= 4;
 
-                        if (tile.wiring.wires.blue)
-                            flags2 |= 4;
+                if (tile.greenWire)
+                    flags2 |= 8;
 
-                        if (tile.wiring.wires.green)
-                            flags2 |= 8;
-                    }
+                if (tile.yellowWire)
+                    flags3 |= 32;
 
-                    if (tile.wiring.actuated)
-                        flags3 |= 4;
+                if (tile.actuated)
+                    flags3 |= 4;
 
-                    if (tile.wiring.actuator)
-                        flags3 |= 2;
-                }
+                if (tile.actuator)
+                    flags3 |= 2;
 
-                if (tile.colors) {
-                    if (tile.colors.wall)
-                        flags3 |= 16;
+                if (tile.wallColor)
+                    flags3 |= 16;
 
-                    if (tile.colors.block)
-                        flags3 |= 8;
-                }
+                if (tile.blockColor)
+                    flags3 |= 8;
 
                 if (flags2 || flags3) {
                     flags1 |= 1;
@@ -372,18 +366,18 @@ export default class terrariaWorldSaver extends terrariaFileSaver {
                     }
 
                     if (flags3 & 8)
-                        this.saveUInt8( tile.colors.block );
+                        this.saveUInt8( tile.blockColor );
                 }
 
                 if (flags1 & 4) {
                     this.saveUInt8( tile.wallId & 255 );
 
                     if (flags3 & 16)
-                        this.saveUInt8( tile.colors.wall );
+                        this.saveUInt8( tile.wallColor );
                 }
 
-                if (tile.liquid)
-                    this.saveUInt8( tile.liquid.amount );
+                if (typeof tile.liquidAmount == "number")
+                    this.saveUInt8( tile.liquidAmount );
 
                 if (flags3 & 64)
                     this.saveUInt8(1);

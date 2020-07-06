@@ -400,10 +400,8 @@ export default class terrariaWorldParser extends terrariaFileParser {
             }
 
             // painted block
-            if (flags3 & 8) {
-                if (!tile.colors) tile.colors = {};
-                tile.colors.block = this.readUInt8();
-            }
+            if (flags3 & 8)
+                tile.blockColor = this.readUInt8();
         }
 
         // contains wall
@@ -411,36 +409,29 @@ export default class terrariaWorldParser extends terrariaFileParser {
             tile.wallId = this.readUInt8();
 
             // painted wall
-            if (flags3 & 16) {
-                if (!tile.colors) tile.colors = {};
-                tile.colors.wall = this.readUInt8();
-            }
+            if (flags3 & 16)
+                tile.wallColor = this.readUInt8();
         }
 
         // liquid informations
         const liquidType = (flags1 & 24) >> 3;
         if (liquidType != 0) {
-            if (!tile.liquid) tile.liquid = {};
-            tile.liquid.amount = this.readUInt8();
+            tile.liquidAmount = this.readUInt8();
             switch (liquidType) {
-                case 1: tile.liquid.type = "water"; break;
-                case 2: tile.liquid.type = "lava"; break;
-                case 3: tile.liquid.type = "honey"; break;
+                case 1: tile.liquidType = "water"; break;
+                case 2: tile.liquidType = "lava"; break;
+                case 3: tile.liquidType = "honey"; break;
             }
         }
 
         // flags2 has any other informations than flags3 presence
         if (flags2 > 1) {
-            if (!tile.wiring)
-                tile.wiring = {};
-            if (!tile.wiring.wires)
-                tile.wiring.wires = {};
             if (flags2 & 2)
-                tile.wiring.wires.red = true;
+                tile.redWire = true;
             if (flags2 & 4)
-                tile.wiring.wires.blue = true;
+                tile.blueWire = true;
             if (flags2 & 8)
-                tile.wiring.wires.green = true;
+                tile.greenWire = true;
 
             const slope = (flags2 & 112) >> 4;
             if (slope != 0)
@@ -455,17 +446,12 @@ export default class terrariaWorldParser extends terrariaFileParser {
 
         // flags3 has any informations
         if (flags3 > 0) {
-            if (!tile.wiring)
-                tile.wiring = {};
             if (flags3 & 2)
-                tile.wiring.actuator = true;
+                tile.actuator = true;
             if (flags3 & 4)
-                tile.wiring.actuated = true;
-            if (flags3 & 32) {
-                if (!tile.wiring.wires)
-                    tile.wiring.wires = {};
-                tile.wiring.wires.yellow = true;
-            }
+                tile.actuated = true;
+            if (flags3 & 32)
+                tile.yellowWire = true;
             if (flags3 & 64)
                 tile.wallId = (this.readUInt8() << 8) | tile.wallId; //adding another byte
         }

@@ -256,25 +256,21 @@ Type | Variable | Description
 
 Type | Variable | Description
 --- | --- | ---
-*byte / unint16* | blockId | tile id
+*uint8 / uint16* | blockId | tile id
+*uint8 / uint16* | wallId | wall id
 *int16* | frameX | frame x (tile frame important)
 *int16* | frameY | frame y (^)
-*uint8* | wallId | wall id
 *string* | slope | edited block (half, TR, TL, BR, BL)
-*object* | colors |
-\|&nbsp;&nbsp;&nbsp;&nbsp;*uint8* | block | painted block
-\|&nbsp;&nbsp;&nbsp;&nbsp;*uint8* | wall | painted wall
-*object* | liquid |
-\|&nbsp;&nbsp;&nbsp;&nbsp;*string* | type | liquid type (water, lava, honey)
-\|&nbsp;&nbsp;&nbsp;&nbsp;*uint8* | amount | amount
-*object* | wiring |
-\|&nbsp;&nbsp;&nbsp;&nbsp;*bool* | actuator | contains actuator
-\|&nbsp;&nbsp;&nbsp;&nbsp;*bool* | actuated | is actuated
-\|&nbsp;&nbsp;&nbsp;&nbsp;*object* | wires |
-\|&nbsp;&nbsp;&nbsp;&nbsp;\|&nbsp;&nbsp;&nbsp;&nbsp;*bool* | red | contains red wire
-\|&nbsp;&nbsp;&nbsp;&nbsp;\|&nbsp;&nbsp;&nbsp;&nbsp;*bool* | blue | contains blue wire
-\|&nbsp;&nbsp;&nbsp;&nbsp;\|&nbsp;&nbsp;&nbsp;&nbsp;*bool* | green | contains green wire
-\|&nbsp;&nbsp;&nbsp;&nbsp;\|&nbsp;&nbsp;&nbsp;&nbsp;*bool* | yellow | contains yellow wire
+*uint8* | blockColor | block paint
+*uint8* | wallColor | wall paint
+*string* | liquidType | liquid type (water, lava, honey)
+*uint8* | liquidAmount | liquid amount
+*bool* | actuator | contains actuator
+*bool* | actuated | is actuated
+*bool* | redWire | contains red wire
+*bool* | blueWire | contains blue wire
+*bool* | greenWire | contains green wire
+*bool* | yellowWire | contains yellow wire
 
 *objects array*&nbsp;&nbsp;**chests**
 
