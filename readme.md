@@ -267,10 +267,10 @@ Type | Variable | Description
 *uint8* | liquidAmount | liquid amount
 *bool* | actuator | contains actuator
 *bool* | actuated | is actuated
-*bool* | redWire | contains red wire
-*bool* | blueWire | contains blue wire
-*bool* | greenWire | contains green wire
-*bool* | yellowWire | contains yellow wire
+*bool* | wireRed | contains red wire
+*bool* | wireBlue | contains blue wire
+*bool* | wireGreen | contains green wire
+*bool* | wireYellow | contains yellow wire
 
 *objects array*&nbsp;&nbsp;**chests**
 

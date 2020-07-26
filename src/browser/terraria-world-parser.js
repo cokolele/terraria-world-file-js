@@ -427,11 +427,11 @@ export default class terrariaWorldParser extends terrariaFileParser {
         // flags2 has any other informations than flags3 presence
         if (flags2 > 1) {
             if (flags2 & 2)
-                tile.redWire = true;
+                tile.wireRed = true;
             if (flags2 & 4)
-                tile.blueWire = true;
+                tile.wireBlue = true;
             if (flags2 & 8)
-                tile.greenWire = true;
+                tile.wireGreen = true;
 
             const slope = (flags2 & 112) >> 4;
             if (slope != 0)
@@ -451,7 +451,7 @@ export default class terrariaWorldParser extends terrariaFileParser {
             if (flags3 & 4)
                 tile.actuated = true;
             if (flags3 & 32)
-                tile.yellowWire = true;
+                tile.wireYellow = true;
             if (flags3 & 64)
                 tile.wallId = (this.readUInt8() << 8) | tile.wallId; //adding another byte
         }

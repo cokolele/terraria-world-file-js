@@ -317,16 +317,16 @@ export default class terrariaWorldSaver extends terrariaFileSaver {
                     }
                 }
 
-                if (tile.redWire)
+                if (tile.wireRed)
                     flags2 |= 2;
 
-                if (tile.blueWire)
+                if (tile.wireBlue)
                     flags2 |= 4;
 
-                if (tile.greenWire)
+                if (tile.wireGreen)
                     flags2 |= 8;
 
-                if (tile.yellowWire)
+                if (tile.wireYellow)
                     flags3 |= 32;
 
                 if (tile.actuated)
