@@ -603,7 +603,7 @@ export default class terrariaWorldSaver extends terrariaFileSaver {
         this.saveInt32( data.length );
 
         data.forEach(room => {
-            this.saveInt32( room.npcId );
+            this.saveInt32( room.NPCId );
             this.saveInt32( room.position.x );
             this.saveInt32( room.position.y );
         });
@@ -614,20 +614,21 @@ export default class terrariaWorldSaver extends terrariaFileSaver {
     saveBestiary() {
         const data = this.options.world.bestiary;
 
-        this.saveInt32( data.NPCKillsCount );
         data.NPCKills = Object.entries(data.NPCKills);
-        for (let i = 0; i < data.NPCKillsCount; i++) {
+
+        this.saveInt32( data.NPCKills.length );
+        for (let i = 0; i < data.NPCKills.length; i++) {
             this.saveString( data.NPCKills[i][0] );
             this.saveInt32( data.NPCKills[i][1] );
         }
 
-        this.saveInt32( data.NPCSightsCount );
-        for (let i = 0; i < data.NPCSightsCount; i++)
-            this.saveString( data.NPCSights.shift() );
+        this.saveInt32( data.NPCSights.length );
+        for (let i = 0; i < data.NPCSights.length; i++)
+            this.saveString( data.NPCSights[i] );
 
-        this.saveInt32( data.NPCChatsCount );
-        for (let i = 0; i < data.NPCChatsCount; i++)
-            this.saveString( data.NPCChats.shift() );
+        this.saveInt32( data.NPCChats.length );
+        for (let i = 0; i < data.NPCChats.length; i++)
+            this.saveString( data.NPCChats[i] );
 
         return this.offset;
     }
