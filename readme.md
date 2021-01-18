@@ -380,19 +380,19 @@ Type | Variable | Description
 *object* : | NPCKills |
 \|&nbsp;&nbsp;&nbsp;&nbsp;*string* | [key] | name of the NPC
 \|&nbsp;&nbsp;&nbsp;&nbsp;*int32* | [value] | given NPC kill count
-*strings array* : | NPCSights | name of NPCs that player encountered
-*strings array* : | NPCChats | name of NPCs that player chatted with
+*strings array* | NPCSights | names of NPCs that player encountered
+*strings array* | NPCChats | names of NPCs that player chatted with
 
 *object*&nbsp;&nbsp;**creativePowers**<br>— only 1.4
 
 Type | Variable | Description
 --- | --- | ---
-*bool* : | freezeTime | Freeze Time enabled
-*float32* : | modifyTimeRate | Time Speed Slider value
-*bool* : | freezeRainPower | Rain Change freeze enabled
-*bool* : | freezeWindDirectionAndStrength | Wind Change freeze enabled
-*float32* : | difficultySliderPower | Enemy Difficulty Slider value
-*bool* : | stopBiomeSpreadPower | Infection Spread freeze enabled
+*bool* | freezeTime | Freeze Time enabled
+*float32* | modifyTimeRate | Time Speed Slider value
+*bool* | freezeRainPower | Rain Change freeze enabled
+*bool* | freezeWindDirectionAndStrength | Wind Change freeze enabled
+*float32* | difficultySliderPower | Enemy Difficulty Slider value
+*bool* | stopBiomeSpreadPower | Infection Spread freeze enabled
 
 *object*&nbsp;&nbsp;**footer**
 
