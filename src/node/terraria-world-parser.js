@@ -750,63 +750,27 @@ module.exports = class terrariaWorldParser extends terrariaFileParser {
     }
 
     parseCreativePowers() {
-        let data = [];
+        let data = {};
 
-        while (this.readBoolean()) {
-            let creativePower = {
-                powerId: this.readInt16()
-            };
+        this.skipBytes(3);
+        data.freezeTime = this.readBoolean();
 
-            switch (creativePower.powerId) {
-                case 0:
-                    creativePower.freezeTime = {
-                        enabled: this.readBoolean()
-                    };
-                    break;
-                case 5:
-                    creativePower.godMode = {
-                        enabled: this.readBoolean()
-                    };
-                    break;
-                case 8:
-                    creativePower.modifyTimeRate = {
-                        sliderValue: this.readFloat32()
-                    };
-                    break;
-                case 9:
-                    creativePower.freezeRainPower = {
-                        enabled: this.readBoolean()
-                    };
-                    break;
-                case 10:
-                    creativePower.freezeWindDirectionAndStrength = {
-                        enabled: this.readBoolean()
-                    };
-                    break;
-                case 11:
-                    creativePower.farPlacementRangePower = {
-                        enabled: this.readBoolean()
-                    };
-                    break;
-                case 12:
-                    creativePower.difficultySliderPower = {
-                        sliderValue: this.readFloat32()
-                    };
-                    break;
-                case 13:
-                    creativePower.stopBiomeSpreadPower = {
-                        enabled: this.readBoolean()
-                    };
-                    break;
-                case 14:
-                    creativePower.spawnRateSliderPerPlayerPower = {
-                        sliderValue: this.readFloat32()
-                    };
-                    break;
-            }
+        this.skipBytes(3);
+        data.modifyTimeRate = this.readFloat32()
 
-            data.push(creativePower);
-        }
+        this.skipBytes(3);
+        data.freezeRainPower = this.readBoolean();
+
+        this.skipBytes(3);
+        data.freezeWindDirectionAndStrength = this.readBoolean();
+
+        this.skipBytes(3);
+        data.difficultySliderPower = this.readFloat32();
+
+        this.skipBytes(3);
+        data.stopBiomeSpreadPower = this.readBoolean();
+
+        this.skipBytes(1);
 
         return data;
     }

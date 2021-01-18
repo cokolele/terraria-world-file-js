@@ -636,46 +636,30 @@ export default class terrariaWorldSaver extends terrariaFileSaver {
     saveCreativePowers() {
         const creativePowers = this.options.world.creativePowers;
 
-        for (let i = 0; i < creativePowers.length; i++) {
-            this.saveBoolean(true);
+        this.saveBoolean(true);
+        this.saveInt16(0);
+        this.saveBoolean(creativePowers.freezeTime);
 
-            if (creativePowers[i].freezeTime) {
-                this.saveInt16(0);
-                this.saveBoolean(creativePowers[i].freezeTime.enabled);
-            }
-            else if (creativePowers[i].godmode) {
-                this.saveInt16(5);
-                this.saveBoolean(creativePowers[i].godmode.enabled);
-            }
-            else if (creativePowers[i].modifyTimeRate) {
-                this.saveInt16(8);
-                this.saveFloat32( creativePowers[i].modifyTimeRate.sliderValue );
-            }
-            else if (creativePowers[i].freezeRainPower) {
-                this.saveInt16(9);
-                this.saveBoolean(creativePowers[i].freezeRainPower.enabled);
-            }
-            else if (creativePowers[i].freezeWindDirectionAndStrength) {
-                this.saveInt16(10);
-                this.saveBoolean(creativePowers[i].freezeWindDirectionAndStrength.enabled);
-            }
-            else if (creativePowers[i].farPlacementRangePower) {
-                this.saveInt16(11);
-                this.saveBoolean(creativePowers[i].farPlacementRangePower.enabled);
-            }
-            else if (creativePowers[i].difficultySliderPower) {
-                this.saveInt16(12);
-                this.saveFloat32( creativePowers[i].difficultySliderPower.sliderValue );
-            }
-            else if (creativePowers[i].stopBiomeSpreadPower) {
-                this.saveInt16(13);
-                this.saveBoolean(creativePowers[i].stopBiomeSpreadPower.enabled);
-            }
-            else if (creativePowers[i].spawnRateSliderPerPlayerPower) {
-                this.saveInt16(14);
-                this.saveFloat32( creativePowers[i].spawnRateSliderPerPlayerPower.sliderValue );
-            }
-        }
+        this.saveBoolean(true);
+        this.saveInt16(8);
+        this.saveFloat32(creativePowers.modifyTimeRate);
+
+        this.saveBoolean(true);
+        this.saveInt16(9);
+        this.saveBoolean(creativePowers.freezeRainPower);
+
+        this.saveBoolean(true);
+        this.saveInt16(10);
+        this.saveBoolean(creativePowers.freezeWindDirectionAndStrength);
+
+        this.saveBoolean(true);
+        this.saveInt16(12);
+        this.saveFloat32(creativePowers.difficultySliderPower);
+
+        this.saveBoolean(true);
+        this.saveInt16(13);
+        this.saveBoolean(creativePowers.stopBiomeSpreadPower);
+
         this.saveBoolean(false);
 
         return this.offset;

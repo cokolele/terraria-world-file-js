@@ -383,29 +383,16 @@ Type | Variable | Description
 *strings array* : | NPCSights | name of NPCs that player encountered
 *strings array* : | NPCChats | name of NPCs that player chatted with
 
-*objects array*&nbsp;&nbsp;**creativePowers**<br>— only 1.4
+*object*&nbsp;&nbsp;**creativePowers**<br>— only 1.4
 
 Type | Variable | Description
 --- | --- | ---
-*int16* | powerId | id of the power (order of the CreativePowerManager.Initialize in source code)<br>each object has only one power listed below
-*object* : | freezeTime | id 0
-\|&nbsp;&nbsp;&nbsp;&nbsp;*bool* | enabled | is enabled
-*object* : | godMode | id 5
-\|&nbsp;&nbsp;&nbsp;&nbsp;*bool* | enabled | is enabled
-*object* : | modifyTimeRate | id 8
-\|&nbsp;&nbsp;&nbsp;&nbsp;*float32* | sliderValue | value of the slider
-*object* : | freezeRainPower | id 9
-\|&nbsp;&nbsp;&nbsp;&nbsp;*bool* | enabled | is enabled
-*object* : | freezeWindDirectionAndStrength | id 10
-\|&nbsp;&nbsp;&nbsp;&nbsp;*bool* | enabled | is enabled
-*object* : | farPlacementRangePower | id 11
-\|&nbsp;&nbsp;&nbsp;&nbsp;*bool* | enabled | is enabled
-*object* : | difficultySliderPower | id 12
-\|&nbsp;&nbsp;&nbsp;&nbsp;*float32* | sliderValue | value of the slider
-*object* : | stopBiomeSpreadPower | id 13
-\|&nbsp;&nbsp;&nbsp;&nbsp;*bool* | enabled | is enabled
-*object* : | spawnRateSliderPerPlayerPower | id 14
-\|&nbsp;&nbsp;&nbsp;&nbsp;*float32* | sliderValue | value of the slider
+*bool* : | freezeTime | Freeze Time enabled
+*float32* : | modifyTimeRate | Time Speed Slider value
+*bool* : | freezeRainPower | Rain Change freeze enabled
+*bool* : | freezeWindDirectionAndStrength | Wind Change freeze enabled
+*float32* : | difficultySliderPower | Enemy Difficulty Slider value
+*bool* : | stopBiomeSpreadPower | Infection Spread freeze enabled
 
 *object*&nbsp;&nbsp;**footer**
 
