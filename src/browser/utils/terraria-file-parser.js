@@ -122,4 +122,15 @@ export default class terrariaFileParse {
 
         return bitValues;
     }
+
+    parseGuid(bytes) {
+        bytes = Array.from(bytes); //from uint8 to regular
+        return bytes
+            .slice(0, 4).reverse()
+            .concat( bytes.slice(4,6).reverse() )
+            .concat( bytes.slice(6,8).reverse() )
+            .concat( bytes.slice(8) )
+            .map((byte, i) => ("00" + byte.toString(16)).substr(-2,2) + ([4, 6, 8, 10].includes(i) ? "-" : ""))
+            .join("");
+    }
 }

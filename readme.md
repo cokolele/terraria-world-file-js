@@ -115,7 +115,8 @@ Type | Variable | Description
 *string* | mapName | map name
 *string* | seedText | map seed
 *uint64* | worldGeneratorVersion | version of the world generator, returns 8 bytes array
-*guid* | guid | guid of the map, returns 16 bytes array
+*uint8 array* | guid | guid of the map
+*string* | guidString | guid of the map (only browser parser)
 *int32* | worldId | map ID
 *int32* | leftWorld | map dimesion in pixels
 *int32* | rightWorld | ^

@@ -154,6 +154,7 @@ export default class terrariaWorldParser extends terrariaFileParser {
         data.seedText               = this.readString();
         data.worldGeneratorVersion  = this.readBytes(8);
         data.guid                   = this.readBytes(16);
+        data.guidString             = this.parseGuid(data.guid);
         data.worldId                = this.readInt32();
         data.leftWorld              = this.readInt32();
         data.rightWorld             = this.readInt32();
