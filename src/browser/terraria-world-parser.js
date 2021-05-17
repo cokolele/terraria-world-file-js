@@ -168,6 +168,8 @@ export default class terrariaWorldParser extends terrariaFileParser {
 
             if (this.world.version >= 227)
                 data.getGoodWorld   = this.readBoolean();
+            if (this.world.version >= 238)
+                data.getTenthAnniversaryWorld = this.readBoolean();
         } else {
             data.expertMode             = this.readBoolean();
         }

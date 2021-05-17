@@ -84,6 +84,8 @@ export default class terrariaWorldSaver extends terrariaFileSaver {
 
             if (this.options.world.fileFormatHeader.version >= 227)
                 this.saveBoolean( data.getGoodWorld );
+            if (this.options.world.fileFormatHeader.version >= 238)
+                this.saveBoolean( data.getTenthAnniversaryWorld );
         } else
             this.saveBoolean( data.expertMode );
         this.saveBytes( data.creationTime );

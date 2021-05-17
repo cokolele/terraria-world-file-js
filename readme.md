@@ -127,6 +127,7 @@ Type | Variable | Description
 *int32* | gameMode | map game mode<br>only >1.4.0.1
 *bool* | drunkWorld | drunk world (seed) enabled<br>only >1.4.0.1
 *bool* | getGoodWorld | good world (seed) enabled<br>only >1.4.0.3
+*bool* | getTenthAnniversaryWorld | Tenth Anniversary world (seed) enabled<br>only >1.4.2.3
 *bool* | expertMode | expert mode<br>only 1.3.5.3
 *int64* | creationTime | time of creation, returns 8 bytes array (Datetime.ToBinary)
 *uint8* | moonType | moon type
