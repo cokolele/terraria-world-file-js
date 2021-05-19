@@ -190,7 +190,7 @@ module.exports = class terrariaWorldParser extends terrariaFileParser {
             if (this.world.version >= 238)
                 data.getTenthAnniversaryWorld = this.readBoolean();
         } else {
-            data.expertMode             = this.readBoolean();
+            data.expertMode         = this.readBoolean();
         }
         data.creationTime           = this.readBytes(8);
         data.moonType               = this.readUInt8();

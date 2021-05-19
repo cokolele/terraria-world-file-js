@@ -9,7 +9,7 @@
 
 Terraria world file parser and saver written in javascript
 
-\- supports maps from 1.3.5.3 to 1.4.1.2
+\- supports maps from 1.3.5.3 to 1.4.2.3
 
 Feel free to contribute 🌳
 
