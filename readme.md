@@ -128,6 +128,8 @@ Type | Variable | Description
 *bool* | drunkWorld | drunk world (seed) enabled<br>only >1.4.0.1
 *bool* | getGoodWorld | good world (seed) enabled<br>only >1.4.0.3
 *bool* | getTenthAnniversaryWorld | Tenth Anniversary world (seed) enabled<br>only >1.4.2.3
+*bool* | getDontStarveWorld | Don't Starve Crossover world (seed) enabled<br>only >1.4.3.0
+*bool* | getNotTheBeesWorld | Not the Bees world (seed) enabled<br>only >1.4.3.0
 *bool* | expertMode | expert mode<br>only 1.3.5.3
 *int64* | creationTime | time of creation, returns 8 bytes array (Datetime.ToBinary)
 *uint8* | moonType | moon type
@@ -253,6 +255,7 @@ Type | Variable | Description
 *bool* | boughtBunny | bought bunny<br>only 1.4
 *bool* | downedEmpressOfLight | killed empress of light<br>only 1.4
 *bool* | downedQueenSlime | killed queen slime<br>only 1.4
+*bool* | downedDeerclops | killed Deerclops<br>only 1.4.3
 
 *2D objects array*&nbsp;&nbsp;**tiles**
 

@@ -189,6 +189,10 @@ module.exports = class terrariaWorldParser extends terrariaFileParser {
                 data.getGoodWorld   = this.readBoolean();
             if (this.world.version >= 238)
                 data.getTenthAnniversaryWorld = this.readBoolean();
+            if (this.world.version >= 239)
+                data.getDontStarveWorld = this.readBoolean();
+            if (this.world.version >= 241)
+                data.getNotTheBeesWorld = this.readBoolean();
         } else {
             data.expertMode         = this.readBoolean();
         }
@@ -364,6 +368,9 @@ module.exports = class terrariaWorldParser extends terrariaFileParser {
 
             data.downedEmpressOfLight = this.readBoolean();
             data.downedQueenSlime = this.readBoolean();
+
+            if (this.world.version >= 240)
+                data.downedDeerclops = this.readBoolean();
         }
 
         return data;
