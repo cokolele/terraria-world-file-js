@@ -86,8 +86,13 @@ export default class terrariaWorldSaver extends terrariaFileSaver {
                 this.saveBoolean( data.getGoodWorld );
             if (this.options.world.fileFormatHeader.version >= 238)
                 this.saveBoolean( data.getTenthAnniversaryWorld );
-        } else
+            if (this.options.world.fileFormatHeader.version >= 239)
+                this.saveBoolean( data.dontStarveWorld );
+            if (this.options.world.fileFormatHeader.version >= 241)
+                this.saveBoolean( data.notTheBeesWorld );
+        } else {
             this.saveBoolean( data.expertMode );
+        }
         this.saveBytes( data.creationTime );
         this.saveUInt8( data.moonType );
         this.saveInt32( data.treeX[0] );
@@ -244,6 +249,10 @@ export default class terrariaWorldSaver extends terrariaFileSaver {
 
             this.saveBoolean( data.downedEmpressOfLight );
             this.saveBoolean( data.downedQueenSlime );
+
+            if (this.options.world.fileFormatHeader.version >= 240) {
+                this.saveBoolean( data.downedDeerclops );
+            }
         }
 
         return this.offset;
