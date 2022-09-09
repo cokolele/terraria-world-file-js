@@ -92,9 +92,7 @@ export default class terrariaWorldParser extends terrariaFileParser {
 
     parseNecessaryData() {
         let version, magicNumber, fileType, pointers, importants, height, width;
-        let fileRevision = 0;
         let isAndroid = false;
-        let fileFlags = 0;
 
         this.offset = 0;
 
@@ -102,8 +100,7 @@ export default class terrariaWorldParser extends terrariaFileParser {
             version = this.readInt32();
             magicNumber = this.readString(7);
             fileType = this.readUInt8();
-            fileRevision = this.readInt32();
-            fileFlags = this.readUInt32();
+            this.skipBytes(12);
             pointers = [0];
             for (let i = this.readInt16(); i > 0; i--)
                 pointers.push(this.readInt32());
@@ -119,10 +116,10 @@ export default class terrariaWorldParser extends terrariaFileParser {
 
         this.offset = 0;
 
-        if ((magicNumber != "relogic" || magicNumber != "xindong") || fileType != 2)
+        if ((magicNumber != "relogic" && magicNumber != "xindong") || fileType != 2)
             throw new Error("Invalid file type");
 
-        if ( magicNumber != "xindong") {
+        if ( magicNumber == "xindong") {
             isAndroid = true;
         }
 
@@ -135,8 +132,6 @@ export default class terrariaWorldParser extends terrariaFileParser {
             importants,
             width,
             height,
-            fileRevision,
-            fileFlags,
             isAndroid
         };
     }
@@ -155,6 +150,9 @@ export default class terrariaWorldParser extends terrariaFileParser {
             data.pointers.push(this.readInt32());
         data.importants     = this.parseBitsByte(this.readInt16());
 
+        if (data.magicNumber == "xindong") {
+            data.isAndroid = true;
+        }
         return data;
     }
 

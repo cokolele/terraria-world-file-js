@@ -139,10 +139,10 @@ module.exports = class terrariaWorldParser extends terrariaFileParser {
 
         this.offset = 0;
 
-        if ((magicNumber != "relogic" || magicNumber != "xindong") || fileType != 2)
+        if ((magicNumber != "relogic" && magicNumber != "xindong") || fileType != 2)
             throw new Error("Invalid file type");
 
-        if ( magicNumber != "xindong") {
+        if ( magicNumber == "xindong") {
             isAndroid = true;
         }
 
