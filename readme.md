@@ -187,14 +187,14 @@ Type | Variable | Description
 *int32* | oreTier1 | tier 1 hardmode ore block id
 *int32* | oreTier2 | tier 2 hardmode ore block id
 *int32* | oreTier3 | tier 3 hardmode ore block id
-*uint8* | setBG0 | forest background style
-*uint8* | setBG1 | corruption background style
-*uint8* | setBG2 | jungle background style
-*uint8* | setBG3 | snow background style
-*uint8* | setBG4 | hallow background style
-*uint8* | setBG5 | crimson background style
-*uint8* | setBG6 | desert background style
-*uint8* | setBG7 | ocean background style
+*uint8* | setBGTree | forest background style
+*uint8* | setBGCorruption | corruption background style
+*uint8* | setBGJungle | jungle background style
+*uint8* | setBGSnow | snow background style
+*uint8* | setBGHallow | hallow background style
+*uint8* | setBGCrimson | crimson background style
+*uint8* | setBGDesert | desert background style
+*uint8* | setBGOcean | ocean background style
 *int32* | cloudBGActive | ?
 *int16* | numClouds | clouds count (max 200)
 *float* | windSpeed | wind speed
@@ -237,11 +237,11 @@ Type | Variable | Description
 *bool* | DD2Event_DownedInvasionT1 | old one's army tier 1 killed
 *bool* | DD2Event_DownedInvasionT2 | old one's army tier 2 killed
 *bool* | DD2Event_DownedInvasionT3 | old one's army tier 3 killed
-*uint8* | setBG8 | mushroom biome background style<br>only 1.4
-*uint8* | setBG9 | underworld background style<br>only 1.4
-*uint8* | setBG10 | Forest 2 background style<br>only 1.4
-*uint8* | setBG11 | Forest 3 background style<br>only 1.4
-*uint8* | setBG12 | Forest 4 background style<br>only 1.4
+*uint8* | setBGMushroom | mushroom biome background style<br>only 1.4
+*uint8* | setBGUnderworld | underworld background style<br>only 1.4
+*uint8* | setBGTree2 | Forest 2 background style<br>only 1.4
+*uint8* | setBGTree3 | Forest 3 background style<br>only 1.4
+*uint8* | setBGTree4 | Forest 4 background style<br>only 1.4
 *bool* | combatBookWasUsed | ?<br>only 1.4
 *int32 array* | treeTopsVariations | ?<br>only 1.4
 *bool* | forceHalloweenForToday | ?<br>only 1.4

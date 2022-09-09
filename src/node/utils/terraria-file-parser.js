@@ -55,6 +55,13 @@ module.exports = class terrariaFileParser {
         return this.buffer.readUInt32LE( this.offset - 4 );
     }
 
+    readUInt64() {
+        this.offset += 8;
+        if (this.options.ignoreBounds && this.offset > this.buffer.byteLength)
+            return 0;
+        return this.buffer.readBigUInt64LE( this.offset - 8, true );
+    }
+
     readFloat32() {
         this.offset += 4;
         if (this.options.ignoreBounds && this.offset > this.buffer.byteLength)

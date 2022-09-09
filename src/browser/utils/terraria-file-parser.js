@@ -60,6 +60,13 @@ export default class terrariaFileParse {
         return this.buffer.getUint32( this.offset - 4, true );
     }
 
+    readUInt64() {
+        this.offset += 8;
+        if (this.options.ignoreBounds && this.offset > this.buffer.byteLength)
+            return 0;
+        return this.buffer.getBigUint64( this.offset - 8, true );
+    }
+
     readFloat32() {
         this.offset += 4;
         if (this.options.ignoreBounds && this.offset > this.buffer.byteLength)

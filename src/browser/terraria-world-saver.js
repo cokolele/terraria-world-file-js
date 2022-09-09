@@ -45,7 +45,7 @@ export default class terrariaWorldSaver extends terrariaFileSaver {
         const data = this.options.world.fileFormatHeader;
 
         this.saveInt32( data.version );
-        this.saveString( "relogic", false );
+        this.saveString( data.magicNumber, false );
         this.saveUInt8( data.fileType );
         this.saveUInt32( data.revision );
         this.saveBoolean( data.favorite );
@@ -68,9 +68,18 @@ export default class terrariaWorldSaver extends terrariaFileSaver {
         const data = this.options.world.header;
 
         this.saveString( data.mapName );
-        this.saveString( data.seedText );
-        this.saveBytes( data.worldGeneratorVersion );
-        this.saveBytes( data.guid );
+
+        if (this.options.world.fileFormatHeader.version >= 179) {
+          if (this.options.world.fileFormatHeader.version == 179) {
+            this.saveInt32(data.seedText);
+          } else {
+            this.saveString(data.seedText);
+          }
+          this.saveBytes( data.worldGeneratorVersion );
+        }
+        if (this.options.world.fileFormatHeader.version >= 181) {
+          this.saveBytes( data.guid );
+        }
         this.saveInt32( data.worldId );
         this.saveInt32( data.leftWorld );
         this.saveInt32( data.rightWorld );
@@ -78,9 +87,14 @@ export default class terrariaWorldSaver extends terrariaFileSaver {
         this.saveInt32( data.bottomWorld );
         this.saveInt32( data.maxTilesY );
         this.saveInt32( data.maxTilesX );
-        if (this.options.world.fileFormatHeader.version >= 225) {
+
+        if (this.options.world.fileFormatHeader.version >= 209) {
             this.saveInt32( data.gameMode );
+
+          if (this.options.world.fileFormatHeader.version >= 222) {
+
             this.saveBoolean( data.drunkWorld )
+          }
 
             if (this.options.world.fileFormatHeader.version >= 227)
                 this.saveBoolean( data.getGoodWorld );
@@ -90,11 +104,25 @@ export default class terrariaWorldSaver extends terrariaFileSaver {
                 this.saveBoolean( data.dontStarveWorld );
             if (this.options.world.fileFormatHeader.version >= 241)
                 this.saveBoolean( data.notTheBeesWorld );
-        } else {
-            this.saveBoolean( data.expertMode );
+        } else if (this.options.world.fileFormatHeader.version  == 208) {
+            this.saveBoolean(data.masterMode);
+        } else if (this.options.world.fileFormatHeader.version >= 112) {
+            this.saveBoolean(data.expertMode);
         }
-        this.saveBytes( data.creationTime );
-        this.saveUInt8( data.moonType );
+
+        if (this.options.world.fileFormatHeader.version >= 141) {
+          this.saveBytes( data.creationTime );
+        }
+
+        // 1, 3 >= v69, 9 >= 226
+        if (this.options.world.fileFormatHeader.version >= 226 && data.moonType <= 9 && data.moonType >= 0) {
+            this.saveInt32(data.moonType);
+        } else if (this.options.world.fileFormatHeader.version >= 69 && data.moonType <= 3 & data.moonType >= 0) {
+            this.saveInt32(data.moonType);
+        } else {
+            this.saveInt32(0);
+        }
+
         this.saveInt32( data.treeX[0] );
         this.saveInt32( data.treeX[1] );
         this.saveInt32( data.treeX[2] );
@@ -134,7 +162,9 @@ export default class terrariaWorldSaver extends terrariaFileSaver {
         this.saveBoolean( data.downedMechBossAny );
         this.saveBoolean( data.downedPlantBoss );
         this.saveBoolean( data.downedGolemBoss );
-        this.saveBoolean( data.downedSlimeKing );
+        if (this.options.world.fileFormatHeader.version >= 118) {
+            this.saveBoolean( data.downedSlimeKing );
+        }
         this.saveBoolean( data.savedGoblin );
         this.saveBoolean( data.savedWizard );
         this.saveBoolean( data.savedMech );
@@ -151,108 +181,181 @@ export default class terrariaWorldSaver extends terrariaFileSaver {
         this.saveInt32( data.invasionSize );
         this.saveInt32( data.invasionType );
         this.saveFloat64( data.invasionX );
-        this.saveFloat64( data.slimeRainTime );
-        this.saveUInt8( data.sundialCooldown );
+        if (this.options.world.fileFormatHeader.version >= 118) {
+          this.saveFloat64( data.slimeRainTime );
+        }
+        if (this.options.world.fileFormatHeader.version >= 113) {
+            this.saveUInt8( data.sundialCooldown );
+        }
         this.saveBoolean( data.tempRaining );
         this.saveInt32( data.tempRainTime );
         this.saveFloat32( data.tempMaxRain );
         this.saveInt32( data.oreTier1 );
         this.saveInt32( data.oreTier2 );
         this.saveInt32( data.oreTier3 );
-        this.saveUInt8( data.setBG0 );
-        this.saveUInt8( data.setBG1 );
-        this.saveUInt8( data.setBG2 );
-        this.saveUInt8( data.setBG3 );
-        this.saveUInt8( data.setBG4 );
-        this.saveUInt8( data.setBG5 );
-        this.saveUInt8( data.setBG6 );
-        this.saveUInt8( data.setBG7 );
+        this.saveUInt8( data.setBGTree );
+        this.saveUInt8( data.setBGCorruption );
+        this.saveUInt8( data.setBGJungle );
+        this.saveUInt8( data.setBGSnow );
+        this.saveUInt8( data.setBGHallow );
+        this.saveUInt8( data.setBGCrimson );
+        this.saveUInt8( data.setBGDesert );
+        this.saveUInt8( data.setBGOcean );
         this.saveInt32( data.cloudBGActive );
         this.saveInt16( data.numClouds );
         this.saveFloat32( data.windSpeed );
+
+        if (this.options.world.fileFormatHeader.version < 95) {
+          return this.offset;
+        }
+
         this.saveInt32( data.anglerWhoFinishedToday.length );
         for (let i = 0; i < data.anglerWhoFinishedToday.length; i++)
             this.saveString( data.anglerWhoFinishedToday.shift() );
+
+        if (this.options.world.fileFormatHeader.version < 99) {
+            return this.offset;
+        }
+
         this.saveBoolean( data.savedAngler );
+
+        if (this.options.world.fileFormatHeader.version < 101) {
+            return this.offset;
+        }
+
         this.saveInt32( data.anglerQuest );
-        this.saveBoolean( data.savedStylist );
-        this.saveBoolean( data.savedTaxCollector );
-        if (this.options.world.fileFormatHeader.version >= 225)
+
+        if (this.options.world.fileFormatHeader.version < 104) {
+            return this.offset;
+        }
+
+        if (this.options.world.fileFormatHeader.version > 104)
+          this.saveBoolean( data.savedStylist );
+        if (this.options.world.fileFormatHeader.version >= 129)
+          this.saveBoolean( data.savedTaxCollector );
+        if (this.options.world.fileFormatHeader.version >= 201)
             this.saveBoolean( data.savedGolfer );
-        this.saveInt32( data.invasionSizeStart );
-        this.saveInt32( data.tempCultistDelay );
+        if (this.options.world.fileFormatHeader.version >= 107)
+          this.saveInt32( data.invasionSizeStart );
+        if (this.options.world.fileFormatHeader.version >= 108)
+          this.saveInt32( data.tempCultistDelay );
+
+        if (this.options.world.fileFormatHeader.version < 109) {
+            return this.offset;
+        }
+
         this.saveInt16( data.killCount.length );
         for (let i = 0; i < data.killCount.length; i++)
             this.saveInt32( data.killCount[i] );
-        this.saveBoolean( data.fastForwardTime );
-        this.saveBoolean( data.downedFishron );
-        this.saveBoolean( data.downedMartians );
-        this.saveBoolean( data.downedAncientCultist );
+
+        if (this.options.world.fileFormatHeader.version < 109) {
+            return this.offset;
+        }
+
+        if (this.options.world.fileFormatHeader.version >= 140)
+          this.saveBoolean( data.fastForwardTime );
+
+        if (this.options.world.fileFormatHeader.version < 131) {
+            return this.offset;
+        }
+
+        if (this.options.world.fileFormatHeader.version >= 140) {
+            this.saveBoolean( data.downedFishron );
+            this.saveBoolean( data.downedMartians );
+            this.saveBoolean( data.downedAncientCultist );
+        }
         this.saveBoolean( data.downedMoonlord );
         this.saveBoolean( data.downedHalloweenKing );
         this.saveBoolean( data.downedHalloweenTree );
         this.saveBoolean( data.downedChristmasIceQueen );
+
+        if (this.options.world.fileFormatHeader.version < 140) {
+            return this.offset;
+        }
+
         this.saveBoolean( data.downedChristmasSantank );
         this.saveBoolean( data.downedChristmasTree );
-        this.saveBoolean( data.downedTowerSolar );
-        this.saveBoolean( data.downedTowerVortex );
-        this.saveBoolean( data.downedTowerNebula );
-        this.saveBoolean( data.downedTowerStardust );
-        this.saveBoolean( data.TowerActiveSolar );
-        this.saveBoolean( data.TowerActiveVortex );
-        this.saveBoolean( data.TowerActiveNebula );
-        this.saveBoolean( data.TowerActiveStardust );
-        this.saveBoolean( data.LunarApocalypseIsUp );
-        this.saveBoolean( data.tempPartyManual );
-        this.saveBoolean( data.tempPartyGenuine );
-        this.saveInt32( data.tempPartyCooldown );
-        this.saveInt32(data.tempPartyCelebratingNPCs.length);
-        for (let i = 0; i < data.tempPartyCelebratingNPCs.length; i++)
-            this.saveInt32( data.tempPartyCelebratingNPCs.shift() );
-        this.saveBoolean( data.Temp_Sandstorm_Happening );
-        this.saveInt32( data.Temp_Sandstorm_TimeLeft );
-        this.saveFloat32( data.Temp_Sandstorm_Severity );
-        this.saveFloat32( data.Temp_Sandstorm_IntendedSeverity );
-        this.saveBoolean( data.savedBartender );
-        this.saveBoolean( data.DD2Event_DownedInvasionT1 );
-        this.saveBoolean( data.DD2Event_DownedInvasionT2 );
-        this.saveBoolean( data.DD2Event_DownedInvasionT3 );
 
-        if (this.options.world.fileFormatHeader.version >= 225) {
-            this.saveUInt8( data.setBG8 );
-            this.saveUInt8( data.setBG9 );
-            this.saveUInt8( data.setBG10 );
-            this.saveUInt8( data.setBG11 );
-            this.saveUInt8( data.setBG12 );
+        if (this.options.world.fileFormatHeader.version >= 140) {
+            this.saveBoolean( data.downedTowerSolar );
+            this.saveBoolean( data.downedTowerVortex );
+            this.saveBoolean( data.downedTowerNebula );
+            this.saveBoolean( data.downedTowerStardust );
+            this.saveBoolean( data.TowerActiveSolar );
+            this.saveBoolean( data.TowerActiveVortex );
+            this.saveBoolean( data.TowerActiveNebula );
+            this.saveBoolean( data.TowerActiveStardust );
+            this.saveBoolean( data.LunarApocalypseIsUp );
+        }
 
+        if (this.options.world.fileFormatHeader.version >= 140) {
+            this.saveBoolean( data.tempPartyManual );
+            this.saveBoolean( data.tempPartyGenuine );
+            this.saveInt32( data.tempPartyCooldown );
+            this.saveInt32(data.tempPartyCelebratingNPCs.length);
+            for (let i = 0; i < data.tempPartyCelebratingNPCs.length; i++)
+                this.saveInt32( data.tempPartyCelebratingNPCs.shift() );
+        }
+        if (this.options.world.fileFormatHeader.version >= 174) {
+            this.saveBoolean( data.Temp_Sandstorm_Happening );
+            this.saveInt32( data.Temp_Sandstorm_TimeLeft );
+            this.saveFloat32( data.Temp_Sandstorm_Severity );
+            this.saveFloat32( data.Temp_Sandstorm_IntendedSeverity );
+        }
+        if (this.options.world.fileFormatHeader.version >= 178) {
+            this.saveBoolean( data.savedBartender );
+            this.saveBoolean( data.DD2Event_DownedInvasionT1 );
+            this.saveBoolean( data.DD2Event_DownedInvasionT2 );
+            this.saveBoolean( data.DD2Event_DownedInvasionT3 );
+        }
+        if (this.options.world.fileFormatHeader.version >= 194)
+            this.saveUInt8( data.setBGMushroom );
+        if (this.options.world.fileFormatHeader.version >= 215)
+            this.saveUInt8( data.setBGUnderworld );
+        if (this.options.world.fileFormatHeader.version >= 195) {
+            this.saveUInt8( data.setBGTree2 );
+            this.saveUInt8( data.setBGTree3 );
+            this.saveUInt8( data.setBGTree4 );
+        }
+
+        if (this.options.world.fileFormatHeader.version >= 204)
             this.saveBoolean( data.combatBookWasUsed );
+
+        if (this.options.world.fileFormatHeader.version >= 204) {
             this.saveInt32( data.lanternNightCooldown );
             this.saveBoolean( data.lanternNightGenuine );
             this.saveBoolean( data.lanternNightManual );
             this.saveBoolean( data.lanternNightNextNightIsGenuine );
+        }
 
+        if (this.options.world.fileFormatHeader.version >= 204) {
             this.saveInt32(data.treeTopsVariations.length);
             for (let i = 0; i < data.treeTopsVariations.length; i++)
                 this.saveInt32( data.treeTopsVariations[i] );
-
+        }
+        if (this.options.world.fileFormatHeader.version >= 212) {
             this.saveBoolean( data.forceHalloweenForToday );
             this.saveBoolean( data.forceXMasForToday );
-
+        }
+        if (this.options.world.fileFormatHeader.version >= 216) {
             this.saveInt32( data.savedOreTierCopper );
             this.saveInt32( data.savedOreTierIron );
             this.saveInt32( data.savedOreTierSilver );
             this.saveInt32( data.savedOreTierGold );
+        }
 
+        if (this.options.world.fileFormatHeader.version >= 217) {
             this.saveBoolean( data.boughtCat );
             this.saveBoolean( data.boughtDog );
             this.saveBoolean( data.boughtBunny );
+        }
 
+        if (this.options.world.fileFormatHeader.version >= 223) {
             this.saveBoolean( data.downedEmpressOfLight );
             this.saveBoolean( data.downedQueenSlime );
-
-            if (this.options.world.fileFormatHeader.version >= 240) {
-                this.saveBoolean( data.downedDeerclops );
-            }
+        }
+        if (this.options.world.fileFormatHeader.version >= 240) {
+            this.saveBoolean( data.downedDeerclops );
         }
 
         return this.offset;
@@ -390,7 +493,7 @@ export default class terrariaWorldSaver extends terrariaFileSaver {
                 if (typeof tile.liquidAmount == "number")
                     this.saveUInt8( tile.liquidAmount );
 
-                if (flags3 & 64)
+                if (this.options.world.fileFormatHeader.version >= 222 && flags3 & 64)
                     this.saveUInt8(1);
 
                 if (RLE) {
@@ -460,7 +563,62 @@ export default class terrariaWorldSaver extends terrariaFileSaver {
         data.forEach(NPC => {
             if (NPC.townNPC) {
                 this.saveBoolean( true );
-                this.saveInt32( NPC.id );
+
+                if (this.options.world.fileFormatHeader.version >= 190) {
+                  this.saveInt32( NPC.id );
+                } else {
+                     switch (NPC.id) {
+                        case '17': this.saveString('Merchant'); break;
+                        case '18': this.saveString('Nurse'); break;
+                        case '19': this.saveString('Arms Dealer'); break;
+                        case '20': this.saveString('Dryad'); break;
+                        case '22': this.saveString('Guide'); break;
+                        case '37': this.saveString('Old Man'); break;
+                        case '38': this.saveString('Demolitionist'); break;
+                        case '54': this.saveString('Clothier'); break;
+                        case '105': this.saveString('Bound Goblin'); break;
+                        case '106': this.saveString('Bound Wizard'); break;
+                        case '107': this.saveString('Goblin Tinkerer'); break;
+                        case '108': this.saveString('Wizard'); break;
+                        case '123': this.saveString('Bound Mechanic'); break;
+                        case '124': this.saveString('Mechanic'); break;
+                        case '142': this.saveString('Santa Claus'); break;
+                        case '160': this.saveString('Truffle'); break;
+                        case '178': this.saveString('Steampunker'); break;
+                        case '207': this.saveString('Dye Trader'); break;
+                        case '208': this.saveString('Party Girl'); break;
+                        case '209': this.saveString('Cyborg'); break;
+                        case '227': this.saveString('Painter'); break;
+                        case '228': this.saveString('Witch Doctor'); break;
+                        case '229': this.saveString('Pirate'); break;
+                        case '353': this.saveString('Stylist'); break;
+                        case '354': this.saveString('Webbed Stylist'); break;
+                        case '357': this.saveString('Worm'); break;
+                        case '368': this.saveString('Traveling Merchant'); break;
+                        case '369': this.saveString('Angler'); break;
+                        case '376': this.saveString('Sleeping Angler'); break; 
+                        case '377': this.saveString('Grasshopper'); break;
+                        case '441': this.saveString('Tax Collector'); break;
+                        case '446': this.saveString('Gold Grasshopper'); break;
+                        case '448': this.saveString('Gold Worm'); break;
+                        case '453': this.saveString('Skeleton Merchant'); break;
+                        case '484': this.saveString('Enchanted Nightcrawler'); break;
+                        case '485': this.saveString('Grubby'); break;
+                        case '486': this.saveString('Sluggy'); break;
+                        case '487': this.saveString('Buggy'); break;
+                        case '548': this.saveString('Eternia Crystal'); break;
+                        case '550': this.saveString('Tavernkeep'); break;
+                        case '579': this.saveString('Unconscious Man'); break;
+                        case '588': this.saveString('Golfer'); break;
+                        case '606': this.saveString('Maggot'); break;
+                        case '633': this.saveString('Zoologist'); break;
+                        case '637': this.saveString('Cat'); break;
+                        case '638': this.saveString('Dog'); break;
+                        case '656': this.saveString('Bunny'); break;
+                        case '663': this.saveString('Princess'); break;
+                     }
+                }
+
                 this.saveString( NPC.name );
                 this.saveFloat32( NPC.position.x );
                 this.saveFloat32( NPC.position.y );
@@ -468,7 +626,7 @@ export default class terrariaWorldSaver extends terrariaFileSaver {
                 this.saveInt32( NPC.homePosition.x );
                 this.saveInt32( NPC.homePosition.y );
 
-                if (this.options.world.fileFormatHeader.version >= 225) {
+                if (this.options.world.fileFormatHeader.version >= 213) {
                     if (NPC.variationIndex !== undefined) {
                         this.saveBitsByte([true]);
                         this.saveInt32( NPC.variationIndex );

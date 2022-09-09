@@ -92,6 +92,9 @@ export default class terrariaWorldParser extends terrariaFileParser {
 
     parseNecessaryData() {
         let version, magicNumber, fileType, pointers, importants, height, width;
+        let fileRevision = 0;
+        let isAndroid = false;
+        let fileFlags = 0;
 
         this.offset = 0;
 
@@ -99,7 +102,8 @@ export default class terrariaWorldParser extends terrariaFileParser {
             version = this.readInt32();
             magicNumber = this.readString(7);
             fileType = this.readUInt8();
-            this.skipBytes(12);
+            fileRevision = this.readInt32();
+            fileFlags = this.readUInt32();
             pointers = [0];
             for (let i = this.readInt16(); i > 0; i--)
                 pointers.push(this.readInt32());
@@ -115,8 +119,12 @@ export default class terrariaWorldParser extends terrariaFileParser {
 
         this.offset = 0;
 
-        if (magicNumber != "relogic" || fileType != 2)
+        if ((magicNumber != "relogic" || magicNumber != "xindong") || fileType != 2)
             throw new Error("Invalid file type");
+
+        if ( magicNumber != "xindong") {
+            isAndroid = true;
+        }
 
         if (version < 194)
             throw new Error("Map version is older than 1.3.5.3 and cannot be parsed");
@@ -126,7 +134,10 @@ export default class terrariaWorldParser extends terrariaFileParser {
             pointers,
             importants,
             width,
-            height
+            height,
+            fileRevision,
+            fileFlags,
+            isAndroid
         };
     }
 
@@ -151,9 +162,17 @@ export default class terrariaWorldParser extends terrariaFileParser {
         let data = {};
 
         data.mapName                = this.readString();
-        data.seedText               = this.readString();
-        data.worldGeneratorVersion  = this.readBytes(8);
-        data.guid                   = this.readBytes(16);
+        if (this.world.version >= 179) {
+          if (this.world.version == 179) {
+            data.seedText               = this.readInt32();
+          } else {
+            data.seedText               = this.readString();
+          }
+          data.worldGeneratorVersion  = this.readBytes(8);
+        }
+        if (this.world.version >= 181) {
+          data.guid                   = this.readBytes(16);
+        }
         data.guidString             = this.parseGuid(data.guid);
         data.worldId                = this.readInt32();
         data.leftWorld              = this.readInt32();
@@ -162,9 +181,12 @@ export default class terrariaWorldParser extends terrariaFileParser {
         data.bottomWorld            = this.readInt32();
         data.maxTilesY              = this.readInt32();
         data.maxTilesX              = this.readInt32();
-        if (this.world.version >= 225) {
+
+        if (this.world.version >= 209) {
             data.gameMode           = this.readInt32();
+          if (this.world.version >= 222) {
             data.drunkWorld         = this.readBoolean();
+          }
 
             if (this.world.version >= 227)
                 data.getGoodWorld   = this.readBoolean();
@@ -174,10 +196,17 @@ export default class terrariaWorldParser extends terrariaFileParser {
                 data.dontStarveWorld = this.readBoolean();
             if (this.world.version >= 241)
                 data.notTheBeesWorld = this.readBoolean();
-        } else {
+        } else if (this.world.version == 208) {
+            data.masterMode         = this.readBoolean();
+        } else if (this.world.version >= 112) {
             data.expertMode         = this.readBoolean();
         }
-        data.creationTime           = this.readBytes(8);
+
+
+        if (this.world.version >= 141) {
+          data.creationTime           = this.readBytes(8);
+        }
+
         data.moonType               = this.readUInt8();
 
         data.treeX = [];
@@ -227,7 +256,9 @@ export default class terrariaWorldParser extends terrariaFileParser {
         data.downedMechBossAny      = this.readBoolean();
         data.downedPlantBoss        = this.readBoolean();
         data.downedGolemBoss        = this.readBoolean();
-        data.downedSlimeKing        = this.readBoolean();
+        if (this.world.version >= 118) {
+            data.downedSlimeKing        = this.readBoolean();
+        }
         data.savedGoblin            = this.readBoolean();
         data.savedWizard            = this.readBoolean();
         data.savedMech              = this.readBoolean();
@@ -244,117 +275,192 @@ export default class terrariaWorldParser extends terrariaFileParser {
         data.invasionSize           = this.readInt32();
         data.invasionType           = this.readInt32();
         data.invasionX              = this.readFloat64();
-        data.slimeRainTime          = this.readFloat64();
-        data.sundialCooldown        = this.readUInt8();
+        if (this.world.version >= 118) {
+            data.slimeRainTime          = this.readFloat64();
+        }
+        if (this.world.version >= 113) {
+            data.sundialCooldown        = this.readUInt8();
+        }
         data.tempRaining            = this.readBoolean();
         data.tempRainTime           = this.readInt32();
         data.tempMaxRain            = this.readFloat32();
         data.oreTier1               = this.readInt32();
         data.oreTier2               = this.readInt32();
         data.oreTier3               = this.readInt32();
-        data.setBG0                 = this.readUInt8();
-        data.setBG1                 = this.readUInt8();
-        data.setBG2                 = this.readUInt8();
-        data.setBG3                 = this.readUInt8();
-        data.setBG4                 = this.readUInt8();
-        data.setBG5                 = this.readUInt8();
-        data.setBG6                 = this.readUInt8();
-        data.setBG7                 = this.readUInt8();
+        data.setBGTree                 = this.readUInt8();
+        data.setBGCorruption                 = this.readUInt8();
+        data.setBGJungle                 = this.readUInt8();
+        data.setBGSnow                 = this.readUInt8();
+        data.setBGHallow                 = this.readUInt8();
+        data.setBGCrimson                 = this.readUInt8();
+        data.setBGDesert                 = this.readUInt8();
+        data.setBGOcean                 = this.readUInt8();
         data.cloudBGActive          = this.readInt32();
         data.numClouds              = this.readInt16();
         data.windSpeed              = this.readFloat32();
+
+        if (this.world.version < 95) {
+            return data;
+        }
+
 
         data.anglerWhoFinishedToday = [];
         for (let i = this.readInt32(); i > 0; --i)
             data.anglerWhoFinishedToday.push(this.readString());
 
+        if (this.world.version < 95) {
+            return data;
+        }
+
         data.savedAngler            = this.readBoolean();
+
+        if (this.world.version < 101) {
+            return data;
+        }
+
         data.anglerQuest            = this.readInt32();
-        data.savedStylist           = this.readBoolean();
-        data.savedTaxCollector      = this.readBoolean();
-        if (this.world.version >= 225)
+
+        if (this.world.version < 104) {
+            return data;
+        }
+
+        if (this.world.version > 104)
+          data.savedStylist           = this.readBoolean();
+        if (this.world.version >= 129)
+          data.savedTaxCollector      = this.readBoolean();
+        if (this.world.version >= 201)
             data.savedGolfer        = this.readBoolean();
 
-        data.invasionSizeStart      = this.readInt32();
-        data.tempCultistDelay       = this.readInt32();
+        if (this.world.version >= 107)
+          data.invasionSizeStart      = this.readInt32();
+        if (this.world.version >= 108)
+          data.tempCultistDelay       = this.readInt32();
+
+        if (this.world.version < 109) {
+            return data;
+        }
 
         data.killCount = [];
         for (let i = this.readInt16(); i > 0; i--)
             data.killCount.push(this.readInt32());
 
-        data.fastForwardTime        = this.readBoolean();
+        if (this.world.version < 109) {
+            return data;
+        }
+
+        if (this.world.version >= 140) {
+          data.fastForwardTime  = this.readBoolean();
+        }
+
+        if (this.world.version < 131) {
+            return data;
+        }
+
         data.downedFishron          = this.readBoolean();
-        data.downedMartians         = this.readBoolean();
-        data.downedAncientCultist   = this.readBoolean();
-        data.downedMoonlord         = this.readBoolean();
+        if (this.world.version >= 140) {
+            data.downedMartians         = this.readBoolean();
+            data.downedAncientCultist   = this.readBoolean();
+            data.downedMoonlord         = this.readBoolean();
+        }
+
         data.downedHalloweenKing    = this.readBoolean();
         data.downedHalloweenTree    = this.readBoolean();
         data.downedChristmasIceQueen = this.readBoolean();
+
+        if (this.world.version < 140) {
+            return data;
+        }
+
         data.downedChristmasSantank = this.readBoolean();
         data.downedChristmasTree    = this.readBoolean();
-        data.downedTowerSolar       = this.readBoolean();
-        data.downedTowerVortex      = this.readBoolean();
-        data.downedTowerNebula      = this.readBoolean();
-        data.downedTowerStardust    = this.readBoolean();
-        data.TowerActiveSolar       = this.readBoolean();
-        data.TowerActiveVortex      = this.readBoolean();
-        data.TowerActiveNebula      = this.readBoolean();
-        data.TowerActiveStardust    = this.readBoolean();
-        data.LunarApocalypseIsUp    = this.readBoolean();
-        data.tempPartyManual        = this.readBoolean();
-        data.tempPartyGenuine       = this.readBoolean();
-        data.tempPartyCooldown      = this.readInt32();
 
-        data.tempPartyCelebratingNPCs = [];
-        for (let i = this.readInt32(); i > 0; i--)
-            data.tempPartyCelebratingNPCs.push(this.readInt32());
+        if (this.world.version >= 140) {
+            data.downedTowerSolar       = this.readBoolean();
+            data.downedTowerVortex      = this.readBoolean();
+            data.downedTowerNebula      = this.readBoolean();
+            data.downedTowerStardust    = this.readBoolean();
+            data.TowerActiveSolar       = this.readBoolean();
+            data.TowerActiveVortex      = this.readBoolean();
+            data.TowerActiveNebula      = this.readBoolean();
+            data.TowerActiveStardust    = this.readBoolean();
+            data.LunarApocalypseIsUp    = this.readBoolean();
+        }
 
-        data.Temp_Sandstorm_Happening       = this.readBoolean();
-        data.Temp_Sandstorm_TimeLeft        = this.readInt32();
-        data.Temp_Sandstorm_Severity        = this.readFloat32();
-        data.Temp_Sandstorm_IntendedSeverity = this.readFloat32();
-        data.savedBartender                 = this.readBoolean();
-        data.DD2Event_DownedInvasionT1      = this.readBoolean();
-        data.DD2Event_DownedInvasionT2      = this.readBoolean();
-        data.DD2Event_DownedInvasionT3      = this.readBoolean();
+        if (this.world.version >= 170) {
+            data.tempPartyManual        = this.readBoolean();
+            data.tempPartyGenuine       = this.readBoolean();
+            data.tempPartyCooldown      = this.readInt32();
 
-        if (this.world.version >= 225) {
-            data.setBG8 = this.readUInt8();
-            data.setBG9 = this.readUInt8();
-            data.setBG10 = this.readUInt8();
-            data.setBG11 = this.readUInt8();
-            data.setBG12 = this.readUInt8();
+            data.tempPartyCelebratingNPCs = [];
+            for (let i = this.readInt32(); i > 0; i--)
+                data.tempPartyCelebratingNPCs.push(this.readInt32());
+        }
 
+        if (this.world.version >= 174) {
+            data.Temp_Sandstorm_Happening       = this.readBoolean();
+            data.Temp_Sandstorm_TimeLeft        = this.readInt32();
+            data.Temp_Sandstorm_Severity        = this.readFloat32();
+            data.Temp_Sandstorm_IntendedSeverity = this.readFloat32();
+        }
+        if (this.world.version >= 178) {
+            data.savedBartender                 = this.readBoolean();
+            data.DD2Event_DownedInvasionT1      = this.readBoolean();
+            data.DD2Event_DownedInvasionT2      = this.readBoolean();
+            data.DD2Event_DownedInvasionT3      = this.readBoolean();
+        }
+
+        if (this.world.version >= 194) 
+            data.setBGMushroom = this.readUInt8();
+        if (this.world.version >= 215) 
+            data.setBGUnderworld = this.readUInt8();
+
+        if (this.world.version >= 195) {
+            data.setBGTree2 = this.readUInt8();
+            data.setBGTree3 = this.readUInt8();
+            data.setBGTree4 = this.readUInt8();
+        }
+
+        if (this.world.version >= 204) {
             data.combatBookWasUsed = this.readBoolean();
+        }
+        if (this.world.version >= 207) {
             data.lanternNightCooldown = this.readInt32();
             data.lanternNightGenuine = this.readBoolean();
             data.lanternNightManual = this.readBoolean();
             data.lanternNightNextNightIsGenuine = this.readBoolean();
+        }
 
+        if (this.world.version >= 211) {
             data.treeTopsVariations = [];
             for (let i = this.readInt32(); i > 0; i--)
                 data.treeTopsVariations.push(this.readInt32());
-
+        }
+        if (this.world.version >= 212) {
             data.forceHalloweenForToday = this.readBoolean();
             data.forceXMasForToday = this.readBoolean();
-
+        }
+        if (this.world.version >= 216) {
             data.savedOreTierCopper = this.readInt32();
             data.savedOreTierIron = this.readInt32();
             data.savedOreTierSilver = this.readInt32();
             data.savedOreTierGold = this.readInt32();
+        }
 
+        if (this.world.version >= 217) {
             data.boughtCat = this.readBoolean();
             data.boughtDog = this.readBoolean();
             data.boughtBunny = this.readBoolean();
-
-            data.downedEmpressOfLight = this.readBoolean();
-            data.downedQueenSlime = this.readBoolean();
-
-            if (this.world.version >= 240) {
-                data.downedDeerclops = this.readBoolean();
-            }
         }
 
+        if (this.world.version >= 223) {
+            data.downedEmpressOfLight = this.readBoolean();
+            data.downedQueenSlime = this.readBoolean();
+        }
+
+        if (this.world.version >= 240) {
+            data.downedDeerclops = this.readBoolean();
+        }
+        
         return data;
     }
 
@@ -463,10 +569,11 @@ export default class terrariaWorldParser extends terrariaFileParser {
                 tile.actuated = true;
             if (flags3 & 32)
                 tile.wireYellow = true;
-            if (flags3 & 64)
+            if (this.world.version >= 222 && flags3 & 64)
                 tile.wallId = (this.readUInt8() << 8) | tile.wallId; //adding another byte
         }
 
+        
         switch ((flags1 & 192) >> 6) {
             case 1: this.RLE = this.readUInt8(); break;
             case 2: this.RLE = this.readInt16(); break;
@@ -533,9 +640,67 @@ export default class terrariaWorldParser extends terrariaFileParser {
 
         let i = 0;
         for (; this.readBoolean(); i++) {
+            let id;
+            if (this.world.version >= 190) {
+                id = this.readInt32()
+            } else {
+                let npcNameId = this.readString();
+
+                switch (npcNameId) {
+                    case 'Merchant': id=17; break;
+                    case 'Nurse': id=18; break;
+                    case 'Arms Dealer': id=19; break;
+                    case 'Dryad': id=20; break;
+                    case 'Guide': id=22; break;
+                    case 'Old Man': id=37; break;
+                    case 'Demolitionist': id=38; break;
+                    case 'Clothier': id=54; break;
+                    case 'Bound Goblin': id=105; break;
+                    case 'Bound Wizard': id=106; break;
+                    case 'Goblin Tinkerer': id=107; break;
+                    case 'Wizard': id=108; break;
+                    case 'Bound Mechanic': id=123; break;
+                    case 'Mechanic': id=124; break;
+                    case 'Santa Claus': id=142; break;
+                    case 'Truffle': id=160; break;
+                    case 'Steampunker': id=178; break;
+                    case 'Dye Trader': id=207; break;
+                    case 'Party Girl': id=208; break;
+                    case 'Cyborg': id=209; break;
+                    case 'Painter': id=227; break;
+                    case 'Witch Doctor': id=228; break;
+                    case 'Pirate': id=229; break;
+                    case 'Stylist': id=353; break;
+                    case 'Webbed Stylist': id=354; break;
+                    case 'Worm': id=357; break;
+                    case 'Traveling Merchant': id=368; break;
+                    case 'Angler': id=369; break;
+                    case 'Sleeping Angler': id=376; break; 
+                    case 'Grasshopper': id=377; break;
+                    case 'Tax Collector': id=441; break;
+                    case 'Gold Grasshopper': id=446; break;
+                    case 'Gold Worm': id=448; break;
+                    case 'Skeleton Merchant': id=453; break;
+                    case 'Enchanted Nightcrawler': id=484; break;
+                    case 'Grubby': id=485; break;
+                    case 'Sluggy': id=486; break;
+                    case 'Buggy': id=487; break;
+                    case 'Eternia Crystal': id=548; break;
+                    case 'Tavernkeep': id=550; break;
+                    case 'Unconscious Man': id=579; break;
+                    case 'Golfer': id=588; break;
+                    case 'Maggot': id=606; break;
+                    case 'Zoologist': id=633; break;
+                    case 'Cat': id=637; break;
+                    case 'Dog': id=638; break;
+                    case 'Bunny': id=656; break;
+                    case 'Princess': id=663; break;
+                }
+            }
+
             data[i] = {
                 townNPC: true,
-                id: this.readInt32(),
+                id: id,
                 name: this.readString(),
                 position: {
                     x: this.readFloat32(),
@@ -548,7 +713,7 @@ export default class terrariaWorldParser extends terrariaFileParser {
                 }
             };
 
-            if (this.world.version >= 225 && this.parseBitsByte(1)[0])
+            if (this.world.version >= 213 && this.parseBitsByte(1)[0])
                 data[i].variationIndex = this.readInt32();
         }
 

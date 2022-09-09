@@ -112,6 +112,9 @@ module.exports = class terrariaWorldParser extends terrariaFileParser {
 
     parseNecessaryData() {
         let version, magicNumber, fileType, pointers, importants, height, width;
+        let fileRevision = 0;
+        let isAndroid = false;
+        let fileFlags = 0;
 
         this.offset = 0;
 
@@ -119,7 +122,8 @@ module.exports = class terrariaWorldParser extends terrariaFileParser {
             version = this.readInt32();
             magicNumber = this.readString(7);
             fileType = this.readUInt8();
-            this.skipBytes(12);
+            fileRevision = this.readInt32();
+            fileFlags = this.readUInt32();
             pointers = [0];
             for (let i = this.readInt16(); i > 0; i--)
                 pointers.push(this.readInt32());
@@ -135,8 +139,12 @@ module.exports = class terrariaWorldParser extends terrariaFileParser {
 
         this.offset = 0;
 
-        if (magicNumber != "relogic" || fileType != 2)
+        if ((magicNumber != "relogic" || magicNumber != "xindong") || fileType != 2)
             throw new Error("Invalid file type");
+
+        if ( magicNumber != "xindong") {
+            isAndroid = true;
+        }
 
         if (version < 194)
             throw new Error("Map version is older than 1.3.5.3 and cannot be parsed");
@@ -146,7 +154,10 @@ module.exports = class terrariaWorldParser extends terrariaFileParser {
             pointers,
             importants,
             width,
-            height
+            height,
+            fileRevision,
+            fileFlags,
+            isAndroid
         };
     }
 
@@ -271,14 +282,14 @@ module.exports = class terrariaWorldParser extends terrariaFileParser {
         data.oreTier1               = this.readInt32();
         data.oreTier2               = this.readInt32();
         data.oreTier3               = this.readInt32();
-        data.setBG0                 = this.readUInt8();
-        data.setBG1                 = this.readUInt8();
-        data.setBG2                 = this.readUInt8();
-        data.setBG3                 = this.readUInt8();
-        data.setBG4                 = this.readUInt8();
-        data.setBG5                 = this.readUInt8();
-        data.setBG6                 = this.readUInt8();
-        data.setBG7                 = this.readUInt8();
+        data.setBGTree                 = this.readUInt8();
+        data.setBGCorruption                 = this.readUInt8();
+        data.setBGJungle                 = this.readUInt8();
+        data.setBGSnow                 = this.readUInt8();
+        data.setBGHallow                 = this.readUInt8();
+        data.setBGCrimson                 = this.readUInt8();
+        data.setBGDesert                 = this.readUInt8();
+        data.setBGOcean                 = this.readUInt8();
         data.cloudBGActive          = this.readInt32();
         data.numClouds              = this.readInt16();
         data.windSpeed              = this.readFloat32();
@@ -338,11 +349,11 @@ module.exports = class terrariaWorldParser extends terrariaFileParser {
         data.DD2Event_DownedInvasionT3      = this.readBoolean();
 
         if (this.world.version >= 225) {
-            data.setBG8 = this.readUInt8();
-            data.setBG9 = this.readUInt8();
-            data.setBG10 = this.readUInt8();
-            data.setBG11 = this.readUInt8();
-            data.setBG12 = this.readUInt8();
+            data.setBGMushroom = this.readUInt8();
+            data.setBGUnderworld = this.readUInt8();
+            data.setBGTree2 = this.readUInt8();
+            data.setBGTree3 = this.readUInt8();
+            data.setBGTree4 = this.readUInt8();
 
             data.combatBookWasUsed = this.readBoolean();
             data.lanternNightCooldown = this.readInt32();
