@@ -9,7 +9,7 @@ module.exports = class terrariaWorldParser extends terrariaFileParser {
     loadFileSync(file) {
         try {
             super.loadFileSync(file);
-        } catch(e) {
+        } catch (e) {
             throw new TerrariaWorldParserError("Problem with loading the file", e);
         }
 
@@ -19,7 +19,7 @@ module.exports = class terrariaWorldParser extends terrariaFileParser {
     async loadFile(file) {
         try {
             await super.loadFile(file);
-        } catch(e) {
+        } catch (e) {
             throw new TerrariaWorldParserError("Problem with loading the file", e);
         }
 
@@ -29,7 +29,7 @@ module.exports = class terrariaWorldParser extends terrariaFileParser {
     loadBuffer(buffer) {
         try {
             super.loadBuffer(buffer);
-        } catch(e) {
+        } catch (e) {
             throw new TerrariaWorldParserError("Problem with loading the buffer", e);
         }
 
@@ -38,18 +38,18 @@ module.exports = class terrariaWorldParser extends terrariaFileParser {
 
     parse(options) {
         const sections = {
-            fileFormatHeader:       this.parseFileFormatHeader,
-            header:                 this.parseHeader,
-            tiles:                  this.parseWorldTiles,
-            chests:                 this.parseChests,
-            signs:                  this.parseSigns,
-            NPCs:                   this.parseNPCs,
-            tileEntities:           this.parseTileEntities,
+            fileFormatHeader: this.parseFileFormatHeader,
+            header: this.parseHeader,
+            tiles: this.parseWorldTiles,
+            chests: this.parseChests,
+            signs: this.parseSigns,
+            NPCs: this.parseNPCs,
+            tileEntities: this.parseTileEntities,
             weightedPressurePlates: this.parseWeightedPressurePlates,
-            rooms:                  this.parseTownManager,
-            bestiary:               this.parseBestiary,
-            creativePowers:         this.parseCreativePowers,
-            footer:                 this.parseFooter
+            rooms: this.parseTownManager,
+            bestiary: this.parseBestiary,
+            creativePowers: this.parseCreativePowers,
+            footer: this.parseFooter
         }
 
         this.options = {
@@ -71,7 +71,7 @@ module.exports = class terrariaWorldParser extends terrariaFileParser {
                 get: () => _offset,
                 set: (value) => {
                     _offset = value;
-                    if (_offset >= nextPercentSize){
+                    if (_offset >= nextPercentSize) {
                         percent++;
                         nextPercentSize += onePercentSize;
                         this.options.progressCallback(percent);
@@ -93,7 +93,7 @@ module.exports = class terrariaWorldParser extends terrariaFileParser {
             }
 
             for (let [sectionName, parseFunction] of Object.entries(sections)) {
-                if (this.options.sections.includes( sectionName.toLowerCase() )) {
+                if (this.options.sections.includes(sectionName.toLowerCase())) {
                     const sectionIndex = Object.keys(sections).indexOf(sectionName);
 
                     this.offset = this.world.pointers[sectionIndex];
@@ -103,7 +103,7 @@ module.exports = class terrariaWorldParser extends terrariaFileParser {
                         throw new Error("Bad " + sectionName + " section end offset");
                 }
             }
-        } catch(e) {
+        } catch (e) {
             throw new TerrariaWorldParserError("Problem with parsing the file", e);
         }
 
@@ -129,7 +129,7 @@ module.exports = class terrariaWorldParser extends terrariaFileParser {
             this.skipBytes(44);
             height = this.readInt32();
             width = this.readInt32();
-        } catch(e) {
+        } catch (e) {
             throw new Error("Invalid file type");
         }
 
@@ -153,16 +153,16 @@ module.exports = class terrariaWorldParser extends terrariaFileParser {
     parseFileFormatHeader() {
         let data = {};
 
-        data.version        = this.readInt32();
-        data.magicNumber    = this.readString(7);
-        data.fileType       = this.readUInt8();
-        data.revision       = this.readUInt32();
-        data.favorite       = this.readBoolean();
+        data.version = this.readInt32();
+        data.magicNumber = this.readString(7);
+        data.fileType = this.readUInt8();
+        data.revision = this.readUInt32();
+        data.favorite = this.readBoolean();
         this.skipBytes(7);
-        data.pointers       = [];
+        data.pointers = [];
         for (let i = this.readInt16(); i > 0; i--)
             data.pointers.push(this.readInt32());
-        data.importants     = this.parseBitsByte(this.readInt16());
+        data.importants = this.parseBitsByte(this.readInt16());
 
         return data;
     }
@@ -170,172 +170,183 @@ module.exports = class terrariaWorldParser extends terrariaFileParser {
     parseHeader() {
         let data = {};
 
-        data.mapName                = this.readString();
-        data.seedText               = this.readString();
-        data.worldGeneratorVersion  = this.readBytes(8);
-        data.guid                   = this.readBytes(16);
-        data.worldId                = this.readInt32();
-        data.leftWorld              = this.readInt32();
-        data.rightWorld             = this.readInt32();
-        data.topWorld               = this.readInt32();
-        data.bottomWorld            = this.readInt32();
-        data.maxTilesY              = this.readInt32();
-        data.maxTilesX              = this.readInt32();
+        data.mapName = this.readString();
+        data.seedText = this.readString();
+        data.worldGeneratorVersion = this.readBytes(8);
+        data.guid = this.readBytes(16);
+        data.guidString = this.parseGuid(data.guid);
+        data.worldId = this.readInt32();
+        data.leftWorld = this.readInt32();
+        data.rightWorld = this.readInt32();
+        data.topWorld = this.readInt32();
+        data.bottomWorld = this.readInt32();
+        data.maxTilesY = this.readInt32();
+        data.maxTilesX = this.readInt32();
+
         if (this.world.version >= 225) {
-            data.gameMode           = this.readInt32();
-            data.drunkWorld         = this.readBoolean();
+            data.gameMode = this.readInt32();
+            data.drunkWorld = this.readBoolean();
 
             if (this.world.version >= 227)
-                data.getGoodWorld   = this.readBoolean();
+                data.getGoodWorld = this.readBoolean();
             if (this.world.version >= 238)
                 data.getTenthAnniversaryWorld = this.readBoolean();
             if (this.world.version >= 239)
                 data.dontStarveWorld = this.readBoolean();
             if (this.world.version >= 241)
                 data.notTheBeesWorld = this.readBoolean();
+            if (this.world.version >= 249)
+                data.remixWorld = this.readBoolean();
+            if (this.world.version >= 266)
+                data.noTrapsWorld = this.readBoolean();
+            if (this.world.version >= 267)
+                data.zenithWorld = this.readBoolean();
+
         } else {
-            data.expertMode         = this.readBoolean();
+            data.expertMode = this.readBoolean();
         }
-        data.creationTime           = this.readBytes(8);
-        data.moonType               = this.readUInt8();
+
+        data.creationTime = this.readBytes(8);
+        data.moonType = this.readUInt8();
 
         data.treeX = [];
-        data.treeX[0]               = this.readInt32();
-        data.treeX[1]               = this.readInt32();
-        data.treeX[2]               = this.readInt32();
+        data.treeX[0] = this.readInt32();
+        data.treeX[1] = this.readInt32();
+        data.treeX[2] = this.readInt32();
 
         data.treeStyle = [];
-        data.treeStyle[0]           = this.readInt32();
-        data.treeStyle[1]           = this.readInt32();
-        data.treeStyle[2]           = this.readInt32();
-        data.treeStyle[3]           = this.readInt32();
+        data.treeStyle[0] = this.readInt32();
+        data.treeStyle[1] = this.readInt32();
+        data.treeStyle[2] = this.readInt32();
+        data.treeStyle[3] = this.readInt32();
 
         data.caveBackX = [];
-        data.caveBackX[0]           = this.readInt32();
-        data.caveBackX[1]           = this.readInt32();
-        data.caveBackX[2]           = this.readInt32();
+        data.caveBackX[0] = this.readInt32();
+        data.caveBackX[1] = this.readInt32();
+        data.caveBackX[2] = this.readInt32();
 
         data.caveBackStyle = [];
-        data.caveBackStyle[0]       = this.readInt32();
-        data.caveBackStyle[1]       = this.readInt32();
-        data.caveBackStyle[2]       = this.readInt32();
-        data.caveBackStyle[3]       = this.readInt32();
+        data.caveBackStyle[0] = this.readInt32();
+        data.caveBackStyle[1] = this.readInt32();
+        data.caveBackStyle[2] = this.readInt32();
+        data.caveBackStyle[3] = this.readInt32();
 
-        data.iceBackStyle           = this.readInt32();
-        data.jungleBackStyle        = this.readInt32();
-        data.hellBackStyle          = this.readInt32();
-        data.spawnTileX             = this.readInt32();
-        data.spawnTileY             = this.readInt32();
-        data.worldSurface           = this.readFloat64();
-        data.rockLayer              = this.readFloat64();
-        data.tempTime               = this.readFloat64();
-        data.tempDayTime            = this.readBoolean();
-        data.tempMoonPhase          = this.readInt32();
-        data.tempBloodMoon          = this.readBoolean();
-        data.tempEclipse            = this.readBoolean();
-        data.dungeonX               = this.readInt32();
-        data.dungeonY               = this.readInt32();
-        data.crimson                = this.readBoolean();
-        data.downedBoss1            = this.readBoolean();
-        data.downedBoss2            = this.readBoolean();
-        data.downedBoss3            = this.readBoolean();
-        data.downedQueenBee         = this.readBoolean();
-        data.downedMechBoss1        = this.readBoolean();
-        data.downedMechBoss2        = this.readBoolean();
-        data.downedMechBoss3        = this.readBoolean();
-        data.downedMechBossAny      = this.readBoolean();
-        data.downedPlantBoss        = this.readBoolean();
-        data.downedGolemBoss        = this.readBoolean();
-        data.downedSlimeKing        = this.readBoolean();
-        data.savedGoblin            = this.readBoolean();
-        data.savedWizard            = this.readBoolean();
-        data.savedMech              = this.readBoolean();
-        data.downedGoblins          = this.readBoolean();
-        data.downedClown            = this.readBoolean();
-        data.downedFrost            = this.readBoolean();
-        data.downedPirates          = this.readBoolean();
-        data.shadowOrbSmashed       = this.readBoolean();
-        data.spawnMeteor            = this.readBoolean();
-        data.shadowOrbCount         = this.readUInt8();
-        data.altarCount             = this.readInt32();
-        data.hardMode               = this.readBoolean();
-        data.invasionDelay          = this.readInt32();
-        data.invasionSize           = this.readInt32();
-        data.invasionType           = this.readInt32();
-        data.invasionX              = this.readFloat64();
-        data.slimeRainTime          = this.readFloat64();
-        data.sundialCooldown        = this.readUInt8();
-        data.tempRaining            = this.readBoolean();
-        data.tempRainTime           = this.readInt32();
-        data.tempMaxRain            = this.readFloat32();
-        data.oreTier1               = this.readInt32();
-        data.oreTier2               = this.readInt32();
-        data.oreTier3               = this.readInt32();
-        data.setBG0                 = this.readUInt8();
-        data.setBG1                 = this.readUInt8();
-        data.setBG2                 = this.readUInt8();
-        data.setBG3                 = this.readUInt8();
-        data.setBG4                 = this.readUInt8();
-        data.setBG5                 = this.readUInt8();
-        data.setBG6                 = this.readUInt8();
-        data.setBG7                 = this.readUInt8();
-        data.cloudBGActive          = this.readInt32();
-        data.numClouds              = this.readInt16();
-        data.windSpeed              = this.readFloat32();
+        data.iceBackStyle = this.readInt32();
+        data.jungleBackStyle = this.readInt32();
+        data.hellBackStyle = this.readInt32();
+        data.spawnTileX = this.readInt32();
+        data.spawnTileY = this.readInt32();
+        data.worldSurface = this.readFloat64();
+        data.rockLayer = this.readFloat64();
+        data.tempTime = this.readFloat64();
+        data.tempDayTime = this.readBoolean();
+        data.tempMoonPhase = this.readInt32();
+        data.tempBloodMoon = this.readBoolean();
+        data.tempEclipse = this.readBoolean();
+        data.dungeonX = this.readInt32();
+        data.dungeonY = this.readInt32();
+        data.crimson = this.readBoolean();
+        data.downedBoss1 = this.readBoolean();
+        data.downedBoss2 = this.readBoolean();
+        data.downedBoss3 = this.readBoolean();
+        data.downedQueenBee = this.readBoolean();
+        data.downedMechBoss1 = this.readBoolean();
+        data.downedMechBoss2 = this.readBoolean();
+        data.downedMechBoss3 = this.readBoolean();
+        data.downedMechBossAny = this.readBoolean();
+        data.downedPlantBoss = this.readBoolean();
+        data.downedGolemBoss = this.readBoolean();
+        data.downedSlimeKing = this.readBoolean();
+        data.savedGoblin = this.readBoolean();
+        data.savedWizard = this.readBoolean();
+        data.savedMech = this.readBoolean();
+        data.downedGoblins = this.readBoolean();
+        data.downedClown = this.readBoolean();
+        data.downedFrost = this.readBoolean();
+        data.downedPirates = this.readBoolean();
+        data.shadowOrbSmashed = this.readBoolean();
+        data.spawnMeteor = this.readBoolean();
+        data.shadowOrbCount = this.readUInt8();
+        data.altarCount = this.readInt32();
+        data.hardMode = this.readBoolean();
+        data.afterPartyOfDoom = this.world.version >= 257 ? this.readBoolean() : false;
+        data.invasionDelay = this.readInt32();
+        data.invasionSize = this.readInt32();
+        data.invasionType = this.readInt32();
+        data.invasionX = this.readFloat64();
+        data.slimeRainTime = this.readFloat64();
+        data.sundialCooldown = this.readUInt8();
+        data.tempRaining = this.readBoolean();
+        data.tempRainTime = this.readInt32();
+        data.tempMaxRain = this.readFloat32();
+        data.oreTier1 = this.readInt32();
+        data.oreTier2 = this.readInt32();
+        data.oreTier3 = this.readInt32();
+        data.setBG0 = this.readUInt8();
+        data.setBG1 = this.readUInt8();
+        data.setBG2 = this.readUInt8();
+        data.setBG3 = this.readUInt8();
+        data.setBG4 = this.readUInt8();
+        data.setBG5 = this.readUInt8();
+        data.setBG6 = this.readUInt8();
+        data.setBG7 = this.readUInt8();
+        data.cloudBGActive = this.readInt32();
+        data.numClouds = this.readInt16();
+        data.windSpeed = this.readFloat32();
 
         data.anglerWhoFinishedToday = [];
         for (let i = this.readInt32(); i > 0; --i)
             data.anglerWhoFinishedToday.push(this.readString());
 
-        data.savedAngler            = this.readBoolean();
-        data.anglerQuest            = this.readInt32();
-        data.savedStylist           = this.readBoolean();
-        data.savedTaxCollector      = this.readBoolean();
+        data.savedAngler = this.readBoolean();
+        data.anglerQuest = this.readInt32();
+        data.savedStylist = this.readBoolean();
+        data.savedTaxCollector = this.readBoolean();
         if (this.world.version >= 225)
-            data.savedGolfer        = this.readBoolean();
+            data.savedGolfer = this.readBoolean();
 
-        data.invasionSizeStart      = this.readInt32();
-        data.tempCultistDelay       = this.readInt32();
+        data.invasionSizeStart = this.readInt32();
+        data.tempCultistDelay = this.readInt32();
 
         data.killCount = [];
         for (let i = this.readInt16(); i > 0; i--)
             data.killCount.push(this.readInt32());
 
-        data.fastForwardTime        = this.readBoolean();
-        data.downedFishron          = this.readBoolean();
-        data.downedMartians         = this.readBoolean();
-        data.downedAncientCultist   = this.readBoolean();
-        data.downedMoonlord         = this.readBoolean();
-        data.downedHalloweenKing    = this.readBoolean();
-        data.downedHalloweenTree    = this.readBoolean();
+        data.fastForwardTimeToDawn = this.readBoolean();
+        data.downedFishron = this.readBoolean();
+        data.downedMartians = this.readBoolean();
+        data.downedAncientCultist = this.readBoolean();
+        data.downedMoonlord = this.readBoolean();
+        data.downedHalloweenKing = this.readBoolean();
+        data.downedHalloweenTree = this.readBoolean();
         data.downedChristmasIceQueen = this.readBoolean();
         data.downedChristmasSantank = this.readBoolean();
-        data.downedChristmasTree    = this.readBoolean();
-        data.downedTowerSolar       = this.readBoolean();
-        data.downedTowerVortex      = this.readBoolean();
-        data.downedTowerNebula      = this.readBoolean();
-        data.downedTowerStardust    = this.readBoolean();
-        data.TowerActiveSolar       = this.readBoolean();
-        data.TowerActiveVortex      = this.readBoolean();
-        data.TowerActiveNebula      = this.readBoolean();
-        data.TowerActiveStardust    = this.readBoolean();
-        data.LunarApocalypseIsUp    = this.readBoolean();
-        data.tempPartyManual        = this.readBoolean();
-        data.tempPartyGenuine       = this.readBoolean();
-        data.tempPartyCooldown      = this.readInt32();
+        data.downedChristmasTree = this.readBoolean();
+        data.downedTowerSolar = this.readBoolean();
+        data.downedTowerVortex = this.readBoolean();
+        data.downedTowerNebula = this.readBoolean();
+        data.downedTowerStardust = this.readBoolean();
+        data.TowerActiveSolar = this.readBoolean();
+        data.TowerActiveVortex = this.readBoolean();
+        data.TowerActiveNebula = this.readBoolean();
+        data.TowerActiveStardust = this.readBoolean();
+        data.LunarApocalypseIsUp = this.readBoolean();
+        data.tempPartyManual = this.readBoolean();
+        data.tempPartyGenuine = this.readBoolean();
+        data.tempPartyCooldown = this.readInt32();
 
         data.tempPartyCelebratingNPCs = [];
         for (let i = this.readInt32(); i > 0; i--)
             data.tempPartyCelebratingNPCs.push(this.readInt32());
 
-        data.Temp_Sandstorm_Happening       = this.readBoolean();
-        data.Temp_Sandstorm_TimeLeft        = this.readInt32();
-        data.Temp_Sandstorm_Severity        = this.readFloat32();
+        data.Temp_Sandstorm_Happening = this.readBoolean();
+        data.Temp_Sandstorm_TimeLeft = this.readInt32();
+        data.Temp_Sandstorm_Severity = this.readFloat32();
         data.Temp_Sandstorm_IntendedSeverity = this.readFloat32();
-        data.savedBartender                 = this.readBoolean();
-        data.DD2Event_DownedInvasionT1      = this.readBoolean();
-        data.DD2Event_DownedInvasionT2      = this.readBoolean();
-        data.DD2Event_DownedInvasionT3      = this.readBoolean();
+        data.savedBartender = this.readBoolean();
+        data.DD2Event_DownedInvasionT1 = this.readBoolean();
+        data.DD2Event_DownedInvasionT2 = this.readBoolean();
+        data.DD2Event_DownedInvasionT3 = this.readBoolean();
 
         if (this.world.version >= 225) {
             data.setBG8 = this.readUInt8();
@@ -368,10 +379,33 @@ module.exports = class terrariaWorldParser extends terrariaFileParser {
 
             data.downedEmpressOfLight = this.readBoolean();
             data.downedQueenSlime = this.readBoolean();
+        }
 
-            if (this.world.version >= 240) {
-                data.downedDeerclops = this.readBoolean();
-            }
+        if (this.world.version >= 240) {
+            data.downedDeerclops = this.readBoolean();
+        }
+
+        if (versionNumber >= 269) {
+            data.unlockedSlimeBlueSpawn = this.readBoolean();
+            data.unlockedMerchantSpawn = this.readBoolean();
+            data.unlockedDemolitionistSpawn = this.readBoolean();
+            data.unlockedPartyGirlSpawn = this.readBoolean();
+            data.unlockedDyeTraderSpawn = this.readBoolean();
+            data.unlockedTruffleSpawn = this.readBoolean();
+            data.unlockedArmsDealerSpawn = this.readBoolean();
+            data.unlockedNurseSpawn = this.readBoolean();
+            data.unlockedPrincessSpawn = this.readBoolean();
+            data.combatBookVolumeTwoWasUsed = this.readBoolean();
+            data.peddlersSatchelWasUsed = this.readBoolean();
+            data.unlockedSlimeGreenSpawn = this.readBoolean();
+            data.unlockedSlimeOldSpawn = this.readBoolean();
+            data.unlockedSlimePurpleSpawn = this.readBoolean();
+            data.unlockedSlimeRainbowSpawn = this.readBoolean();
+            data.unlockedSlimeRedSpawn = this.readBoolean();
+            data.unlockedSlimeYellowSpawn = this.readBoolean();
+            data.unlockedSlimeCopperSpawn = this.readBoolean();
+            data.fastForwardTimeToDusk = this.readBoolean();
+            data.moondialCooldown = this.readUInt8();
         }
 
         return data;
@@ -387,8 +421,8 @@ module.exports = class terrariaWorldParser extends terrariaFileParser {
             for (let y = 0; y < this.world.height; y++) {
                 data[x][y] = this.parseTileData();
 
-                while(this.RLE > 0) {
-                    data[x][y+1] = data[x][y];
+                while (this.RLE > 0) {
+                    data[x][y + 1] = data[x][y];
                     y++;
                     this.RLE--;
                 }
@@ -402,60 +436,62 @@ module.exports = class terrariaWorldParser extends terrariaFileParser {
         let tile = {};
 
         const flags1 = this.readUInt8();
-        let flags2, flags3;
+        let flags2, flags3, flags4;
 
-        // flags2 present
         if (flags1 & 1) {
             flags2 = this.readUInt8();
 
-        // flags3 present
-            if (flags2 & 1)
+            if (flags2 & 1) {
                 flags3 = this.readUInt8();
-        }
 
-        // contains block
-        if (flags1 & 2) {
-            // block id has 1 byte / 2 bytes
-            if (flags1 & 32)
-                tile.blockId = this.readUInt16();
-            else
-                tile.blockId = this.readUInt8();
-
-            // important tile (animated, big sprite, more variants...)
-            if (this.world.importants[tile.blockId]) {
-                tile.frameX = this.readInt16();
-                tile.frameY = this.readInt16();
-                if (tile.blockId == 144)
-                    tile.frameY = 0;
-            }
-
-            // painted block
-            if (flags3 & 8)
-                tile.blockColor = this.readUInt8();
-        }
-
-        // contains wall
-        if (flags1 & 4) {
-            tile.wallId = this.readUInt8();
-
-            // painted wall
-            if (flags3 & 16)
-                tile.wallColor = this.readUInt8();
-        }
-
-        // liquid informations
-        const liquidType = (flags1 & 24) >> 3;
-        if (liquidType != 0) {
-            tile.liquidAmount = this.readUInt8();
-            switch (liquidType) {
-                case 1: tile.liquidType = "water"; break;
-                case 2: tile.liquidType = "lava"; break;
-                case 3: tile.liquidType = "honey"; break;
+                if (flags3 & 1) {
+                    flags4 = this.readUInt8();
+                }
             }
         }
 
-        // flags2 has any other informations than flags3 presence
-        if (flags2 > 1) {
+        if (flags1 > 1) {
+
+            if (flags1 & 2) {
+                if (flags1 & 32)
+                    tile.blockId = this.readUInt16();
+                else
+                    tile.blockId = this.readUInt8();
+
+                if (this.world.importants[tile.blockId]) {
+                    tile.frameX = this.readInt16();
+                    tile.frameY = this.readInt16();
+                    if (tile.blockId == 144)
+                        tile.frameY = 0;
+                }
+
+                if (flags3 & 8)
+                    tile.blockColor = this.readUInt8();
+            }
+
+            if (flags1 & 4) {
+                tile.wallId = this.readUInt8();
+
+                if (flags3 & 16)
+                    tile.wallColor = this.readUInt8();
+            }
+
+            const liquidType = (flags1 & 24) >> 3;
+            if (liquidType) {
+                tile.liquidAmount = this.readUInt8();
+
+                if (flags3 & 128)
+                    tile.liquidType = "shimmer";
+                else
+                    switch (liquidType) {
+                        case 1: tile.liquidType = "water"; break;
+                        case 2: tile.liquidType = "lava"; break;
+                        case 3: tile.liquidType = "honey"; break;
+                    }
+            }
+        }
+
+        if (flags2) {
             if (flags2 & 2)
                 tile.wireRed = true;
             if (flags2 & 4)
@@ -464,26 +500,36 @@ module.exports = class terrariaWorldParser extends terrariaFileParser {
                 tile.wireGreen = true;
 
             const slope = (flags2 & 112) >> 4;
-            if (slope != 0)
-                switch(slope) {
+            if (slope)
+                switch (slope) {
                     case 1: tile.slope = "half"; break;
                     case 2: tile.slope = "TR"; break;
                     case 3: tile.slope = "TL"; break;
                     case 4: tile.slope = "BR"; break;
                     case 5: tile.slope = "BL"; break;
                 }
-        }
 
-        // flags3 has any informations
-        if (flags3 > 0) {
-            if (flags3 & 2)
-                tile.actuator = true;
-            if (flags3 & 4)
-                tile.actuated = true;
-            if (flags3 & 32)
-                tile.wireYellow = true;
-            if (flags3 & 64)
-                tile.wallId = (this.readUInt8() << 8) | tile.wallId; //adding another byte
+            if (flags3) {
+                if (flags3 & 2)
+                    tile.actuator = true;
+                if (flags3 & 4)
+                    tile.actuated = true;
+                if (flags3 & 32)
+                    tile.wireYellow = true;
+                if (flags3 & 64)
+                    tile.wallId = (this.readUInt8() << 8) | tile.wallId;
+
+                if (flags4) {
+                    if (flags4 & 2)
+                        tile.invisibleBlock = true;
+                    if (flags4 & 4)
+                        tile.invisibleWall = true;
+                    if (flags4 & 8)
+                        tile.fullBrightBlock = true;
+                    if (flags4 & 16)
+                        tile.fullBrightWall = true;
+                }
+            }
         }
 
         switch ((flags1 & 192) >> 6) {
@@ -550,9 +596,17 @@ module.exports = class terrariaWorldParser extends terrariaFileParser {
     parseNPCs() {
         let data = [];
 
+        if (this.world.version > 268)
+            for (let i = this.readInt32(); i > 0; i--)
+                data[this.readInt32()] = {
+                    shimmered: true
+                };
+
         let i = 0;
         for (; this.readBoolean(); i++) {
             data[i] = {
+                ...data[i],
+
                 townNPC: true,
                 id: this.readInt32(),
                 name: this.readString(),
@@ -588,7 +642,7 @@ module.exports = class terrariaWorldParser extends terrariaFileParser {
         let data = [];
 
         const tileEntitiesCount = this.readInt32(); //use world.tileEntities.length instead
-        for (let i = 0; i < tileEntitiesCount; i++ ) {
+        for (let i = 0; i < tileEntitiesCount; i++) {
             data[i] = {
                 type: this.readUInt8(),
                 id: this.readInt32(),
@@ -657,7 +711,7 @@ module.exports = class terrariaWorldParser extends terrariaFileParser {
                     data[i].weaponsRack = {
                         itemId: this.readInt16(),
                         prefix: this.readUInt8(),
-                        stack : this.readInt16()
+                        stack: this.readInt16()
                     };
                     break;
                 //hat rack
@@ -697,7 +751,7 @@ module.exports = class terrariaWorldParser extends terrariaFileParser {
                     data[i].foodPlatter = {
                         itemId: this.readInt16(),
                         prefix: this.readUInt8(),
-                        stack : this.readInt16()
+                        stack: this.readInt16()
                     };
                     break;
                 //teleportation pylon
@@ -746,7 +800,7 @@ module.exports = class terrariaWorldParser extends terrariaFileParser {
 
         data.NPCKills = {};
         for (let i = this.readInt32(); i > 0; --i)
-            data.NPCKills[ this.readString() ] = this.readInt32();
+            data.NPCKills[this.readString()] = this.readInt32();
 
         data.NPCSights = [];
         for (let i = this.readInt32(); i > 0; --i)
