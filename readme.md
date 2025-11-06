@@ -5,6 +5,10 @@
   Tags: terraria, world file, file structure, file dumper, file format, documentation, data, parsing, parser, map viewer, tool, javascript, node, browser, saver, editor, save, edit
   -->
 
+# Archived
+
+Repository has not been actively developer or maintained since 2022. Code is still functioning for given versions. You can find a new repository here https://github.com/cokolele/terraria-world-file-ts
+
 # Terraria world file - js
 
 Terraria world file parser and saver written in javascript
